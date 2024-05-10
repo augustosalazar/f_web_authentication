@@ -2,24 +2,23 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
 import '../models/user.dart';
-import '../repositories/repository.dart';
+import '../repositories/i_repository.dart';
 
 class UserUseCase {
-  final Repository _repository = Get.find();
+  late IRepository repository;
 
-  UserUseCase();
+  UserUseCase(this.repository);
 
   Future<List<User>> getUsers() async {
     logInfo("Getting users  from UseCase");
-    return await _repository.getUsers();
+    return await repository.getUsers();
   }
 
-  Future<void> addUser(User user) async => await _repository.addUser(user);
+  Future<void> addUser(User user) async => await repository.addUser(user);
 
-  Future<void> updateUser(User user) async =>
-      await _repository.updateUser(user);
+  Future<void> updateUser(User user) async => await repository.updateUser(user);
 
-  deleteUser(int id) async => await _repository.deleteUser(id);
+  Future<void> deleteUser(int id) async => await repository.deleteUser(id);
 
-  simulateProcess() async => await _repository.simulateProcess();
+  Future<void> deleteUsers() async => await repository.deleteUsers();
 }

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
-import 'domain/repositories/repository.dart';
+import 'domain/repositories/i_repository.dart';
 import 'domain/use_case/authentication_usecase.dart';
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
     ),
   );
 
-  Get.put(Repository());
+  Get.put(IRepository());
   Get.put(AuthenticationUseCase());
   Get.put(UserUseCase());
   Get.put(AuthenticationController());

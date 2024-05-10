@@ -39,7 +39,7 @@ class _UserListPageState extends State<UserListPage> {
         IconButton(
             icon: const Icon(Icons.access_time),
             onPressed: () {
-              userController.simulateProcess();
+              userController.deleteUsers();
             }),
       ]),
       body: Center(child: _getXlistView()),
