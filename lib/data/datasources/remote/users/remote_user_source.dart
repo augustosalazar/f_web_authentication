@@ -1,11 +1,18 @@
 import 'dart:convert';
 import 'package:loggy/loggy.dart';
-import '../../../domain/models/user.dart';
+import '../../../../domain/models/user.dart';
 import 'package:http/http.dart' as http;
 
-class UserDataSource {
-  final String apiKey = 'W4uoN7';
+import 'i_remote_user_source.dart';
 
+class RemoteUserSource implements IRemoteUserSource {
+  final http.Client httpClient;
+  final String apiKey = 'qtDGZS';
+
+  RemoteUserSource({http.Client? client})
+      : httpClient = client ?? http.Client();
+
+  @override
   Future<List<User>> getUsers() async {
     List<User> users = [];
     var request = Uri.parse("https://retoolapi.dev/$apiKey/data")
@@ -13,13 +20,14 @@ class UserDataSource {
       "format": 'json',
     }));
 
-    var response = await http.get(request);
+    var response = await httpClient.get(request);
 
     if (response.statusCode == 200) {
       //logInfo(response.body);
       final data = jsonDecode(response.body);
 
-      users = List<User>.from(data.map((x) => User.fromJson(x)));
+      users = List<User>.from(data.skip(1).map((x) => User.fromJson(x)));
+      //users.removeAt(1);
     } else {
       logError("Got error code ${response.statusCode}");
       return Future.error('Error code ${response.statusCode}');
@@ -28,10 +36,11 @@ class UserDataSource {
     return Future.value(users);
   }
 
+  @override
   Future<bool> addUser(User user) async {
     logInfo("Web service, Adding user");
 
-    final response = await http.post(
+    final response = await httpClient.post(
       Uri.parse("https://retoolapi.dev/$apiKey/data"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -44,12 +53,14 @@ class UserDataSource {
       return Future.value(true);
     } else {
       logError("Got error code ${response.statusCode}");
+      logError(response.body);
       return Future.value(false);
     }
   }
 
+  @override
   Future<bool> updateUser(User user) async {
-    final response = await http.put(
+    final response = await httpClient.put(
       Uri.parse("https://retoolapi.dev/$apiKey/data/${user.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -57,7 +68,7 @@ class UserDataSource {
       body: jsonEncode(user.toJson()),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       //logInfo(response.body);
       return Future.value(true);
     } else {
@@ -66,15 +77,16 @@ class UserDataSource {
     }
   }
 
+  @override
   Future<bool> deleteUser(int id) async {
-    final response = await http.delete(
+    final response = await httpClient.delete(
       Uri.parse("https://retoolapi.dev/$apiKey/data/$id"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-
-    if (response.statusCode == 201) {
+    logInfo("Deleting user with id $id status code ${response.statusCode}");
+    if (response.statusCode == 200) {
       //logInfo(response.body);
       return Future.value(true);
     } else {
@@ -83,22 +95,12 @@ class UserDataSource {
     }
   }
 
-  Future<bool> simulateProcess(String baseUrl, String token) async {
-    final response = await http.get(
-      Uri.parse("$baseUrl/me"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token'
-      },
-    );
-
-    logInfo(response.statusCode);
-    if (response.statusCode == 200) {
-      logInfo('simulateProcess access ok');
-      return Future.value(true);
-    } else {
-      logError("Got error code ${response.statusCode}");
-      return Future.error('Error code ${response.statusCode}');
+  @override
+  Future<bool> deleteUsers() async {
+    List<User> users = await getUsers();
+    for (var user in users) {
+      await deleteUser(user.id!);
     }
+    return Future.value(true);
   }
 }
