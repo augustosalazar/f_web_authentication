@@ -37,7 +37,7 @@ class _UserListPageState extends State<UserListPage> {
               _logout();
             }),
         IconButton(
-            icon: const Icon(Icons.access_time),
+            icon: const Icon(Icons.delete),
             onPressed: () {
               userController.deleteUsers();
             }),

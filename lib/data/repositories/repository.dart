@@ -1,41 +1,38 @@
-import 'package:f_web_authentication/data/datasources/remote/authentication_datasource.dart';
 import 'package:f_web_authentication/domain/models/authentication_user.dart';
 import 'package:f_web_authentication/domain/repositories/i_repository.dart';
-
-import '../datasources/remote/users/remote_user_source.dart';
+import '../datasources/remote/authentication/i_authentication_source.dart';
+import '../datasources/remote/users/i_remote_user_source.dart';
 import '../../domain/models/user.dart';
 
 class Repository implements IRepository {
-  late AuthenticationDatatasource authenticationDataSource;
-  late RemoteUserSource userDatatasource;
+  late IAuthenticationSource authenticationSource;
+  late IRemoteUserSource userSource;
 
-  Repository(this.authenticationDataSource, this.userDatatasource);
+  Repository(this.authenticationSource, this.userSource);
 
   @override
   Future<bool> login(String email, String password) async =>
-      await authenticationDataSource.login(email, password);
+      await authenticationSource.login(email, password);
 
   @override
   Future<bool> signUp(AuthenticationUser user) async =>
-      await authenticationDataSource.signUp(user);
+      await authenticationSource.signUp(user);
 
   @override
-  Future<bool> logOut() async => await authenticationDataSource.logOut();
+  Future<bool> logOut() async => await authenticationSource.logOut();
 
   @override
-  Future<List<User>> getUsers() async => await userDatatasource.getUsers();
+  Future<List<User>> getUsers() async => await userSource.getUsers();
 
   @override
-  Future<bool> addUser(User user) async => await userDatatasource.addUser(user);
+  Future<bool> addUser(User user) async => await userSource.addUser(user);
 
   @override
-  Future<bool> updateUser(User user) async =>
-      await userDatatasource.updateUser(user);
+  Future<bool> updateUser(User user) async => await userSource.updateUser(user);
 
   @override
-  Future<bool> deleteUser(int id) async =>
-      await userDatatasource.deleteUser(id);
+  Future<bool> deleteUser(int id) async => await userSource.deleteUser(id);
 
   @override
-  Future<bool> deleteUsers() async => await userDatatasource.deleteUsers();
+  Future<bool> deleteUsers() async => await userSource.deleteUsers();
 }

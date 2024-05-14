@@ -6,8 +6,9 @@ import 'package:f_web_authentication/ui/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-
-import 'data/datasources/remote/authentication_datasource.dart';
+import 'data/datasources/remote/authentication/authentication_source.dart';
+import 'data/datasources/remote/authentication/i_authentication_source.dart';
+import 'data/datasources/remote/users/i_remote_user_source.dart';
 import 'data/datasources/remote/users/remote_user_source.dart';
 import 'domain/repositories/i_repository.dart';
 import 'domain/use_case/authentication_usecase.dart';
@@ -19,10 +20,10 @@ void main() {
     ),
   );
 
-  Get.put<AuthenticationDatatasource>(AuthenticationDatatasource());
-  Get.put<RemoteUserSource>(RemoteUserSource());
+  Get.put<IAuthenticationSource>(AuthenticationSource());
+  Get.put<IRemoteUserSource>(RemoteUserSource());
   Get.put<IRepository>(Repository(Get.find(), Get.find()));
-  Get.put(AuthenticationUseCase());
+  Get.put(AuthenticationUseCase(Get.find()));
   Get.put(UserUseCase(Get.find()));
   Get.put(AuthenticationController());
   Get.put(UserController());
