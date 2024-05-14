@@ -1,6 +1,4 @@
-import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-
 import '../models/user.dart';
 import '../repositories/i_repository.dart';
 

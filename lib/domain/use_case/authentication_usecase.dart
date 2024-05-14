@@ -1,6 +1,5 @@
 import 'package:f_web_authentication/domain/models/authentication_user.dart';
 import 'package:f_web_authentication/domain/repositories/i_repository.dart';
-import 'package:get/get.dart';
 
 class AuthenticationUseCase {
   final IRepository _repository;
