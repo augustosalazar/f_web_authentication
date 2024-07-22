@@ -6,7 +6,7 @@ class User {
     required this.email,
   });
 
-  int? id;
+  String? id;
   String firstName;
   String lastName;
   String email;
@@ -16,14 +16,14 @@ class User {
   String get emailAddress => email;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json["id"],
+        id: json["entry_id"],
         firstName: json["firstName"] ?? "somefirstName",
         lastName: json["lastName"] ?? "someLastName",
         email: json["email"] ?? "someemail",
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id ?? 0,
+        "entry_id": id ?? "0",
         "firstName": firstName,
         "lastName": lastName,
         "email": email,

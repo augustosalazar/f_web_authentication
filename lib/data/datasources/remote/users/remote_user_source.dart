@@ -7,7 +7,6 @@ import 'i_remote_user_source.dart';
 
 class RemoteUserSource implements IRemoteUserSource {
   final http.Client httpClient;
-  final String apiKey = 'qtDGZS';
 
   RemoteUserSource({http.Client? client})
       : httpClient = client ?? http.Client();
@@ -15,7 +14,7 @@ class RemoteUserSource implements IRemoteUserSource {
   @override
   Future<List<User>> getUsers() async {
     List<User> users = [];
-    var request = Uri.parse("https://retoolapi.dev/$apiKey/data")
+    var request = Uri.parse("https://unibase.azurewebsites.net/data/users/all")
         .resolveUri(Uri(queryParameters: {
       "format": 'json',
     }));
@@ -24,9 +23,14 @@ class RemoteUserSource implements IRemoteUserSource {
 
     if (response.statusCode == 200) {
       //logInfo(response.body);
-      final data = jsonDecode(response.body);
+      //final data = jsonDecode(response.body);
 
-      users = List<User>.from(data.skip(1).map((x) => User.fromJson(x)));
+      Map<String, dynamic> decodedJson = jsonDecode(response.body);
+      final data = decodedJson['data'];
+
+      logInfo(data);
+
+      users = List<User>.from(data.map((x) => User.fromJson(x)));
       //users.removeAt(1);
     } else {
       logError("Got error code ${response.statusCode}");
@@ -41,11 +45,14 @@ class RemoteUserSource implements IRemoteUserSource {
     logInfo("Web service, Adding user");
 
     final response = await httpClient.post(
-      Uri.parse("https://retoolapi.dev/$apiKey/data"),
+      Uri.parse("https://unibase.azurewebsites.net/data/store"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(user.toJson()),
+      body: jsonEncode({
+        'table_name': 'users',
+        'data': user.toJson(),
+      }),
     );
 
     if (response.statusCode == 201) {
@@ -61,7 +68,7 @@ class RemoteUserSource implements IRemoteUserSource {
   @override
   Future<bool> updateUser(User user) async {
     final response = await httpClient.put(
-      Uri.parse("https://retoolapi.dev/$apiKey/data/${user.id}"),
+      Uri.parse("https://retoolapi.dev/data/${user.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -78,9 +85,9 @@ class RemoteUserSource implements IRemoteUserSource {
   }
 
   @override
-  Future<bool> deleteUser(int id) async {
+  Future<bool> deleteUser(String id) async {
     final response = await httpClient.delete(
-      Uri.parse("https://retoolapi.dev/$apiKey/data/$id"),
+      Uri.parse("https://retoolapi.dev/data/$id"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
