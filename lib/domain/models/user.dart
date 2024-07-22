@@ -28,4 +28,9 @@ class User {
         "lastName": lastName,
         "email": email,
       };
+
+  @override
+  String toString() {
+    return 'User{entry_id: $id, firstName: $firstName, lastName: $lastName, email: $email}';
+  }
 }

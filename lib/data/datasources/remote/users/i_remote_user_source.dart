@@ -7,7 +7,7 @@ abstract class IRemoteUserSource {
 
   Future<bool> updateUser(User user);
 
-  Future<bool> deleteUser(String id);
+  Future<bool> deleteUser(User user);
 
   Future<bool> deleteUsers();
 }

@@ -67,16 +67,19 @@ class RemoteUserSource implements IRemoteUserSource {
 
   @override
   Future<bool> updateUser(User user) async {
+    logInfo("Web service, Updating user with id $user");
     final response = await httpClient.put(
-      Uri.parse("https://retoolapi.dev/data/${user.id}"),
+      Uri.parse(
+          "https://unibase.azurewebsites.net/data/users/update/${user.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(user.toJson()),
     );
 
+    logInfo("updateUser response status code ${response.statusCode}");
+    logInfo("updateUser response body ${response.body}");
     if (response.statusCode == 200) {
-      //logInfo(response.body);
       return Future.value(true);
     } else {
       logError("Got error code ${response.statusCode}");
@@ -85,14 +88,17 @@ class RemoteUserSource implements IRemoteUserSource {
   }
 
   @override
-  Future<bool> deleteUser(String id) async {
+  Future<bool> deleteUser(User user) async {
+    logInfo("Web service, Deleting user with id $user");
     final response = await httpClient.delete(
-      Uri.parse("https://retoolapi.dev/data/$id"),
+      Uri.parse(
+          "https://unibase.azurewebsites.net/data/users/delete/${user.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-    logInfo("Deleting user with id $id status code ${response.statusCode}");
+    logInfo("deleteUser response status code ${response.statusCode}");
+    logInfo("deleteUser response body ${response.body}");
     if (response.statusCode == 200) {
       //logInfo(response.body);
       return Future.value(true);
@@ -106,7 +112,7 @@ class RemoteUserSource implements IRemoteUserSource {
   Future<bool> deleteUsers() async {
     List<User> users = await getUsers();
     for (var user in users) {
-      await deleteUser(user.id!);
+      await deleteUser(user);
     }
     return Future.value(true);
   }

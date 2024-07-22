@@ -31,8 +31,7 @@ class Repository implements IRepository {
   Future<bool> updateUser(User user) async => await userSource.updateUser(user);
 
   @override
-  Future<bool> deleteUser(int id) async =>
-      await userSource.deleteUser(id.toString());
+  Future<bool> deleteUser(User user) async => await userSource.deleteUser(user);
 
   @override
   Future<bool> deleteUsers() async => await userSource.deleteUsers();

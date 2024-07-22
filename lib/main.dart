@@ -28,7 +28,7 @@ void main() {
   Get.put(AuthenticationUseCase(Get.find()));
   Get.put(UserUseCase(Get.find()));
   Get.put(AuthenticationController());
-  Get.put(UserController());
+  Get.lazyPut(() => UserController());
   runApp(const MyApp());
 }
 
