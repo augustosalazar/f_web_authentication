@@ -72,9 +72,11 @@ class RemoteUserSource implements IRemoteUserSource {
       Uri.parse(
           "https://unibase.azurewebsites.net/data/users/update/${user.id}"),
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
       },
-      body: jsonEncode(user.toJson()),
+      body: jsonEncode({
+        'data': user.toJsonNoId(),
+      }),
     );
 
     logInfo("updateUser response status code ${response.statusCode}");
