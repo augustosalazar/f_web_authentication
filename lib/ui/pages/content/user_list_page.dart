@@ -72,10 +72,11 @@ class _UserListPageState extends State<UserListPage> {
                   ),
                 )),
             onDismissed: (direction) {
-              userController.deleteUser(user.id!);
+              userController.deleteUser(user);
             },
             child: Card(
               child: ListTile(
+                leading: Text(user.id.toString()),
                 title: Text(user.name),
                 subtitle: Text(user.email),
                 onTap: () {

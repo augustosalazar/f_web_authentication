@@ -14,7 +14,7 @@ abstract class IRepository {
 
   Future<bool> updateUser(User user);
 
-  Future<bool> deleteUser(int id);
+  Future<bool> deleteUser(User user);
 
   Future<bool> deleteUsers();
 }

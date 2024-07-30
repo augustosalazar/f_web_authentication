@@ -1,6 +1,7 @@
 import 'package:f_web_authentication/domain/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loggy/loggy.dart';
 
 import '../../controller/user_controller.dart';
 
@@ -23,6 +24,7 @@ class _EditUserPageState extends State<EditUserPage> {
     controllerFirstName.text = user.firstName;
     controllerLastName.text = user.lastName;
     controllerEmail.text = user.email;
+    logInfo("Update page user $user");
     return Scaffold(
       appBar: AppBar(
         title: Text("${user.firstName} ${user.lastName}"),
@@ -68,11 +70,11 @@ class _EditUserPageState extends State<EditUserPage> {
                       flex: 2,
                       child: ElevatedButton(
                           onPressed: () async {
-                            await userController.updateUser(User(
-                                id: user.id,
-                                email: controllerEmail.text,
-                                firstName: controllerFirstName.text,
-                                lastName: controllerLastName.text));
+                            user.email = controllerEmail.text;
+                            user.firstName = controllerFirstName.text;
+                            user.lastName = controllerLastName.text;
+                            logInfo("Going to update user $user");
+                            await userController.updateUser(user);
                             Get.back();
                           },
                           child: const Text("Update")))
