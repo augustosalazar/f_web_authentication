@@ -9,7 +9,7 @@ class AuthenticationSourceService implements IAuthenticationSource {
   final String apiKey = '1zjCuS';
   final http.Client httpClient;
   final String appName = 'clase202430';
-  final String contractKey = 'f82be126-89c4-4e25-80a3-716db9ff7abd';
+  final String contractKey = '53e0e139-4cca-4204-98e5-e1d8f700ab79';
   final String baseUrl =
       'https://authenticationapp.mangocoast-ed120e36.eastus.azurecontainerapps.io';
   String? token;
