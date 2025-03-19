@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../domain/models/user.dart';
-import '../controller/user_controller.dart';
+import '../controller/product_controller.dart';
 
 class NewProductPage extends StatefulWidget {
-  const NewProductPage({Key? key}) : super(key: key);
+  const NewProductPage({super.key});
 
   @override
   State<NewProductPage> createState() => _NewProductPageState();
 }
 
 class _NewProductPageState extends State<NewProductPage> {
-  final controllerFirstName = TextEditingController();
-  final controllerLastName = TextEditingController();
-  final controllerEmail = TextEditingController();
+  final controllerName = TextEditingController();
+  final controllerDesc = TextEditingController();
+  final controllerQuantity = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    UserController userController = Get.find();
+    ProductController productController = Get.find();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New User'),
+        title: const Text('New Product'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -32,26 +30,26 @@ class _NewProductPageState extends State<NewProductPage> {
               height: 20,
             ),
             TextField(
-                controller: controllerFirstName,
+                controller: controllerName,
                 decoration: const InputDecoration(
-                  labelText: 'First Name',
+                  labelText: 'Product Name',
                 )),
             const SizedBox(
               height: 20,
             ),
             TextField(
-                controller: controllerLastName,
+                controller: controllerDesc,
                 decoration: const InputDecoration(
-                  labelText: 'Last Name',
+                  labelText: 'Product Description',
                 )),
             const SizedBox(
               height: 20,
             ),
             TextField(
-                controller: controllerEmail,
-                keyboardType: TextInputType.emailAddress,
+                controller: controllerQuantity,
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Quantity',
                 )),
             const SizedBox(
               height: 20,
@@ -65,10 +63,10 @@ class _NewProductPageState extends State<NewProductPage> {
                       flex: 2,
                       child: ElevatedButton(
                           onPressed: () async {
-                            await userController.addUser(User(
-                                email: controllerEmail.text,
-                                firstName: controllerFirstName.text,
-                                lastName: controllerLastName.text));
+                            await productController.addProduct(
+                                controllerName.text,
+                                controllerDesc.text,
+                                controllerQuantity.text);
                             Get.back();
                           },
                           child: const Text("Save")))

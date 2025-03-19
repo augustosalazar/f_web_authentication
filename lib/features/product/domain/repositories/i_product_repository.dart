@@ -1,13 +1,13 @@
-import '../models/user.dart';
+import '../models/product.dart';
 
 abstract class IProductRepository {
-  Future<List<User>> getUsers();
+  Future<List<Product>> getProducts();
 
-  Future<bool> addUser(User user);
+  Future<bool> addProduct(Product p);
 
-  Future<bool> updateUser(User user);
+  Future<bool> updateProduct(Product p);
 
-  Future<bool> deleteUser(User user);
+  Future<bool> deleteProduct(Product p);
 
-  Future<bool> deleteUsers();
+  Future<bool> deleteProducts();
 }

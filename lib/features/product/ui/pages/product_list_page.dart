@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
 import '../../../auth/ui/controller/authentication_controller.dart';
-import '../../domain/models/user.dart';
+import '../../domain/models/product.dart';
 
-import '../controller/user_controller.dart';
+import '../controller/product_controller.dart';
 import 'edit_product_page.dart';
 import 'new_product_page.dart';
 
@@ -17,7 +17,7 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
-  UserController userController = Get.find();
+  ProductController userController = Get.find();
   AuthenticationController authenticationController = Get.find();
 
   _logout() async {
@@ -57,9 +57,9 @@ class _ProductListPageState extends State<ProductListPage> {
   Widget _getXlistView() {
     return Obx(
       () => ListView.builder(
-        itemCount: userController.users.length,
+        itemCount: userController.products.length,
         itemBuilder: (context, index) {
-          User user = userController.users[index];
+          Product user = userController.products[index];
           return Dismissible(
             key: UniqueKey(),
             background: Container(
@@ -79,7 +79,8 @@ class _ProductListPageState extends State<ProductListPage> {
               child: ListTile(
                 leading: Text(user.id.toString()),
                 title: Text(user.name),
-                subtitle: Text(user.email),
+                subtitle: Text(user.description),
+                trailing: Text(user.quantity.toString()),
                 onTap: () {
                   Get.to(() => const EditUserPage(),
                       arguments: [user, user.id]);

@@ -1,8 +1,6 @@
-import '../../../auth/data/datasources/remote/i_authentication_source.dart';
-import '../../../auth/domain/models/authentication_user.dart';
 import '../../domain/repositories/i_product_repository.dart';
-import '../datasources/i_remote_user_source.dart';
-import '../../domain/models/user.dart';
+import '../datasources/i_remote_product_source.dart';
+import '../../domain/models/product.dart';
 
 class ProductRepository implements IProductRepository {
   late IRemoteUserSource userSource;
@@ -10,17 +8,20 @@ class ProductRepository implements IProductRepository {
   ProductRepository(this.userSource);
 
   @override
-  Future<List<User>> getUsers() async => await userSource.getUsers();
+  Future<List<Product>> getProducts() async => await userSource.getProducts();
 
   @override
-  Future<bool> addUser(User user) async => await userSource.addUser(user);
+  Future<bool> addProduct(Product user) async =>
+      await userSource.addProduct(user);
 
   @override
-  Future<bool> updateUser(User user) async => await userSource.updateUser(user);
+  Future<bool> updateProduct(Product user) async =>
+      await userSource.updateProduct(user);
 
   @override
-  Future<bool> deleteUser(User user) async => await userSource.deleteUser(user);
+  Future<bool> deleteProduct(Product user) async =>
+      await userSource.deleteProduct(user);
 
   @override
-  Future<bool> deleteUsers() async => await userSource.deleteUsers();
+  Future<bool> deleteProducts() async => await userSource.deleteProducts();
 }

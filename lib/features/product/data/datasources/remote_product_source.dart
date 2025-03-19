@@ -1,23 +1,24 @@
 import 'dart:convert';
 import 'package:loggy/loggy.dart';
-import '../../domain/models/user.dart';
+import '../../domain/models/product.dart';
 import 'package:http/http.dart' as http;
 
-import 'i_remote_user_source.dart';
+import 'i_remote_product_source.dart';
 
-class RemoteUserSource implements IRemoteUserSource {
+class RemoteProductSource implements IRemoteUserSource {
   final http.Client httpClient;
 
   final String contractKey = '87f1ab21-327b-4dcc-bea0-067a47214eca';
   final String baseUrl = 'http://unidb.openlab.uninorte.edu.co';
+  final String table = 'products';
 
-  RemoteUserSource({http.Client? client})
+  RemoteProductSource({http.Client? client})
       : httpClient = client ?? http.Client();
 
   @override
-  Future<List<User>> getUsers() async {
-    List<User> users = [];
-    var request = Uri.parse("$baseUrl/$contractKey/data/users/all")
+  Future<List<Product>> getProducts() async {
+    List<Product> products = [];
+    var request = Uri.parse("$baseUrl/$contractKey/data/$table/all")
         .resolveUri(Uri(queryParameters: {
       "format": 'json',
     }));
@@ -33,18 +34,18 @@ class RemoteUserSource implements IRemoteUserSource {
 
       logInfo(data);
 
-      users = List<User>.from(data.map((x) => User.fromJson(x)));
+      products = List<Product>.from(data.map((x) => Product.fromJson(x)));
       //users.removeAt(1);
     } else {
       logError("Got error code ${response.statusCode}");
       return Future.error('Error code ${response.statusCode}');
     }
 
-    return Future.value(users);
+    return Future.value(products);
   }
 
   @override
-  Future<bool> addUser(User user) async {
+  Future<bool> addProduct(Product product) async {
     logInfo("Web service, Adding user");
 
     final response = await httpClient.post(
@@ -53,8 +54,8 @@ class RemoteUserSource implements IRemoteUserSource {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({
-        'table_name': 'users',
-        'data': user.toJson(),
+        'table_name': table,
+        'data': product.toJson(),
       }),
     );
 
@@ -69,15 +70,15 @@ class RemoteUserSource implements IRemoteUserSource {
   }
 
   @override
-  Future<bool> updateUser(User user) async {
-    logInfo("Web service, Updating user with id $user");
+  Future<bool> updateProduct(Product product) async {
+    logInfo("Web service, Updating user with id $product");
     final response = await httpClient.put(
-      Uri.parse("$baseUrl/$contractKey/data/users/update/${user.id}"),
+      Uri.parse("$baseUrl/$contractKey/data/$table/update/${product.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'data': user.toJsonNoId(),
+        'data': product.toJsonNoId(),
       }),
     );
 
@@ -92,10 +93,10 @@ class RemoteUserSource implements IRemoteUserSource {
   }
 
   @override
-  Future<bool> deleteUser(User user) async {
-    logInfo("Web service, Deleting user with id $user");
+  Future<bool> deleteProduct(Product product) async {
+    logInfo("Web service, Deleting user with id $product");
     final response = await httpClient.delete(
-      Uri.parse("$baseUrl/$contractKey/data/users/delete/${user.id}"),
+      Uri.parse("$baseUrl/$contractKey/data/$table/delete/${product.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -112,10 +113,10 @@ class RemoteUserSource implements IRemoteUserSource {
   }
 
   @override
-  Future<bool> deleteUsers() async {
-    List<User> users = await getUsers();
+  Future<bool> deleteProducts() async {
+    List<Product> users = await getProducts();
     for (var user in users) {
-      await deleteUser(user);
+      await deleteProduct(user);
     }
     return Future.value(true);
   }

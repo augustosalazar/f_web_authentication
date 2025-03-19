@@ -1,4 +1,4 @@
-import '../models/user.dart';
+import '../models/product.dart';
 import '../repositories/i_product_repository.dart';
 
 class UserUseCase {
@@ -6,13 +6,18 @@ class UserUseCase {
 
   UserUseCase(this.repository);
 
-  Future<List<User>> getUsers() async => await repository.getUsers();
+  Future<List<Product>> getProducts() async => await repository.getProducts();
 
-  Future<void> addUser(User user) async => await repository.addUser(user);
+  Future<void> addProduct(
+          String name, String description, String quantity) async =>
+      await repository.addProduct(Product(
+          name: name, description: description, quantity: int.parse(quantity)));
 
-  Future<void> updateUser(User user) async => await repository.updateUser(user);
+  Future<void> updateProduct(Product user) async =>
+      await repository.updateProduct(user);
 
-  Future<void> deleteUser(User user) async => await repository.deleteUser(user);
+  Future<void> deleteProduct(Product user) async =>
+      await repository.deleteProduct(user);
 
-  Future<void> deleteUsers() async => await repository.deleteUsers();
+  Future<void> deleteProducts() async => await repository.deleteProducts();
 }

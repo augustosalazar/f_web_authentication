@@ -1,5 +1,3 @@
-import '../../../product/data/datasources/i_remote_user_source.dart';
-import '../../../product/domain/repositories/i_product_repository.dart';
 import '../../domain/models/authentication_user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../datasources/remote/i_authentication_source.dart';
