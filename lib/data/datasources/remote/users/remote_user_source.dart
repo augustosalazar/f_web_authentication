@@ -8,13 +8,16 @@ import 'i_remote_user_source.dart';
 class RemoteUserSource implements IRemoteUserSource {
   final http.Client httpClient;
 
+  final String contractKey = '87f1ab21-327b-4dcc-bea0-067a47214eca';
+  final String baseUrl = 'http://unidb.openlab.uninorte.edu.co';
+
   RemoteUserSource({http.Client? client})
       : httpClient = client ?? http.Client();
 
   @override
   Future<List<User>> getUsers() async {
     List<User> users = [];
-    var request = Uri.parse("https://unibase.azurewebsites.net/data/users/all")
+    var request = Uri.parse("$baseUrl/$contractKey/data/users/all")
         .resolveUri(Uri(queryParameters: {
       "format": 'json',
     }));
@@ -45,7 +48,7 @@ class RemoteUserSource implements IRemoteUserSource {
     logInfo("Web service, Adding user");
 
     final response = await httpClient.post(
-      Uri.parse("https://unibase.azurewebsites.net/data/store"),
+      Uri.parse("$baseUrl/$contractKey/data/store"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -69,8 +72,7 @@ class RemoteUserSource implements IRemoteUserSource {
   Future<bool> updateUser(User user) async {
     logInfo("Web service, Updating user with id $user");
     final response = await httpClient.put(
-      Uri.parse(
-          "https://unibase.azurewebsites.net/data/users/update/${user.id}"),
+      Uri.parse("$baseUrl/$contractKey/data/users/update/${user.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
@@ -93,8 +95,7 @@ class RemoteUserSource implements IRemoteUserSource {
   Future<bool> deleteUser(User user) async {
     logInfo("Web service, Deleting user with id $user");
     final response = await httpClient.delete(
-      Uri.parse(
-          "https://unibase.azurewebsites.net/data/users/delete/${user.id}"),
+      Uri.parse("$baseUrl/$contractKey/data/users/delete/${user.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

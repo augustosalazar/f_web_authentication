@@ -17,9 +17,9 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         id: json["entry_id"],
-        firstName: json["firstName"] ?? "somefirstName",
-        lastName: json["lastName"] ?? "someLastName",
-        email: json["email"] ?? "someemail",
+        firstName: json["data"]["firstName"] ?? "somefirstName",
+        lastName: json["data"]["lastName"] ?? "someLastName",
+        email: json["data"]["email"] ?? "someemail",
       );
 
   Map<String, dynamic> toJson() => {

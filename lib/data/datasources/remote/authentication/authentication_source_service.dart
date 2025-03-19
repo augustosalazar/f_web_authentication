@@ -6,12 +6,10 @@ import 'package:http/http.dart' as http;
 import 'i_authentication_source.dart';
 
 class AuthenticationSourceService implements IAuthenticationSource {
-  final String apiKey = '1zjCuS';
   final http.Client httpClient;
-  final String appName = 'clase202430';
-  final String contractKey = '53e0e139-4cca-4204-98e5-e1d8f700ab79';
-  final String baseUrl =
-      'https://authenticationapp.mangocoast-ed120e36.eastus.azurecontainerapps.io';
+  final String appName = 'clase202510';
+  final String contractKey = '87f1ab21-327b-4dcc-bea0-067a47214eca';
+  final String baseUrl = 'http://authuserver.openlab.uninorte.edu.co';
   String? token;
 
   AuthenticationSourceService({http.Client? client})
