@@ -8,9 +8,9 @@ import 'i_authentication_source.dart';
 
 class AuthenticationSourceService implements IAuthenticationSource {
   final http.Client httpClient;
-  final String appName = 'clase202510';
-  final String contractKey = '87f1ab21-327b-4dcc-bea0-067a47214eca';
-  final String baseUrl = 'http://authuserver.openlab.uninorte.edu.co';
+  final String appName = 'movil202510';
+  final String contractKey = 'e83b7ac8-bdad-4bb8-a532-6aaa5fddefa4';
+  final String baseUrl = 'https://authuserver.openlab.uninorte.edu.co';
   String? token;
 
   AuthenticationSourceService({http.Client? client})

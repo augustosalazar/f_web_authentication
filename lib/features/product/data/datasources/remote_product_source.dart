@@ -8,8 +8,8 @@ import 'i_remote_product_source.dart';
 class RemoteProductSource implements IRemoteUserSource {
   final http.Client httpClient;
 
-  final String contractKey = '87f1ab21-327b-4dcc-bea0-067a47214eca';
-  final String baseUrl = 'http://unidb.openlab.uninorte.edu.co';
+  final String contractKey = 'e83b7ac8-bdad-4bb8-a532-6aaa5fddefa4';
+  final String baseUrl = 'https://unidb.openlab.uninorte.edu.co';
   final String table = 'products';
 
   RemoteProductSource({http.Client? client})
