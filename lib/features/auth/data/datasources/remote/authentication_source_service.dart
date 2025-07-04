@@ -77,4 +77,20 @@ class AuthenticationSourceService implements IAuthenticationSource {
   Future<bool> validate(String email, String validationCode) async {
     return Future.value(true);
   }
+
+  @override
+  Future<bool> refreshToken() async {
+    return Future.value(true);
+  }
+
+  @override
+  Future<bool> forgotPassword(String email) async {
+    return Future.value(true);
+  }
+
+  @override
+  Future<bool> resetPassword(
+      String email, String newPassword, String validationCode) async {
+    return Future.value(true);
+  }
 }

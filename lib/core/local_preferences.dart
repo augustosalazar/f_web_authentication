@@ -37,19 +37,19 @@ class LocalPreferences {
 
     if (value is bool) {
       result = await prefs.setBool(key, value);
-      logInfo("LocalPreferences setBool with key $key got $result");
+      //logInfo("LocalPreferences setBool with key $key got $result");
     } else if (value is double) {
       result = await prefs.setDouble(key, value);
-      logInfo("LocalPreferences setDouble with key $key got $result");
+      //logInfo("LocalPreferences setDouble with key $key got $result");
     } else if (value is int) {
       result = await prefs.setInt(key, value);
-      logInfo("LocalPreferences setInt with key $key got $result");
+      //logInfo("LocalPreferences setInt with key $key got $result");
     } else if (value is String) {
       result = await prefs.setString(key, value);
-      logInfo("LocalPreferences setString with key $key got $result");
+      //logInfo("LocalPreferences setString with key $key got $result");
     } else if (value is List<String>) {
       result = await prefs.setStringList(key, value);
-      logInfo("LocalPreferences setStringList with key $key got $result");
+      //logInfo("LocalPreferences setStringList with key $key got $result");
     } else {
       throw Exception("Unsupported type");
     }

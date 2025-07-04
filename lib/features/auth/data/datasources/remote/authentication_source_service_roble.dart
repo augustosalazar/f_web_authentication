@@ -123,4 +123,45 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       return Future.error('Error code ${response.statusCode}');
     }
   }
+
+  @override
+  Future<bool> refreshToken() async {
+    final sharedPreferences = LocalPreferences();
+    final refreshToken =
+        await sharedPreferences.retrieveData<String>('refreshToken');
+    if (refreshToken == null) {
+      logError("No refresh token found, cannot refresh.");
+      return Future.error('No refresh token found');
+    }
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/refresh-token"),
+      headers: <String, String>{
+        'refreshToken': refreshToken,
+      },
+    );
+
+    logInfo(response.statusCode);
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      final newToken = data['accessToken'];
+      sharedPreferences.storeData('token', newToken);
+      logInfo("Token refreshed successfully");
+      return Future.value(true);
+    } else {
+      logError("Got error code ${response.statusCode}");
+      return Future.error('Error code ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<bool> forgotPassword(String email) async {
+    return Future.value(true);
+  }
+
+  @override
+  Future<bool> resetPassword(
+      String email, String newPassword, String validationCode) async {
+    return Future.value(true);
+  }
 }
