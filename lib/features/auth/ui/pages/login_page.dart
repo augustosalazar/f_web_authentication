@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final controllerEmail = TextEditingController(text: 'a@a.com');
-  final controllerPassword = TextEditingController(text: '123456');
+  final controllerPassword = TextEditingController(text: 'ThePassword1!');
   AuthenticationController authenticationController = Get.find();
 
   _login(theEmail, thePassword) async {

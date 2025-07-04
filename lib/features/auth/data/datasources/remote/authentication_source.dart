@@ -66,4 +66,9 @@ class AuthenticationSource implements IAuthenticationSource {
   Future<bool> logOut() async {
     return Future.value(true);
   }
+
+  @override
+  Future<bool> validate(String email, String validationCode) async {
+    return Future.value(true);
+  }
 }

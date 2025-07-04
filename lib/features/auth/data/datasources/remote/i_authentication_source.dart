@@ -6,4 +6,6 @@ abstract class IAuthenticationSource {
   Future<bool> signUp(AuthenticationUser user);
 
   Future<bool> logOut();
+
+  Future<bool> validate(String email, String validationCode);
 }
