@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:f_web_authentication/core/local_preferences.dart';
 import 'package:loggy/loggy.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,7 +11,6 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   final http.Client httpClient;
   final String baseUrl =
       'https://roble-auth.test-openlab.uninorte.edu.co/contract_flutterdemo_ebabe79ab0';
-  String? token;
 
   AuthenticationSourceServiceRoble({http.Client? client})
       : httpClient = client ?? http.Client();
@@ -29,11 +29,16 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     );
 
     logInfo(response.statusCode);
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       logInfo(response.body);
       final data = jsonDecode(response.body);
-      token = data['accessToken'];
-      logInfo("Token: $token");
+      final token = data['accessToken'];
+      final refreshToken = data['refreshToken'];
+      final sharedPreferences = LocalPreferences();
+      sharedPreferences.storeData('token', token);
+      sharedPreferences.storeData('refreshToken', refreshToken);
+      logInfo("Token: $token"
+          "\nRefresh Token: $refreshToken");
       return Future.value(true);
     } else {
       logError("Got error code ${response.statusCode}");
@@ -70,6 +75,8 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> logOut() async {
+    final sharedPreferences = LocalPreferences();
+    final token = await sharedPreferences.retrieveData<String>('token');
     if (token == null) {
       logError("No token found, cannot log out.");
       return Future.error('No token found');
@@ -83,8 +90,11 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     );
 
     logInfo(response.statusCode);
-    if (response.statusCode == 200) {
-      token = null; // Clear the token on successful logout
+    if (response.statusCode == 201) {
+      final sharedPreferences = LocalPreferences();
+      sharedPreferences.removeData('token');
+      sharedPreferences.removeData('refreshToken');
+      logInfo("Logged out successfully");
       return Future.value(true);
     } else {
       logError("Got error code ${response.statusCode}");
