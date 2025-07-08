@@ -1,22 +1,13 @@
 # f_web_authentication
 
-A Flutter project to test authentication services based on a sever running the following code:
+A Flutter project to test authentication services based on Roble running the following code:
 
 Authentication server:   
 
-First get the contract key from:   
-```link
-https://happy-ocean-0f21e580f.5.azurestaticapps.net/
 ```
-
-Then use the following URL to authenticate:
-
+The project data backend works with the following web servcice:
 ```link
-https://authenticationapp.mangocoast-ed120e36.eastus.azurecontainerapps.io
-```
-The project  works with the following web servcice:
-```link
-https://github.com/proyectosingenieriauninorte/UniBase
+https://unidb.openlab.uninorte.edu.co
 ```
 
 Using this structure:
