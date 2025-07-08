@@ -1,9 +1,11 @@
+import 'package:f_web_authentication/core/refresh_client.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
 import 'central.dart';
-import 'features/auth/data/datasources/remote/authentication_source_service.dart';
+import 'package:f_web_authentication/features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/repositories/i_auth_repository.dart';
@@ -24,7 +26,15 @@ void main() {
   );
 
   //Get.put<IAuthenticationSource>(AuthenticationSource());
-  Get.put<IAuthenticationSource>(AuthenticationSourceService());
+  Get.lazyPut<IAuthenticationSource>(
+    () => AuthenticationSourceServiceRoble(),
+    fenix: true,
+  );
+  Get.lazyPut<http.Client>(() {
+    final auth = Get.find<AuthenticationSourceServiceRoble>();
+    return RefreshClient(http.Client(), auth);
+  }, tag: 'apiClient');
+
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
   Get.put(AuthenticationUseCase(Get.find()));
   Get.put(AuthenticationController());

@@ -23,7 +23,17 @@ class AuthenticationController extends GetxController {
     return true;
   }
 
+  Future<bool> validate(String email, String validationCode) async {
+    final AuthenticationUseCase authentication = Get.find();
+    logInfo('Controller Validate');
+    var rta = await authentication.validate(email, validationCode);
+    return rta;
+  }
+
   Future<void> logOut() async {
+    final AuthenticationUseCase authentication = Get.find();
+    logInfo('Controller Log Out');
+    await authentication.logOut();
     logged.value = false;
   }
 }

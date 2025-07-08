@@ -16,5 +16,8 @@ class AuthenticationUseCase {
           lastName: email,
           password: password));
 
+  Future<bool> validate(String email, String validationCode) async =>
+      await _repository.validate(email, validationCode);
+
   Future<bool> logOut() async => await _repository.logOut();
 }

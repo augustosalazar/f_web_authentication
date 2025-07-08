@@ -17,4 +17,8 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<bool> logOut() async => await authenticationSource.logOut();
+
+  @override
+  Future<bool> validate(String email, String validationCode) async =>
+      await authenticationSource.validate(email, validationCode);
 }
