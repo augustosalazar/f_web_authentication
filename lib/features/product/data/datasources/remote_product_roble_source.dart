@@ -9,7 +9,7 @@ class RemoteProductRobleSource implements IRemoteUserSource {
   final http.Client httpClient;
 
   final String baseUrl = 'https://roble-api.test-openlab.uninorte.edu.co/database/contract_flutterdemo_ebabe79ab0';
-  final String table = 'products';
+  final String table = 'Product';
 
   RemoteProductRobleSource  ({http.Client? client})
       : httpClient = client ?? http.Client();
@@ -74,12 +74,15 @@ class RemoteProductRobleSource implements IRemoteUserSource {
   Future<bool> updateProduct(Product product) async {
     logInfo("Web service, Updating user with id $product");
     final response = await httpClient.put(
-      Uri.parse("$baseUrl/$contractKey/data/$table/update/${product.id}"),
+      Uri.parse("$baseUrl/update"),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'data': product.toJson(),
+        'tableName': table,
+        'idColumn': '_id',
+        'idValue': product.id ?? "0",
+        'updates': product.toJsonNoId(),
       }),
     );
 
@@ -97,10 +100,15 @@ class RemoteProductRobleSource implements IRemoteUserSource {
   Future<bool> deleteProduct(Product product) async {
     logInfo("Web service, Deleting user with id $product");
     final response = await httpClient.delete(
-      Uri.parse("$baseUrl/$contractKey/data/$table/delete/${product.id}"),
+      Uri.parse("$baseUrl/delete"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
+      body: jsonEncode({
+        'tableName': table,
+        'idColumn': '_id',
+        'idValue': product.id ?? "0",
+      }),
     );
     logInfo("deleteUser response status code ${response.statusCode}");
     logInfo("deleteUser response body ${response.body}");

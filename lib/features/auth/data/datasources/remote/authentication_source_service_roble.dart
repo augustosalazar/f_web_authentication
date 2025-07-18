@@ -10,7 +10,7 @@ import 'i_authentication_source.dart';
 class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   final http.Client httpClient;
   final String baseUrl =
-      'https://roble-auth.test-openlab.uninorte.edu.co/contract_flutterdemo_ebabe79ab0';
+      'https://roble-api.test-openlab.uninorte.edu.co/auth/contract_flutterdemo_ebabe79ab0';
 
   AuthenticationSourceServiceRoble({http.Client? client})
       : httpClient = client ?? http.Client();
@@ -42,7 +42,11 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       return Future.value(true);
     } else {
       logError("Got error code ${response.statusCode}");
-      return Future.error('Error code ${response.statusCode}');
+      final Map<String, dynamic> body = json.decode(response.body);
+      final List<dynamic> messages = body['message'];
+      final String errorMessage = messages.join(" ");
+      logError("Got error code ${response.statusCode}");
+      return Future.error('Error $errorMessage');
     }
   }
 
@@ -68,7 +72,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       final Map<String, dynamic> body = json.decode(response.body);
       final List<dynamic> messages = body['message'];
       final String errorMessage = messages.join(" ");
-      logError("Got error code ${response.statusCode}");
+      logError("Got error code ${response.statusCode} - $errorMessage");
       return Future.error('Error $errorMessage');
     }
   }

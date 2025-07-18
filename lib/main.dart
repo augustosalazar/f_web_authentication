@@ -1,4 +1,5 @@
 import 'package:f_web_authentication/core/refresh_client.dart';
+import 'package:f_web_authentication/features/product/data/datasources/remote_product_roble_source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -39,7 +40,7 @@ void main() {
   Get.put(AuthenticationUseCase(Get.find()));
   Get.put(AuthenticationController());
 
-  Get.put<IRemoteUserSource>(RemoteProductSource());
+  Get.put<IRemoteUserSource>(RemoteProductRobleSource());
   Get.put<IProductRepository>(ProductRepository(Get.find()));
   Get.put(UserUseCase(Get.find()));
   Get.lazyPut(() => ProductController());
