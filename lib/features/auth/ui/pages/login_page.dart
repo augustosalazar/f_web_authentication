@@ -13,7 +13,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final controllerEmail = TextEditingController(text: 'a@a.com');
+  final controllerEmail = TextEditingController(text: 'augustosalazar@uninorte.edu.co');
   final controllerPassword = TextEditingController(text: 'ThePassword1!');
   AuthenticationController authenticationController = Get.find();
 

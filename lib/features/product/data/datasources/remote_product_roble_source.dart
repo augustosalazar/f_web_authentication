@@ -8,34 +8,33 @@ import 'i_remote_product_source.dart';
 class RemoteProductRobleSource implements IRemoteUserSource {
   final http.Client httpClient;
 
-  final String baseUrl = 'https://roble-api.test-openlab.uninorte.edu.co/database/contract_flutterdemo_ebabe79ab0';
+  final String contract = 'contract_flutterdemo_ebabe79ab0';
+  final String baseUrl =
+      'https://roble-api.test-openlab.uninorte.edu.co/database/contract_flutterdemo_ebabe79ab0';
   final String table = 'Product';
 
-  RemoteProductRobleSource  ({http.Client? client})
+  RemoteProductRobleSource({http.Client? client})
       : httpClient = client ?? http.Client();
 
   @override
   Future<List<Product>> getProducts() async {
     List<Product> products = [];
-    var request = Uri.parse("$baseUrl/read")
-        .resolveUri(Uri(queryParameters: {
-      "format": 'json',
-      "table_name": table,
-    }));
 
-    var response = await httpClient.get(request);
+    var uri = Uri.https(
+      'roble-api.test-openlab.uninorte.edu.co',
+      '/database/$contract/read',
+      {'tableName': table},
+    );
+
+    var response = await httpClient.get(uri);
 
     if (response.statusCode == 200) {
-      //logInfo(response.body);
-      //final data = jsonDecode(response.body);
+      List<dynamic> decodedJson = jsonDecode(response.body);
 
-      Map<String, dynamic> decodedJson = jsonDecode(response.body);
-      final data = decodedJson['data'];
+      //logInfo(decodedJson);
 
-      logInfo(data);
-
-      products = List<Product>.from(data.map((x) => Product.fromJson(x)));
-      //users.removeAt(1);
+      products =
+          List<Product>.from(decodedJson.map((x) => Product.fromJson(x)));
     } else {
       logError("Got error code ${response.statusCode}");
       return Future.error('Error code ${response.statusCode}');
@@ -48,18 +47,23 @@ class RemoteProductRobleSource implements IRemoteUserSource {
   Future<bool> addProduct(Product product) async {
     logInfo("Web service, Adding user");
 
-    final response = await httpClient.post(
-      Uri.parse("$baseUrl/insert"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-
-      },
-      body: jsonEncode({
-        'tableName': table,
-        'data': product.toJsonNoId(),
-      }),
+    final uri = Uri.https(
+      'roble-api.test-openlab.uninorte.edu.co',
+      '/database/$contract/insert',
     );
 
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+
+    final body = jsonEncode({
+      "tableName": table,
+      "records": [
+        product.toJsonNoId(),
+      ],
+    });
+
+    final response = await http.post(uri, headers: headers, body: body);
     if (response.statusCode == 201) {
       //logInfo(response.body);
       return Future.value(true);
