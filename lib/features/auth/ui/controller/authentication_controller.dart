@@ -7,6 +7,13 @@ import '../../domain/use_case/authentication_usecase.dart';
 class AuthenticationController extends GetxController {
   final logged = false.obs;
 
+  @override
+  Future<void> onInit() async {
+    super.onInit();
+    logInfo('AuthenticationController initialized');
+    logged.value = await validateToken();
+  }
+
   bool get isLogged => logged.value;
 
   Future<bool> login(email, password) async {
@@ -35,5 +42,12 @@ class AuthenticationController extends GetxController {
     logInfo('Controller Log Out');
     await authentication.logOut();
     logged.value = false;
+  }
+
+  Future<bool> validateToken() async {
+    final AuthenticationUseCase authentication = Get.find();
+    logInfo('Controller Validate Token');
+    var rta = await authentication.validateToken();
+    return rta;
   }
 }

@@ -168,4 +168,29 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       String email, String newPassword, String validationCode) async {
     return Future.value(true);
   }
+
+  @override
+  Future<bool> verifyToken() async {
+    final sharedPreferences = LocalPreferences();
+    final token = await sharedPreferences.retrieveData<String>('token');
+    if (token == null) {
+      logError("No token found, cannot verify.");
+      return Future.error('No token found');
+    }
+    logInfo("Verifying token: $token");
+    final response = await http.get(
+      Uri.parse("$baseUrl/verify-token"),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+    );
+    logInfo(response.statusCode);
+    if (response.statusCode == 200) {
+      logInfo("Token is valid");
+      return Future.value(true);
+    } else {
+      logError("Got error code ${response.statusCode}");
+      return Future.value(false);
+    }
+  }
 }

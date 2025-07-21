@@ -20,4 +20,6 @@ class AuthenticationUseCase {
       await _repository.validate(email, validationCode);
 
   Future<bool> logOut() async => await _repository.logOut();
+
+  Future<bool> validateToken() async => await _repository.validateToken();
 }

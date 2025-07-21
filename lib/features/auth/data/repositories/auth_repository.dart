@@ -21,4 +21,8 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<bool> validate(String email, String validationCode) async =>
       await authenticationSource.validate(email, validationCode);
+
+  @override
+  Future<bool> validateToken() async =>
+      await authenticationSource.verifyToken();
 }

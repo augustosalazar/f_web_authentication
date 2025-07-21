@@ -8,4 +8,6 @@ abstract class IAuthRepository {
   Future<bool> logOut();
 
   Future<bool> validate(String email, String validationCode);
+
+  Future<bool> validateToken();
 }
