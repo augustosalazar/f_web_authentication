@@ -40,7 +40,7 @@ class _ListProductPageState extends State<ListProductPage> {
         IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () {
-              userController.deleteUsers();
+              userController.deleteProducts();
             }),
       ]),
       body: Center(child: _getXlistView()),
@@ -73,7 +73,7 @@ class _ListProductPageState extends State<ListProductPage> {
                   ),
                 )),
             onDismissed: (direction) {
-              userController.deleteUser(user);
+              userController.deleteProduct(user);
             },
             child: Card(
               child: ListTile(

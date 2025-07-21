@@ -15,7 +15,7 @@ import 'features/product/data/datasources/i_remote_product_source.dart';
 import 'features/product/data/datasources/remote_product_roble_source.dart';
 import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
-import 'features/product/domain/use_case/user_usecase.dart';
+import 'features/product/domain/use_case/product_usecase.dart';
 import 'features/product/ui/controller/product_controller.dart';
 
 void main() {
@@ -41,7 +41,7 @@ void main() {
 
   Get.put<IRemoteUserSource>(RemoteProductRobleSource());
   Get.put<IProductRepository>(ProductRepository(Get.find()));
-  Get.put(UserUseCase(Get.find()));
+  Get.put(ProductUseCase(Get.find()));
   Get.lazyPut(() => ProductController());
   runApp(const MyApp());
 }

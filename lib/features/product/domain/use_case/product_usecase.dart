@@ -1,10 +1,10 @@
 import '../models/product.dart';
 import '../repositories/i_product_repository.dart';
 
-class UserUseCase {
+class ProductUseCase {
   late IProductRepository repository;
 
-  UserUseCase(this.repository);
+  ProductUseCase(this.repository);
 
   Future<List<Product>> getProducts() async => await repository.getProducts();
 
