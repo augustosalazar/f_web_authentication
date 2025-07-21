@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/product_controller.dart';
 
-class NewProductPage extends StatefulWidget {
-  const NewProductPage({super.key});
+class AddProductPage extends StatefulWidget {
+  const AddProductPage({super.key});
 
   @override
-  State<NewProductPage> createState() => _NewProductPageState();
+  State<AddProductPage> createState() => _AddProductPageState();
 }
 
-class _NewProductPageState extends State<NewProductPage> {
+class _AddProductPageState extends State<AddProductPage> {
   final controllerName = TextEditingController();
   final controllerDesc = TextEditingController();
   final controllerQuantity = TextEditingController();
@@ -33,6 +33,9 @@ class _NewProductPageState extends State<NewProductPage> {
                 controller: controllerName,
                 decoration: const InputDecoration(
                   labelText: 'Product Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
@@ -41,6 +44,9 @@ class _NewProductPageState extends State<NewProductPage> {
                 controller: controllerDesc,
                 decoration: const InputDecoration(
                   labelText: 'Product Description',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
@@ -50,28 +56,26 @@ class _NewProductPageState extends State<NewProductPage> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Quantity',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            await productController.addProduct(
-                                controllerName.text,
-                                controllerDesc.text,
-                                controllerQuantity.text);
-                            Get.back();
-                          },
-                          child: const Text("Save")))
-                ],
-              ),
+            Row(
+              children: [
+                Expanded(
+                    child: FilledButton.tonal(
+                        onPressed: () async {
+                          await productController.addProduct(
+                              controllerName.text,
+                              controllerDesc.text,
+                              controllerQuantity.text);
+                          Get.back();
+                        },
+                        child: const Text("Save")))
+              ],
             )
           ],
         ),

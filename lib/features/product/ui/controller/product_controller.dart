@@ -2,44 +2,46 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
 import '../../domain/models/product.dart';
-import '../../domain/use_case/user_usecase.dart';
+import '../../domain/use_case/product_usecase.dart';
 
 class ProductController extends GetxController {
   final RxList<Product> _products = <Product>[].obs;
-  final UserUseCase productUseCase = Get.find();
+  final ProductUseCase productUseCase = Get.find();
 
   List<Product> get products => _products;
 
   @override
   void onInit() {
-    getUers();
+    getProducts();
     super.onInit();
   }
 
-  getUers() async {
-    logInfo("Getting products");
+  getProducts() async {
+    logInfo("ProductController: Getting products");
     _products.value = await productUseCase.getProducts();
   }
 
   addProduct(String name, String desc, String quantity) async {
-    logInfo("Add product");
+    logInfo("ProductController: Add product");
     await productUseCase.addProduct(name, desc, quantity);
-    getUers();
+    await getProducts();
   }
 
-  updateProduct(Product user) async {
-    logInfo("Update product");
-    await productUseCase.updateProduct(user);
-    getUers();
+  updateProduct(Product product) async {
+    logInfo("ProductController: Update product");
+    await productUseCase.updateProduct(product);
+    await getProducts();
   }
 
-  void deleteUser(Product p) async {
+  void deleteProduct(Product p) async {
+    logInfo("ProductController: Delete product");
     await productUseCase.deleteProduct(p);
-    getUers();
+    await getProducts();
   }
 
-  void deleteUsers() async {
+  void deleteProducts() async {
+    logInfo("ProductController: Delete all products");
     await productUseCase.deleteProducts();
-    getUers();
+    await getProducts();
   }
 }

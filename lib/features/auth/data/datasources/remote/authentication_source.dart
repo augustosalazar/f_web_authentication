@@ -87,4 +87,9 @@ class AuthenticationSource implements IAuthenticationSource {
       String email, String newPassword, String validationCode) async {
     return Future.value(true);
   }
+
+  @override
+  Future<bool> verifyToken() async {
+    return Future.value(false);
+  }
 }
