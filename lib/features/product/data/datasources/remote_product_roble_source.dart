@@ -63,7 +63,7 @@ class RemoteProductRobleSource implements IRemoteUserSource {
       ],
     });
 
-    final response = await http.post(uri, headers: headers, body: body);
+    final response = await httpClient.post(uri, headers: headers, body: body);
     if (response.statusCode == 201) {
       //logInfo(response.body);
       return Future.value(true);

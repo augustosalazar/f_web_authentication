@@ -70,7 +70,10 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          title: const Text("Sign Up"),
+          centerTitle: true,
+        ),
         body: Center(
             child: Container(
                 padding: const EdgeInsets.all(20),
@@ -149,7 +152,12 @@ class _SignUpPageState extends State<SignUpPage> {
         TextFormField(
           keyboardType: TextInputType.emailAddress,
           controller: controllerEmail,
-          decoration: const InputDecoration(labelText: "Email address"),
+          decoration: const InputDecoration(
+            labelText: "Email address",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               logError('SignUp validation empty email');
@@ -166,7 +174,12 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         TextFormField(
           controller: controllerPassword,
-          decoration: const InputDecoration(labelText: "Password"),
+          decoration: const InputDecoration(
+            labelText: "Password",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+          ),
           keyboardType: TextInputType.number,
           obscureText: true,
           validator: (value) {
@@ -181,20 +194,26 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(
           height: 20,
         ),
-        TextButton(
-            onPressed: () async {
-              final form = key.currentState;
-              form!.save();
-              // this line dismiss the keyboard by taking away the focus of the TextFormField and giving it to an unused
-              FocusScope.of(context).requestFocus(FocusNode());
-              if (key.currentState!.validate()) {
-                logInfo('SignUp validation form ok');
-                await _signup(controllerEmail.text, controllerPassword.text);
-              } else {
-                logError('SignUp validation form nok');
-              }
-            },
-            child: const Text("Submit")),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton.tonal(
+                  onPressed: () async {
+                    final form = key.currentState;
+                    form!.save();
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    if (key.currentState!.validate()) {
+                      logInfo('SignUp validation form ok');
+                      await _signup(
+                          controllerEmail.text, controllerPassword.text);
+                    } else {
+                      logError('SignUp validation form nok');
+                    }
+                  },
+                  child: const Text("Submit")),
+            ),
+          ],
+        ),
       ]),
     );
   }

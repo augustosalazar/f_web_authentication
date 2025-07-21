@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
 import 'central.dart';
+import 'core/app_theme.dart';
 import 'core/refresh_client.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
@@ -25,7 +26,6 @@ void main() {
     ),
   );
 
-  //Get.put<IAuthenticationSource>(AuthenticationSource());
   Get.lazyPut<IAuthenticationSource>(
     () => AuthenticationSourceServiceRoble(),
     fenix: true,
@@ -53,9 +53,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Web service Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      debugShowCheckedModeBanner: false,
       home: const Central(),
     );
   }

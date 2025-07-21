@@ -86,7 +86,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       return Future.error('No token found');
     }
 
-    final response = await http.post(
+    final response = await httpClient.post(
       Uri.parse("$baseUrl/logout"),
       headers: <String, String>{
         'Authorization': 'Bearer $token',
@@ -108,7 +108,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> validate(String email, String validationCode) async {
-    final response = await http.post(
+    final response = await httpClient.post(
       Uri.parse("$baseUrl/verify-email"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -160,7 +160,23 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> forgotPassword(String email) async {
-    return Future.value(true);
+    final response = await httpClient.post(
+      Uri.parse("$baseUrl/forgot-password"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "email": email,
+      }),
+    );
+
+    logInfo(response.statusCode);
+    if (response.statusCode == 201) {
+      return Future.value(true);
+    } else {
+      logError("forgotPassword got error code ${response.statusCode}");
+      return Future.error('Error code ${response.statusCode}');
+    }
   }
 
   @override
@@ -175,10 +191,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     final token = await sharedPreferences.retrieveData<String>('token');
     if (token == null) {
       logError("No token found, cannot verify.");
-      return Future.error('No token found');
+      return Future.value(false);
     }
     //logInfo("Verifying token: $token");
-    final response = await http.get(
+    final response = await httpClient.get(
       Uri.parse("$baseUrl/verify-token"),
       headers: <String, String>{
         'Authorization': 'Bearer $token',

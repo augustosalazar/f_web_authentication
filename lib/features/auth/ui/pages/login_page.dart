@@ -1,3 +1,4 @@
+import 'package:f_web_authentication/features/auth/ui/pages/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
@@ -47,17 +48,21 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Login with email",
+                      "Login to access your account",
                       style: TextStyle(fontSize: 20),
                     ),
                     const SizedBox(
-                      height: 20,
+                      height: 30,
                     ),
                     TextFormField(
                       keyboardType: TextInputType.emailAddress,
                       controller: controllerEmail,
-                      decoration:
-                          const InputDecoration(labelText: "Email address"),
+                      decoration: const InputDecoration(
+                        labelText: "Email address",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                      ),
                       validator: (String? value) {
                         if (value!.isEmpty) {
                           return "Enter email";
@@ -72,7 +77,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextFormField(
                       controller: controllerPassword,
-                      decoration: const InputDecoration(labelText: "Password"),
+                      decoration: const InputDecoration(
+                        labelText: "Password",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                      ),
                       obscureText: true,
                       validator: (String? value) {
                         if (value!.isEmpty) {
@@ -92,31 +102,54 @@ class _LoginPageState extends State<LoginPage> {
                         }
                       },
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ForgotPasswordPage()));
+                            },
+                            child: const Text("Forgot password?")),
+                      ],
+                    ),
                     const SizedBox(
                       height: 20,
                     ),
-                    OutlinedButton(
-                        onPressed: () async {
-                          // this line dismiss the keyboard by taking away the focus of the TextFormField and giving it to an unused
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          final form = _formKey.currentState;
-                          form!.save();
-                          if (_formKey.currentState!.validate()) {
-                            await _login(
-                                controllerEmail.text, controllerPassword.text);
-                          }
+                    Row(
+                      children: [
+                        Expanded(
+                            child: FilledButton.tonal(
+                                onPressed: () async {
+                                  // this line dismiss the keyboard by taking away the focus of the TextFormField and giving it to an unused
+                                  FocusScope.of(context)
+                                      .requestFocus(FocusNode());
+                                  final form = _formKey.currentState;
+                                  form!.save();
+                                  if (_formKey.currentState!.validate()) {
+                                    await _login(controllerEmail.text,
+                                        controllerPassword.text);
+                                  }
+                                },
+                                child: const Text("Login"))),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignUpPage()));
                         },
-                        child: const Text("Submit")),
+                        child: const Text("Create account"))
                   ]),
             ),
-            TextButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignUpPage()));
-                },
-                child: const Text("Create account"))
           ],
         ),
       ),

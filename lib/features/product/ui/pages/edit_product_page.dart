@@ -23,7 +23,7 @@ class _EditProductPageState extends State<EditProductPage> {
     ProductController productController = Get.find();
     controllerFirstName.text = product.name;
     controllerLastName.text = product.description;
-    controllerEmail.text = product.quantity as String;
+    controllerEmail.text = product.quantity.toString();
     logInfo("Update page product $product");
     return Scaffold(
       appBar: AppBar(
@@ -40,6 +40,9 @@ class _EditProductPageState extends State<EditProductPage> {
                 controller: controllerFirstName,
                 decoration: const InputDecoration(
                   labelText: 'Product Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
@@ -48,6 +51,9 @@ class _EditProductPageState extends State<EditProductPage> {
                 controller: controllerLastName,
                 decoration: const InputDecoration(
                   labelText: 'Product Description',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
@@ -57,28 +63,28 @@ class _EditProductPageState extends State<EditProductPage> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Quantity',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            product.name = controllerEmail.text;
-                            product.description = controllerFirstName.text;
-                            product.quantity = controllerLastName.text as int;
-                            await productController.updateProduct(product);
-                            Get.back();
-                          },
-                          child: const Text("Update")))
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                    flex: 2,
+                    child: FilledButton.tonal(
+                        onPressed: () async {
+                          product.name = controllerEmail.text;
+                          product.description = controllerFirstName.text;
+                          product.quantity = controllerLastName.text as int;
+                          await productController.updateProduct(product);
+                          Get.back();
+                        },
+                        child: const Text("Update")))
+              ],
             )
           ],
         ),
