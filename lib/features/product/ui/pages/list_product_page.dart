@@ -7,16 +7,16 @@ import '../../domain/models/product.dart';
 
 import '../controller/product_controller.dart';
 import 'edit_product_page.dart';
-import 'new_product_page.dart';
+import 'add_product_page.dart';
 
-class ProductListPage extends StatefulWidget {
-  const ProductListPage({super.key});
+class ListProductPage extends StatefulWidget {
+  const ListProductPage({super.key});
 
   @override
-  State<ProductListPage> createState() => _ProductListPageState();
+  State<ListProductPage> createState() => _ListProductPageState();
 }
 
-class _ProductListPageState extends State<ProductListPage> {
+class _ListProductPageState extends State<ListProductPage> {
   ProductController userController = Get.find();
   AuthenticationController authenticationController = Get.find();
 
@@ -47,7 +47,7 @@ class _ProductListPageState extends State<ProductListPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           logInfo("Add user from UI");
-          Get.to(() => const NewProductPage());
+          Get.to(() => const AddProductPage());
         },
         child: const Icon(Icons.add),
       ),
@@ -81,7 +81,7 @@ class _ProductListPageState extends State<ProductListPage> {
                 subtitle: Text(user.description),
                 trailing: Text(user.quantity.toString()),
                 onTap: () {
-                  Get.to(() => const EditUserPage(),
+                  Get.to(() => const EditProductPage(),
                       arguments: [user, user.id]);
                 },
               ),

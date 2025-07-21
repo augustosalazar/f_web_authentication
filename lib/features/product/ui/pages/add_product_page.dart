@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/product_controller.dart';
 
-class NewProductPage extends StatefulWidget {
-  const NewProductPage({super.key});
+class AddProductPage extends StatefulWidget {
+  const AddProductPage({super.key});
 
   @override
-  State<NewProductPage> createState() => _NewProductPageState();
+  State<AddProductPage> createState() => _AddProductPageState();
 }
 
-class _NewProductPageState extends State<NewProductPage> {
+class _AddProductPageState extends State<AddProductPage> {
   final controllerName = TextEditingController();
   final controllerDesc = TextEditingController();
   final controllerQuantity = TextEditingController();

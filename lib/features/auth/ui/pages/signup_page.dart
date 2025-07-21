@@ -3,15 +3,16 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import '../controller/authentication_controller.dart';
 
-class SignUp extends StatefulWidget {
-  const SignUp({super.key});
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
 
   @override
-  State<SignUp> createState() => _FirebaseSignUpState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _FirebaseSignUpState extends State<SignUp> {
-  final controllerEmail = TextEditingController(text: 'a@a.com');
+class _SignUpPageState extends State<SignUpPage> {
+  final controllerEmail =
+      TextEditingController(text: 'augustosalazar@uninorte.edu.co');
   final controllerPassword = TextEditingController(text: 'ThePassword1!');
   final controllerValidation = TextEditingController();
   AuthenticationController authenticationController = Get.find();

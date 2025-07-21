@@ -1,19 +1,18 @@
-import 'package:f_web_authentication/core/refresh_client.dart';
-import 'package:f_web_authentication/features/product/data/datasources/remote_product_roble_source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
 import 'central.dart';
-import 'package:f_web_authentication/features/auth/data/datasources/remote/authentication_source_service_roble.dart';
+import 'core/refresh_client.dart';
+import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/repositories/i_auth_repository.dart';
 import 'features/auth/domain/use_case/authentication_usecase.dart';
 import 'features/auth/ui/controller/authentication_controller.dart';
 import 'features/product/data/datasources/i_remote_product_source.dart';
-import 'features/product/data/datasources/remote_product_source.dart';
+import 'features/product/data/datasources/remote_product_roble_source.dart';
 import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
 import 'features/product/domain/use_case/user_usecase.dart';

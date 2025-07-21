@@ -5,14 +5,14 @@ import 'package:loggy/loggy.dart';
 import '../../domain/models/product.dart';
 import '../controller/product_controller.dart';
 
-class EditUserPage extends StatefulWidget {
-  const EditUserPage({super.key});
+class EditProductPage extends StatefulWidget {
+  const EditProductPage({super.key});
 
   @override
-  State<EditUserPage> createState() => _EditUserPageState();
+  State<EditProductPage> createState() => _EditProductPageState();
 }
 
-class _EditUserPageState extends State<EditUserPage> {
+class _EditProductPageState extends State<EditProductPage> {
   Product product = Get.arguments[0];
   final controllerFirstName = TextEditingController();
   final controllerLastName = TextEditingController();
