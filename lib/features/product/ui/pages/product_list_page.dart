@@ -77,7 +77,6 @@ class _ProductListPageState extends State<ProductListPage> {
             },
             child: Card(
               child: ListTile(
-                leading: Text(user.id.toString()),
                 title: Text(user.name),
                 subtitle: Text(user.description),
                 trailing: Text(user.quantity.toString()),

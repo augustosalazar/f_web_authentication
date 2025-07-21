@@ -13,7 +13,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final controllerEmail = TextEditingController(text: 'augustosalazar@uninorte.edu.co');
+  final controllerEmail =
+      TextEditingController(text: 'augustosalazar@uninorte.edu.co');
   final controllerPassword = TextEditingController(text: 'ThePassword1!');
   AuthenticationController authenticationController = Get.find();
 
@@ -72,7 +73,6 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: controllerPassword,
                       decoration: const InputDecoration(labelText: "Password"),
-                      keyboardType: TextInputType.number,
                       obscureText: true,
                       validator: (String? value) {
                         if (value!.isEmpty) {
@@ -81,6 +81,15 @@ class _LoginPageState extends State<LoginPage> {
                           return "Password should have at least 6 characters";
                         }
                         return null;
+                      },
+                      onFieldSubmitted: (value) async {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        final form = _formKey.currentState;
+                        form!.save();
+                        if (_formKey.currentState!.validate()) {
+                          await _login(
+                              controllerEmail.text, controllerPassword.text);
+                        }
                       },
                     ),
                     const SizedBox(
