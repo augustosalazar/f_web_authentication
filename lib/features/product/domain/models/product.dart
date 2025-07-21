@@ -15,8 +15,7 @@ class Product {
         id: json["_id"],
         name: json["name"] ?? "---",
         description: json["description"] ?? "---",
-        //quantity: json["quantity"] ?? 0,
-        quantity: 0,
+        quantity: json["quantity"] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
