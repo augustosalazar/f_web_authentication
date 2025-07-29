@@ -1,6 +1,9 @@
-import 'package:f_web_authentication/core/local_preferences.dart';
+import 'package:f_web_authentication/core/local_preferences_shared.dart';
 import 'package:f_web_authentication/features/auth/data/datasources/remote/authentication_source_service_roble.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
+import 'i_local_preferences.dart';
 
 class RefreshClient extends http.BaseClient {
   final http.Client _inner;
@@ -11,8 +14,8 @@ class RefreshClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest req) async {
     // Obtenemos el token de acceso almacenado localmente
-    final prefs = LocalPreferences();
-    final token = await prefs.retrieveData<String>('token');
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     if (token != null) {
       req.headers['Authorization'] = 'Bearer $token';
     }
@@ -25,7 +28,7 @@ class RefreshClient extends http.BaseClient {
       final ok = await _auth.refreshToken();
       if (ok) {
         // pull new token & retry
-        final newToken = await prefs.retrieveData<String>('token');
+        final newToken = await sharedPreferences.retrieveData<String>('token');
         if (newToken != null) {
           req.headers['Authorization'] = 'Bearer $newToken';
           return _inner.send(req);

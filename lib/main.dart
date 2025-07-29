@@ -5,6 +5,8 @@ import 'package:loggy/loggy.dart';
 
 import 'central.dart';
 import 'core/app_theme.dart';
+import 'core/i_local_preferences.dart';
+import 'core/local_preferences_shared.dart';
 import 'core/refresh_client.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
@@ -25,6 +27,8 @@ void main() {
       showColors: true,
     ),
   );
+
+  Get.put<ILocalPreferences>(LocalPreferencesShared());
 
   Get.lazyPut<IAuthenticationSource>(
     () => AuthenticationSourceServiceRoble(),

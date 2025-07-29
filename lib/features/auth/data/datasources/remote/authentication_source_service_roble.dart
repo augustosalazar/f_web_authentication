@@ -1,16 +1,18 @@
 import 'dart:convert';
 
-import 'package:f_web_authentication/core/local_preferences.dart';
+import 'package:f_web_authentication/core/local_preferences_shared.dart';
+import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../../core/i_local_preferences.dart';
 import '../../../domain/models/authentication_user.dart';
 import 'i_authentication_source.dart';
 
 class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   final http.Client httpClient;
   final String baseUrl =
-      'https://roble-api.test-openlab.uninorte.edu.co/auth/contract_flutterdemo_ebabe79ab0';
+      'https://roble-api.openlab.uninorte.edu.co/auth/contract_flutterdemo_ebabe79ab0';
 
   AuthenticationSourceServiceRoble({http.Client? client})
       : httpClient = client ?? http.Client();
@@ -34,7 +36,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       final data = jsonDecode(response.body);
       final token = data['accessToken'];
       final refreshToken = data['refreshToken'];
-      final sharedPreferences = LocalPreferences();
+      final ILocalPreferences sharedPreferences = Get.find();
       sharedPreferences.storeData('token', token);
       sharedPreferences.storeData('refreshToken', refreshToken);
       logInfo("Token: $token"
@@ -79,7 +81,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> logOut() async {
-    final sharedPreferences = LocalPreferences();
+    final ILocalPreferences sharedPreferences = Get.find();
     final token = await sharedPreferences.retrieveData<String>('token');
     if (token == null) {
       logError("No token found, cannot log out.");
@@ -95,7 +97,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
     logInfo(response.statusCode);
     if (response.statusCode == 201) {
-      final sharedPreferences = LocalPreferences();
+      final ILocalPreferences sharedPreferences = Get.find();
       sharedPreferences.removeData('token');
       sharedPreferences.removeData('refreshToken');
       logInfo("Logged out successfully");
@@ -130,7 +132,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> refreshToken() async {
-    final sharedPreferences = LocalPreferences();
+    final ILocalPreferences sharedPreferences = Get.find();
     final refreshToken =
         await sharedPreferences.retrieveData<String>('refreshToken');
     if (refreshToken == null) {
@@ -187,7 +189,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> verifyToken() async {
-    final sharedPreferences = LocalPreferences();
+    final ILocalPreferences sharedPreferences = Get.find();
     final token = await sharedPreferences.retrieveData<String>('token');
     if (token == null) {
       logError("No token found, cannot verify.");
