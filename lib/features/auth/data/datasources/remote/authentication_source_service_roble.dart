@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:f_web_authentication/core/local_preferences_shared.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import 'package:http/http.dart' as http;
