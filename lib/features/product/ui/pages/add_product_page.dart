@@ -68,11 +68,20 @@ class _AddProductPageState extends State<AddProductPage> {
                 Expanded(
                     child: FilledButton.tonal(
                         onPressed: () async {
-                          await productController.addProduct(
-                              controllerName.text,
-                              controllerDesc.text,
-                              controllerQuantity.text);
-                          Get.back();
+                          try {
+                            await productController.addProduct(
+                                controllerName.text,
+                                controllerDesc.text,
+                                controllerQuantity.text);
+                            Get.back();
+                          } catch (err) {
+                            Get.snackbar(
+                              "Error",
+                              err.toString(),
+                              icon: const Icon(Icons.error, color: Colors.red),
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
                         },
                         child: const Text("Save")))
               ],

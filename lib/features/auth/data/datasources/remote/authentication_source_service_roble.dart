@@ -103,8 +103,13 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       logInfo("Logged out successfully");
       return Future.value(true);
     } else {
-      logError("logout endpoint got error code ${response.statusCode}");
-      return Future.error('Error code ${response.statusCode}');
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final List<dynamic> messages = errorBody['message'];
+      final String errorMessage =
+          messages.isNotEmpty ? messages.first.toString() : 'Unknown error';
+      logError(
+          "logout endpoint got error code ${response.statusCode} $errorMessage for token: $token");
+      return Future.error('Error code $errorMessage');
     }
   }
 

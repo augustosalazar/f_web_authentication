@@ -14,16 +14,16 @@ class EditProductPage extends StatefulWidget {
 
 class _EditProductPageState extends State<EditProductPage> {
   Product product = Get.arguments[0];
-  final controllerFirstName = TextEditingController();
-  final controllerLastName = TextEditingController();
-  final controllerEmail = TextEditingController();
+  final controllerProductName = TextEditingController();
+  final controllerProductDesc = TextEditingController();
+  final controllerProductQuantity = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     ProductController productController = Get.find();
-    controllerFirstName.text = product.name;
-    controllerLastName.text = product.description;
-    controllerEmail.text = product.quantity.toString();
+    controllerProductName.text = product.name;
+    controllerProductDesc.text = product.description;
+    controllerProductQuantity.text = product.quantity.toString();
     logInfo("Update page product $product");
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +37,7 @@ class _EditProductPageState extends State<EditProductPage> {
               height: 20,
             ),
             TextField(
-                controller: controllerFirstName,
+                controller: controllerProductName,
                 decoration: const InputDecoration(
                   labelText: 'Product Name',
                   border: OutlineInputBorder(
@@ -48,7 +48,7 @@ class _EditProductPageState extends State<EditProductPage> {
               height: 20,
             ),
             TextField(
-                controller: controllerLastName,
+                controller: controllerProductDesc,
                 decoration: const InputDecoration(
                   labelText: 'Product Description',
                   border: OutlineInputBorder(
@@ -59,7 +59,7 @@ class _EditProductPageState extends State<EditProductPage> {
               height: 20,
             ),
             TextField(
-                controller: controllerEmail,
+                controller: controllerProductQuantity,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Quantity',
@@ -77,11 +77,20 @@ class _EditProductPageState extends State<EditProductPage> {
                     flex: 2,
                     child: FilledButton.tonal(
                         onPressed: () async {
-                          product.name = controllerEmail.text;
-                          product.description = controllerFirstName.text;
-                          product.quantity = controllerLastName.text as int;
-                          await productController.updateProduct(product);
-                          Get.back();
+                          product.name = controllerProductName.text;
+                          product.description = controllerProductDesc.text;
+                          product.quantity =
+                              int.tryParse(controllerProductQuantity.text) ?? 0;
+                          try {
+                            await productController.updateProduct(product);
+                            Get.back();
+                          } catch (err) {
+                            Get.snackbar(
+                              "Error",
+                              err.toString(),
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
                         },
                         child: const Text("Update")))
               ],

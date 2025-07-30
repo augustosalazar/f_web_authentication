@@ -34,8 +34,9 @@ void main() {
     () => AuthenticationSourceServiceRoble(),
     fenix: true,
   );
+
   Get.lazyPut<http.Client>(() {
-    final auth = Get.find<AuthenticationSourceServiceRoble>();
+    final auth = Get.find<IAuthenticationSource>();
     return RefreshClient(http.Client(), auth);
   }, tag: 'apiClient');
 
@@ -43,7 +44,10 @@ void main() {
   Get.put(AuthenticationUseCase(Get.find()));
   Get.put(AuthenticationController());
 
-  Get.put<IRemoteUserSource>(RemoteProductRobleSource());
+  Get.lazyPut<IRemoteUserSource>(() {
+    final client = Get.find<http.Client>(tag: 'apiClient');
+    return RemoteProductRobleSource(client);
+  });
   Get.put<IProductRepository>(ProductRepository(Get.find()));
   Get.put(ProductUseCase(Get.find()));
   Get.lazyPut(() => ProductController());

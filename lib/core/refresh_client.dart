@@ -3,11 +3,12 @@ import 'package:f_web_authentication/features/auth/data/datasources/remote/authe
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'i_local_preferences.dart';
 
 class RefreshClient extends http.BaseClient {
   final http.Client _inner;
-  final AuthenticationSourceServiceRoble _auth;
+  final IAuthenticationSource _auth;
 
   RefreshClient(this._inner, this._auth);
 
