@@ -56,39 +56,46 @@ class _ListProductPageState extends State<ListProductPage> {
 
   Widget _getXlistView() {
     return Obx(
-      () => ListView.builder(
-        itemCount: userController.products.length,
-        itemBuilder: (context, index) {
-          Product user = userController.products[index];
-          return Dismissible(
-            key: UniqueKey(),
-            background: Container(
-                color: Colors.red,
-                alignment: Alignment.centerLeft,
-                child: const Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: Text(
-                    "Deleting",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )),
-            onDismissed: (direction) {
-              userController.deleteProduct(user);
-            },
-            child: Card(
-              child: ListTile(
-                title: Text(user.name),
-                subtitle: Text(user.description),
-                trailing: Text(user.quantity.toString()),
-                onTap: () {
-                  Get.to(() => const EditProductPage(),
-                      arguments: [user, user.id]);
+      () => userController.isLoading.value
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: () async {
+                await userController.getProducts();
+              },
+              child: ListView.builder(
+                itemCount: userController.products.length,
+                itemBuilder: (context, index) {
+                  Product user = userController.products[index];
+                  return Dismissible(
+                    key: UniqueKey(),
+                    background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerLeft,
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Text(
+                            "Deleting",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )),
+                    onDismissed: (direction) {
+                      userController.deleteProduct(user);
+                    },
+                    child: Card(
+                      child: ListTile(
+                        title: Text(user.name),
+                        subtitle: Text(user.description),
+                        trailing: Text(user.quantity.toString()),
+                        onTap: () {
+                          Get.to(() => const EditProductPage(),
+                              arguments: [user, user.id]);
+                        },
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
-          );
-        },
-      ),
     );
   }
 }

@@ -3,7 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'i_local_preferences.dart';
 
 class LocalPreferencesShared implements ILocalPreferences {
-  SharedPreferencesAsync prefs = SharedPreferencesAsync();
+  late SharedPreferencesAsync prefs;
+
+  LocalPreferencesShared() {
+    prefs = SharedPreferencesAsync();
+  }
 
   @override
   Future<T?> retrieveData<T>(String key) async {

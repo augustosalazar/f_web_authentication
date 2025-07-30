@@ -103,9 +103,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       return Future.value(true);
     } else {
       final Map<String, dynamic> errorBody = json.decode(response.body);
-      final List<dynamic> messages = errorBody['message'];
-      final String errorMessage =
-          messages.isNotEmpty ? messages.first.toString() : 'Unknown error';
+      final String errorMessage = errorBody['message'];
       logError(
           "logout endpoint got error code ${response.statusCode} $errorMessage for token: $token");
       return Future.error('Error code $errorMessage');
@@ -129,7 +127,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     if (response.statusCode == 201) {
       return Future.value(true);
     } else {
-      logError("verifyEmail got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "verifyEmail endpoint got error code ${response.statusCode} $errorMessage for email: $email");
       return Future.error('Error code ${response.statusCode}');
     }
   }
@@ -147,8 +148,11 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     final response = await http.post(
       Uri.parse("$baseUrl/refresh-token"),
       headers: <String, String>{
-        'refreshToken': refreshToken,
+        'Content-Type': 'application/json',
       },
+      body: jsonEncode(<String, String>{
+        'refreshToken': refreshToken,
+      }),
     );
 
     logInfo(response.statusCode);
@@ -159,7 +163,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       logInfo("Token refreshed successfully");
       return Future.value(true);
     } else {
-      logError("refreshToken endpoint got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "refreshToken endpoint got error code ${response.statusCode} $errorMessage for refreshToken: $refreshToken");
       return Future.error('Error code ${response.statusCode}');
     }
   }
@@ -180,7 +187,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     if (response.statusCode == 201) {
       return Future.value(true);
     } else {
-      logError("forgotPassword got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "forgotPassword endpoint got error code ${response.statusCode} $errorMessage for email: $email");
       return Future.error('Error code ${response.statusCode}');
     }
   }
@@ -211,7 +221,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       logInfo("Token is valid");
       return Future.value(true);
     } else {
-      logError("verifyToken endpoint got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "verifyToken endpoint got error code ${response.statusCode} $errorMessage for token: $token");
       return Future.value(false);
     }
   }

@@ -7,7 +7,7 @@ import '../../domain/use_case/product_usecase.dart';
 class ProductController extends GetxController {
   final RxList<Product> _products = <Product>[].obs;
   final ProductUseCase productUseCase = Get.find();
-
+  final RxBool isLoading = false.obs;
   List<Product> get products => _products;
 
   @override
@@ -18,13 +18,15 @@ class ProductController extends GetxController {
 
   getProducts() async {
     logInfo("ProductController: Getting products");
+    isLoading.value = true;
     _products.value = await productUseCase.getProducts();
+    isLoading.value = false;
   }
 
   addProduct(String name, String desc, String quantity) async {
     logInfo("ProductController: Add product");
     await productUseCase.addProduct(name, desc, quantity);
-    await getProducts();
+    getProducts();
   }
 
   updateProduct(Product product) async {
@@ -35,13 +37,16 @@ class ProductController extends GetxController {
 
   void deleteProduct(Product p) async {
     logInfo("ProductController: Delete product");
+
     await productUseCase.deleteProduct(p);
     await getProducts();
   }
 
   void deleteProducts() async {
     logInfo("ProductController: Delete all products");
+    isLoading.value = true;
     await productUseCase.deleteProducts();
     await getProducts();
+    isLoading.value = false;
   }
 }
