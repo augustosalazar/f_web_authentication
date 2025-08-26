@@ -53,7 +53,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   @override
   Future<bool> signUp(AuthenticationUser user) async {
     final response = await http.post(
-      Uri.parse("$baseUrl//signup"),
+      Uri.parse("$baseUrl/signup"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
