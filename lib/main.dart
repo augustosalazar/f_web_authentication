@@ -43,7 +43,7 @@ void main() {
 
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
   Get.put(AuthenticationUseCase(Get.find()));
-  Get.put(AuthenticationController());
+  Get.put(AuthenticationController(Get.find()));
 
   Get.lazyPut<IRemoteUserSource>(
       () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')));
