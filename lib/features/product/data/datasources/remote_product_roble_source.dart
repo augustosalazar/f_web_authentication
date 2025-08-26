@@ -5,9 +5,9 @@ import '../../../../core/i_local_preferences.dart';
 import '../../domain/models/product.dart';
 import 'package:http/http.dart' as http;
 
-import 'i_remote_product_source.dart';
+import 'i_product_source.dart';
 
-class RemoteProductRobleSource implements IRemoteUserSource {
+class RemoteProductRobleSource implements IProductSource {
   final http.Client httpClient;
 
   final String contract = 'contract_flutterdemo_ebabe79ab0';

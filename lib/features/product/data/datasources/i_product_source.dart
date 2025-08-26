@@ -1,6 +1,6 @@
 import '../../domain/models/product.dart';
 
-abstract class IRemoteUserSource {
+abstract class IProductSource {
   Future<List<Product>> getProducts();
 
   Future<bool> addProduct(Product user);

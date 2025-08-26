@@ -14,7 +14,7 @@ import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/repositories/i_auth_repository.dart';
 import 'features/auth/domain/use_case/authentication_usecase.dart';
 import 'features/auth/ui/controller/authentication_controller.dart';
-import 'features/product/data/datasources/i_remote_product_source.dart';
+import 'features/product/data/datasources/i_product_source.dart';
 import 'features/product/data/datasources/remote_product_roble_source.dart';
 import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
@@ -45,7 +45,7 @@ void main() {
   Get.put(AuthenticationUseCase(Get.find()));
   Get.put(AuthenticationController(Get.find()));
 
-  Get.lazyPut<IRemoteUserSource>(
+  Get.lazyPut<IProductSource>(
       () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')));
 
   Get.put<IProductRepository>(ProductRepository(Get.find()));
