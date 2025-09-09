@@ -5,6 +5,8 @@ import 'package:loggy/loggy.dart';
 
 import 'central.dart';
 import 'core/app_theme.dart';
+import 'core/i_local_preferences.dart';
+import 'core/local_preferences_shared.dart';
 import 'core/refresh_client.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
@@ -12,7 +14,7 @@ import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/repositories/i_auth_repository.dart';
 import 'features/auth/domain/use_case/authentication_usecase.dart';
 import 'features/auth/ui/controller/authentication_controller.dart';
-import 'features/product/data/datasources/i_remote_product_source.dart';
+import 'features/product/data/datasources/i_product_source.dart';
 import 'features/product/data/datasources/remote_product_roble_source.dart';
 import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
@@ -26,20 +28,26 @@ void main() {
     ),
   );
 
+  Get.put<ILocalPreferences>(LocalPreferencesShared());
+
   Get.lazyPut<IAuthenticationSource>(
     () => AuthenticationSourceServiceRoble(),
     fenix: true,
   );
-  Get.lazyPut<http.Client>(() {
-    final auth = Get.find<AuthenticationSourceServiceRoble>();
-    return RefreshClient(http.Client(), auth);
-  }, tag: 'apiClient');
+
+  Get.put<http.Client>(
+    RefreshClient(http.Client(), Get.find<IAuthenticationSource>()),
+    tag: 'apiClient',
+    permanent: true,
+  );
 
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
   Get.put(AuthenticationUseCase(Get.find()));
-  Get.put(AuthenticationController());
+  Get.put(AuthenticationController(Get.find()));
 
-  Get.put<IRemoteUserSource>(RemoteProductRobleSource());
+  Get.lazyPut<IProductSource>(
+      () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')));
+
   Get.put<IProductRepository>(ProductRepository(Get.find()));
   Get.put(ProductUseCase(Get.find()));
   Get.lazyPut(() => ProductController());

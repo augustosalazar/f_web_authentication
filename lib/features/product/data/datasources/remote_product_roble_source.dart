@@ -1,32 +1,35 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
+import '../../../../core/i_local_preferences.dart';
 import '../../domain/models/product.dart';
 import 'package:http/http.dart' as http;
 
-import 'i_remote_product_source.dart';
+import 'i_product_source.dart';
 
-class RemoteProductRobleSource implements IRemoteUserSource {
+class RemoteProductRobleSource implements IProductSource {
   final http.Client httpClient;
 
   final String contract = 'contract_flutterdemo_ebabe79ab0';
-  final String baseUrl =
-      'https://roble-api.test-openlab.uninorte.edu.co/database/contract_flutterdemo_ebabe79ab0';
+  final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
+  String get contractUrl => '$baseUrl/$contract';
   final String table = 'Product';
 
-  RemoteProductRobleSource({http.Client? client})
-      : httpClient = client ?? http.Client();
+  RemoteProductRobleSource(this.httpClient);
 
   @override
   Future<List<Product>> getProducts() async {
     List<Product> products = [];
 
     var uri = Uri.https(
-      'roble-api.test-openlab.uninorte.edu.co',
+      baseUrl,
       '/database/$contract/read',
       {'tableName': table},
     );
-
-    var response = await httpClient.get(uri);
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+    var response =
+        await httpClient.get(uri, headers: {'Authorization': 'Bearer $token'});
 
     if (response.statusCode == 200) {
       List<dynamic> decodedJson = jsonDecode(response.body);
@@ -45,15 +48,17 @@ class RemoteProductRobleSource implements IRemoteUserSource {
 
   @override
   Future<bool> addProduct(Product product) async {
-    logInfo("Web service, Adding user");
+    logInfo("Web service, Adding product");
 
     final uri = Uri.https(
-      'roble-api.test-openlab.uninorte.edu.co',
+      baseUrl,
       '/database/$contract/insert',
     );
-
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     final headers = {
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
     };
 
     final body = jsonEncode({
@@ -65,23 +70,35 @@ class RemoteProductRobleSource implements IRemoteUserSource {
 
     final response = await httpClient.post(uri, headers: headers, body: body);
     if (response.statusCode == 201) {
-      //logInfo(response.body);
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
-      logError(response.body);
-      return Future.value(false);
+      final Map<String, dynamic> body = json.decode(response.body);
+      final String errorMessage = body['message'];
+      logError(
+          "addProduct got error code ${response.statusCode}: $errorMessage");
+      return Future.error('AddProduct error code ${response.statusCode}');
     }
   }
 
   @override
   Future<bool> updateProduct(Product product) async {
-    logInfo("Web service, Updating user with id $product");
+    logInfo("Web service, Updating product with id $product");
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
+    final uri = Uri.https(
+      baseUrl,
+      '/database/$contract/update',
+    );
+
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
     final response = await httpClient.put(
-      Uri.parse("$baseUrl/update"),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
+      uri,
+      headers: headers,
       body: jsonEncode({
         'tableName': table,
         'idColumn': '_id',
@@ -90,46 +107,63 @@ class RemoteProductRobleSource implements IRemoteUserSource {
       }),
     );
 
-    logInfo("updateUser response status code ${response.statusCode}");
-    logInfo("updateUser response body ${response.body}");
+    //logInfo("update response status code ${response.statusCode}");
+    //logInfo("update response body ${response.body}");
     if (response.statusCode == 200) {
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
-      return Future.value(false);
+      final Map<String, dynamic> body = json.decode(response.body);
+      final String errorMessage = body['message'];
+      logError(
+          "UpdateProduct got error code ${response.statusCode}: $errorMessage");
+      return Future.error(
+          'UpdateProduct error code ${response.statusCode}: $errorMessage');
     }
   }
 
   @override
   Future<bool> deleteProduct(Product product) async {
-    logInfo("Web service, Deleting user with id $product");
-    final response = await httpClient.delete(
-      Uri.parse("$baseUrl/delete"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'tableName': table,
-        'idColumn': '_id',
-        'idValue': product.id ?? "0",
-      }),
+    logInfo("Web service, Deleting product with id $product");
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
+    final uri = Uri.https(
+      baseUrl,
+      '/database/$contract/delete',
     );
-    logInfo("deleteUser response status code ${response.statusCode}");
-    logInfo("deleteUser response body ${response.body}");
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final response = await httpClient.delete(uri,
+        headers: headers,
+        body: jsonEncode({
+          'tableName': table,
+          'idColumn': '_id',
+          'idValue': product.id ?? "0",
+        }));
+
+    //logInfo("delete response status code ${response.statusCode}");
+    //logInfo("delete response body ${response.body}");
     if (response.statusCode == 200) {
-      //logInfo(response.body);
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
-      return Future.value(false);
+      final Map<String, dynamic> body = json.decode(response.body);
+      final String errorMessage = body['message'];
+      logError(
+          "deleteProduct got error code ${response.statusCode}: $errorMessage");
+      return Future.error(
+          'DeleteProduct error code ${response.statusCode}: $errorMessage');
     }
   }
 
   @override
   Future<bool> deleteProducts() async {
-    List<Product> users = await getProducts();
-    for (var user in users) {
-      await deleteProduct(user);
+    List<Product> products = await getProducts();
+    for (var product in products) {
+      await deleteProduct(product);
     }
     return Future.value(true);
   }

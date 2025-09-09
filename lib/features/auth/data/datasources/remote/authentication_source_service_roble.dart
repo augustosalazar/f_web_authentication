@@ -1,16 +1,17 @@
 import 'dart:convert';
 
-import 'package:f_web_authentication/core/local_preferences.dart';
+import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../../core/i_local_preferences.dart';
 import '../../../domain/models/authentication_user.dart';
 import 'i_authentication_source.dart';
 
 class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   final http.Client httpClient;
   final String baseUrl =
-      'https://roble-api.test-openlab.uninorte.edu.co/auth/contract_flutterdemo_ebabe79ab0';
+      'https://roble-api.openlab.uninorte.edu.co/auth/contract_flutterdemo_ebabe79ab0';
 
   AuthenticationSourceServiceRoble({http.Client? client})
       : httpClient = client ?? http.Client();
@@ -34,7 +35,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       final data = jsonDecode(response.body);
       final token = data['accessToken'];
       final refreshToken = data['refreshToken'];
-      final sharedPreferences = LocalPreferences();
+      final ILocalPreferences sharedPreferences = Get.find();
       sharedPreferences.storeData('token', token);
       sharedPreferences.storeData('refreshToken', refreshToken);
       logInfo("Token: $token"
@@ -52,7 +53,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   @override
   Future<bool> signUp(AuthenticationUser user) async {
     final response = await http.post(
-      Uri.parse("$baseUrl//signup"),
+      Uri.parse("$baseUrl/signup"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -79,7 +80,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> logOut() async {
-    final sharedPreferences = LocalPreferences();
+    final ILocalPreferences sharedPreferences = Get.find();
     final token = await sharedPreferences.retrieveData<String>('token');
     if (token == null) {
       logError("No token found, cannot log out.");
@@ -95,14 +96,17 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
     logInfo(response.statusCode);
     if (response.statusCode == 201) {
-      final sharedPreferences = LocalPreferences();
+      final ILocalPreferences sharedPreferences = Get.find();
       sharedPreferences.removeData('token');
       sharedPreferences.removeData('refreshToken');
       logInfo("Logged out successfully");
       return Future.value(true);
     } else {
-      logError("logout endpoint got error code ${response.statusCode}");
-      return Future.error('Error code ${response.statusCode}');
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "logout endpoint got error code ${response.statusCode} $errorMessage for token: $token");
+      return Future.error('Error code $errorMessage');
     }
   }
 
@@ -123,14 +127,17 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     if (response.statusCode == 201) {
       return Future.value(true);
     } else {
-      logError("verifyEmail got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "verifyEmail endpoint got error code ${response.statusCode} $errorMessage for email: $email");
       return Future.error('Error code ${response.statusCode}');
     }
   }
 
   @override
   Future<bool> refreshToken() async {
-    final sharedPreferences = LocalPreferences();
+    final ILocalPreferences sharedPreferences = Get.find();
     final refreshToken =
         await sharedPreferences.retrieveData<String>('refreshToken');
     if (refreshToken == null) {
@@ -141,8 +148,11 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     final response = await http.post(
       Uri.parse("$baseUrl/refresh-token"),
       headers: <String, String>{
-        'refreshToken': refreshToken,
+        'Content-Type': 'application/json',
       },
+      body: jsonEncode(<String, String>{
+        'refreshToken': refreshToken,
+      }),
     );
 
     logInfo(response.statusCode);
@@ -153,7 +163,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       logInfo("Token refreshed successfully");
       return Future.value(true);
     } else {
-      logError("refreshToken endpoint got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "refreshToken endpoint got error code ${response.statusCode} $errorMessage for refreshToken: $refreshToken");
       return Future.error('Error code ${response.statusCode}');
     }
   }
@@ -174,7 +187,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     if (response.statusCode == 201) {
       return Future.value(true);
     } else {
-      logError("forgotPassword got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "forgotPassword endpoint got error code ${response.statusCode} $errorMessage for email: $email");
       return Future.error('Error code ${response.statusCode}');
     }
   }
@@ -187,7 +203,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> verifyToken() async {
-    final sharedPreferences = LocalPreferences();
+    final ILocalPreferences sharedPreferences = Get.find();
     final token = await sharedPreferences.retrieveData<String>('token');
     if (token == null) {
       logError("No token found, cannot verify.");
@@ -205,7 +221,10 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       logInfo("Token is valid");
       return Future.value(true);
     } else {
-      logError("verifyToken endpoint got error code ${response.statusCode}");
+      final Map<String, dynamic> errorBody = json.decode(response.body);
+      final String errorMessage = errorBody['message'];
+      logError(
+          "verifyToken endpoint got error code ${response.statusCode} $errorMessage for token: $token");
       return Future.value(false);
     }
   }

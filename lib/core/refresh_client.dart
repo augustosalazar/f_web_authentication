@@ -1,37 +1,54 @@
-import 'package:f_web_authentication/core/local_preferences.dart';
-import 'package:f_web_authentication/features/auth/data/datasources/remote/authentication_source_service_roble.dart';
+import 'dart:async';
+import 'dart:typed_data';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
+import '../features/auth/data/datasources/remote/i_authentication_source.dart';
+import 'i_local_preferences.dart';
 
 class RefreshClient extends http.BaseClient {
   final http.Client _inner;
-  final AuthenticationSourceServiceRoble _auth;
+  final IAuthenticationSource _auth;
 
   RefreshClient(this._inner, this._auth);
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest req) async {
-    // Obtenemos el token de acceso almacenado localmente
-    final prefs = LocalPreferences();
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final prefs = Get.find<ILocalPreferences>();
     final token = await prefs.retrieveData<String>('token');
     if (token != null) {
-      req.headers['Authorization'] = 'Bearer $token';
+      request.headers['Authorization'] = 'Bearer $token';
     }
 
-    // hacemos la solicitud original
-    var response = await _inner.send(req);
+    Uint8List? bodyBytes;
+    if (request is http.Request) {
+      bodyBytes = request.bodyBytes;
+    } else {
+      final streamed = request.finalize();
+      bodyBytes = await streamed.toBytes();
+    }
 
-    // si la respuesta es 401 (no autorizado), intentamos refrescar el token
+    var response = await _inner.send(request);
+
+    //Si 401, refrescamos y reintentamos
     if (response.statusCode == 401) {
       final ok = await _auth.refreshToken();
       if (ok) {
-        // pull new token & retry
         final newToken = await prefs.retrieveData<String>('token');
         if (newToken != null) {
-          req.headers['Authorization'] = 'Bearer $newToken';
-          return _inner.send(req);
+          final retry = http.Request(request.method, request.url)
+            ..headers.addAll(request.headers)
+            ..headers['Authorization'] = 'Bearer $newToken'
+            ..bodyBytes = bodyBytes ?? Uint8List(0)
+            ..followRedirects = request.followRedirects
+            ..maxRedirects = request.maxRedirects
+            ..persistentConnection = request.persistentConnection;
+
+          return _inner.send(retry);
         }
       }
     }
+
     return response;
   }
 }

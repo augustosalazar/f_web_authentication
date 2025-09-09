@@ -3,9 +3,9 @@ import 'package:loggy/loggy.dart';
 import '../../domain/models/product.dart';
 import 'package:http/http.dart' as http;
 
-import 'i_remote_product_source.dart';
+import 'i_product_source.dart';
 
-class RemoteProductSource implements IRemoteUserSource {
+class RemoteProductSource implements IProductSource {
   final http.Client httpClient;
 
   final String contractKey = 'e83b7ac8-bdad-4bb8-a532-6aaa5fddefa4';

@@ -1,9 +1,9 @@
 import '../../domain/repositories/i_product_repository.dart';
-import '../datasources/i_remote_product_source.dart';
+import '../datasources/i_product_source.dart';
 import '../../domain/models/product.dart';
 
 class ProductRepository implements IProductRepository {
-  late IRemoteUserSource userSource;
+  late IProductSource userSource;
 
   ProductRepository(this.userSource);
 
