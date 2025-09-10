@@ -1,3 +1,4 @@
+import 'package:f_web_authentication/core/local_preferences_secured.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +7,6 @@ import 'package:loggy/loggy.dart';
 import 'central.dart';
 import 'core/app_theme.dart';
 import 'core/i_local_preferences.dart';
-import 'core/local_preferences_shared.dart';
 import 'core/refresh_client.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
@@ -28,7 +28,7 @@ void main() {
     ),
   );
 
-  Get.put<ILocalPreferences>(LocalPreferencesShared());
+  Get.put<ILocalPreferences>(LocalPreferencesSecured());
 
   Get.lazyPut<IAuthenticationSource>(
     () => AuthenticationSourceServiceRoble(),
