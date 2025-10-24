@@ -30,19 +30,19 @@ class LocalPreferencesShared implements ILocalPreferences {
   Future<void> storeData(String key, dynamic value) async {
     if (value is bool) {
       await prefs.setBool(key, value);
-      //logInfo("LocalPreferences setBool with key $key got $result");
+      //loggy.info("LocalPreferences setBool with key $key got $result");
     } else if (value is double) {
       await prefs.setDouble(key, value);
-      //logInfo("LocalPreferences setDouble with key $key got $result");
+      //loggy.info("LocalPreferences setDouble with key $key got $result");
     } else if (value is int) {
       await prefs.setInt(key, value);
-      //logInfo("LocalPreferences setInt with key $key got $result");
+      //loggy.info("LocalPreferences setInt with key $key got $result");
     } else if (value is String) {
       await prefs.setString(key, value);
-      //logInfo("LocalPreferences setString with key $key got $result");
+      //loggy.info("LocalPreferences setString with key $key got $result");
     } else if (value is List<String>) {
       await prefs.setStringList(key, value);
-      //logInfo("LocalPreferences setStringList with key $key got $result");
+      //loggy.info("LocalPreferences setStringList with key $key got $result");
     } else {
       throw Exception("Unsupported type");
     }

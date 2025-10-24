@@ -12,7 +12,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with UiLoggy {
   final _formKey = GlobalKey<FormState>();
   final controllerEmail =
       TextEditingController(text: 'augustosalazar@uninorte.edu.co');
@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   AuthenticationController authenticationController = Get.find();
 
   _login(theEmail, thePassword) async {
-    logInfo('_login $theEmail $thePassword');
+    loggy.info('_login $theEmail $thePassword');
     try {
       await authenticationController.login(theEmail, thePassword);
     } catch (err) {

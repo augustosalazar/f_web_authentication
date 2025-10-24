@@ -10,7 +10,7 @@ class SignUpPage extends StatefulWidget {
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends State<SignUpPage> with UiLoggy {
   final controllerEmail =
       TextEditingController(text: 'augustosalazar@uninorte.edu.co');
   final controllerPassword = TextEditingController(text: 'ThePassword1!');
@@ -33,7 +33,7 @@ class _SignUpPageState extends State<SignUpPage> {
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (err) {
-      logError('SignUp error $err');
+      loggy.error('SignUp error $err');
       Get.snackbar(
         "Sign Up",
         err.toString(),
@@ -57,7 +57,7 @@ class _SignUpPageState extends State<SignUpPage> {
       });
       //Get.offAllNamed('/login');
     } catch (err) {
-      logError('Validation error $err');
+      loggy.error('Validation error $err');
       Get.snackbar(
         "Validation",
         err.toString(),
@@ -99,7 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
           decoration: const InputDecoration(labelText: "Validation code"),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              logError('Validation code is empty');
+              loggy.error('Validation code is empty');
               return "Enter validation code";
             }
             return null;
@@ -117,11 +117,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   form!.save();
                   FocusScope.of(context).requestFocus(FocusNode());
                   if (key.currentState!.validate()) {
-                    logInfo('Validation form ok');
+                    loggy.info('Validation form ok');
                     await _validate(
                         controllerEmail.text, controllerValidation.text);
                   } else {
-                    logError('Validation form nok');
+                    loggy.error('Validation form nok');
                   }
                 },
                 child: const Text("Validate")),
@@ -160,10 +160,10 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              logError('SignUp validation empty email');
+              loggy.error('SignUp validation empty email');
               return "Enter email";
             } else if (!value.contains('@')) {
-              logError('SignUp validation invalid email');
+              loggy.error('SignUp validation invalid email');
               return "Enter valid email address";
             }
             return null;
@@ -203,11 +203,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     form!.save();
                     FocusScope.of(context).requestFocus(FocusNode());
                     if (key.currentState!.validate()) {
-                      logInfo('SignUp validation form ok');
+                      loggy.info('SignUp validation form ok');
                       await _signup(
                           controllerEmail.text, controllerPassword.text);
                     } else {
-                      logError('SignUp validation form nok');
+                      loggy.error('SignUp validation form nok');
                     }
                   },
                   child: const Text("Submit")),

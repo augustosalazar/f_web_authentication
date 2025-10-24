@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'i_product_source.dart';
 
-class RemoteProductRobleSource implements IProductSource {
+class RemoteProductRobleSource with UiLoggy implements IProductSource {
   final http.Client httpClient;
 
   final String contract = 'contract_flutterdemo_ebabe79ab0';
@@ -34,12 +34,12 @@ class RemoteProductRobleSource implements IProductSource {
     if (response.statusCode == 200) {
       List<dynamic> decodedJson = jsonDecode(response.body);
 
-      //logInfo(decodedJson);
+      //loggy.info(decodedJson);
 
       products =
           List<Product>.from(decodedJson.map((x) => Product.fromJson(x)));
     } else {
-      logError("Got error code ${response.statusCode}");
+      loggy.error("Got error code ${response.statusCode}");
       return Future.error('Error code ${response.statusCode}');
     }
 
@@ -48,7 +48,7 @@ class RemoteProductRobleSource implements IProductSource {
 
   @override
   Future<bool> addProduct(Product product) async {
-    logInfo("Web service, Adding product");
+    loggy.info("Web service, Adding product");
 
     final uri = Uri.https(
       baseUrl,
@@ -74,7 +74,7 @@ class RemoteProductRobleSource implements IProductSource {
     } else {
       final Map<String, dynamic> body = json.decode(response.body);
       final String errorMessage = body['message'];
-      logError(
+      loggy.error(
           "addProduct got error code ${response.statusCode}: $errorMessage");
       return Future.error('AddProduct error code ${response.statusCode}');
     }
@@ -82,7 +82,7 @@ class RemoteProductRobleSource implements IProductSource {
 
   @override
   Future<bool> updateProduct(Product product) async {
-    logInfo("Web service, Updating product with id $product");
+    loggy.info("Web service, Updating product with id $product");
     final ILocalPreferences sharedPreferences = Get.find();
     final token = await sharedPreferences.retrieveData<String>('token');
 
@@ -107,14 +107,14 @@ class RemoteProductRobleSource implements IProductSource {
       }),
     );
 
-    //logInfo("update response status code ${response.statusCode}");
-    //logInfo("update response body ${response.body}");
+    //loggy.info("update response status code ${response.statusCode}");
+    //loggy.info("update response body ${response.body}");
     if (response.statusCode == 200) {
       return Future.value(true);
     } else {
       final Map<String, dynamic> body = json.decode(response.body);
       final String errorMessage = body['message'];
-      logError(
+      loggy.error(
           "UpdateProduct got error code ${response.statusCode}: $errorMessage");
       return Future.error(
           'UpdateProduct error code ${response.statusCode}: $errorMessage');
@@ -123,7 +123,7 @@ class RemoteProductRobleSource implements IProductSource {
 
   @override
   Future<bool> deleteProduct(Product product) async {
-    logInfo("Web service, Deleting product with id $product");
+    loggy.info("Web service, Deleting product with id $product");
     final ILocalPreferences sharedPreferences = Get.find();
     final token = await sharedPreferences.retrieveData<String>('token');
 
@@ -145,14 +145,14 @@ class RemoteProductRobleSource implements IProductSource {
           'idValue': product.id ?? "0",
         }));
 
-    //logInfo("delete response status code ${response.statusCode}");
-    //logInfo("delete response body ${response.body}");
+    //loggy.info("delete response status code ${response.statusCode}");
+    //loggy.info("delete response body ${response.body}");
     if (response.statusCode == 200) {
       return Future.value(true);
     } else {
       final Map<String, dynamic> body = json.decode(response.body);
       final String errorMessage = body['message'];
-      logError(
+      loggy.error(
           "deleteProduct got error code ${response.statusCode}: $errorMessage");
       return Future.error(
           'DeleteProduct error code ${response.statusCode}: $errorMessage');

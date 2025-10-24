@@ -16,7 +16,7 @@ class ListProductPage extends StatefulWidget {
   State<ListProductPage> createState() => _ListProductPageState();
 }
 
-class _ListProductPageState extends State<ListProductPage> {
+class _ListProductPageState extends State<ListProductPage> with UiLoggy {
   ProductController userController = Get.find();
   AuthenticationController authenticationController = Get.find();
 
@@ -24,7 +24,7 @@ class _ListProductPageState extends State<ListProductPage> {
     try {
       await authenticationController.logOut();
     } catch (e) {
-      logInfo(e);
+      loggy.info(e);
     }
   }
 
@@ -46,7 +46,7 @@ class _ListProductPageState extends State<ListProductPage> {
       body: Center(child: _getXlistView()),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          logInfo("Add user from UI");
+          loggy.info("Add user from UI");
           Get.to(() => const AddProductPage());
         },
         child: const Icon(Icons.add),

@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../../domain/models/authentication_user.dart';
 import 'i_authentication_source.dart';
 
-class AuthenticationSource implements IAuthenticationSource {
+class AuthenticationSource with UiLoggy implements IAuthenticationSource {
   final String apiKey = '1zjCuS';
   final http.Client httpClient;
 
@@ -32,13 +32,13 @@ class AuthenticationSource implements IAuthenticationSource {
       var userFiltered = users.where((element) =>
           element.username == username && element.password == password);
       if (userFiltered.isNotEmpty) {
-        logInfo("User found ${userFiltered.first.username}");
+        loggy.info("User found ${userFiltered.first.username}");
         return Future.value(true);
       } else {
         return Future.error('User not found');
       }
     } else {
-      logError("Got error code ${response.statusCode}");
+      loggy.error("Got error code ${response.statusCode}");
       return Future.error('Error code ${response.statusCode}');
     }
   }
@@ -56,8 +56,8 @@ class AuthenticationSource implements IAuthenticationSource {
     if (response.statusCode == 201) {
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
-      logError(response.body);
+      loggy.error("Got error code ${response.statusCode}");
+      loggy.error(response.body);
       return Future.error('Error code ${response.statusCode}');
     }
   }

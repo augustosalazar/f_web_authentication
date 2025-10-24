@@ -10,14 +10,14 @@ class ForgotPasswordPage extends StatefulWidget {
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> with UiLoggy {
   final _formKey = GlobalKey<FormState>();
   final controllerEmail =
       TextEditingController(text: 'augustosalazar@uninorte.edu.co');
   final AuthenticationController authenticationController = Get.find();
 
   Future<void> _sendResetLink(String email) async {
-    logInfo('_sendResetLink $email');
+    loggy.info('_sendResetLink $email');
     try {
       await authenticationController.forgotPassword(email);
       Get.snackbar(

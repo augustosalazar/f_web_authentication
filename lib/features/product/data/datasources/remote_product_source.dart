@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'i_product_source.dart';
 
-class RemoteProductSource implements IProductSource {
+class RemoteProductSource with UiLoggy implements IProductSource {
   final http.Client httpClient;
 
   final String contractKey = 'e83b7ac8-bdad-4bb8-a532-6aaa5fddefa4';
@@ -26,18 +26,18 @@ class RemoteProductSource implements IProductSource {
     var response = await httpClient.get(request);
 
     if (response.statusCode == 200) {
-      //logInfo(response.body);
+      //loggy.info(response.body);
       //final data = jsonDecode(response.body);
 
       Map<String, dynamic> decodedJson = jsonDecode(response.body);
       final data = decodedJson['data'];
 
-      logInfo(data);
+      loggy.info(data);
 
       products = List<Product>.from(data.map((x) => Product.fromJson(x)));
       //users.removeAt(1);
     } else {
-      logError("Got error code ${response.statusCode}");
+      loggy.error("Got error code ${response.statusCode}");
       return Future.error('Error code ${response.statusCode}');
     }
 
@@ -46,7 +46,7 @@ class RemoteProductSource implements IProductSource {
 
   @override
   Future<bool> addProduct(Product product) async {
-    logInfo("Web service, Adding user");
+    loggy.info("Web service, Adding user");
 
     final response = await httpClient.post(
       Uri.parse("$baseUrl/$contractKey/data/store"),
@@ -60,18 +60,18 @@ class RemoteProductSource implements IProductSource {
     );
 
     if (response.statusCode == 201) {
-      //logInfo(response.body);
+      //loggy.info(response.body);
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
-      logError(response.body);
+      loggy.error("Got error code ${response.statusCode}");
+      loggy.error(response.body);
       return Future.value(false);
     }
   }
 
   @override
   Future<bool> updateProduct(Product product) async {
-    logInfo("Web service, Updating user with id $product");
+    loggy.info("Web service, Updating user with id $product");
     final response = await httpClient.put(
       Uri.parse("$baseUrl/$contractKey/data/$table/update/${product.id}"),
       headers: <String, String>{
@@ -82,32 +82,32 @@ class RemoteProductSource implements IProductSource {
       }),
     );
 
-    logInfo("updateUser response status code ${response.statusCode}");
-    logInfo("updateUser response body ${response.body}");
+    loggy.info("updateUser response status code ${response.statusCode}");
+    loggy.info("updateUser response body ${response.body}");
     if (response.statusCode == 200) {
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
+      loggy.error("Got error code ${response.statusCode}");
       return Future.value(false);
     }
   }
 
   @override
   Future<bool> deleteProduct(Product product) async {
-    logInfo("Web service, Deleting user with id $product");
+    loggy.info("Web service, Deleting user with id $product");
     final response = await httpClient.delete(
       Uri.parse("$baseUrl/$contractKey/data/$table/delete/${product.id}"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-    logInfo("deleteUser response status code ${response.statusCode}");
-    logInfo("deleteUser response body ${response.body}");
+    loggy.info("deleteUser response status code ${response.statusCode}");
+    loggy.info("deleteUser response body ${response.body}");
     if (response.statusCode == 200) {
-      //logInfo(response.body);
+      //loggy.info(response.body);
       return Future.value(true);
     } else {
-      logError("Got error code ${response.statusCode}");
+      loggy.error("Got error code ${response.statusCode}");
       return Future.value(false);
     }
   }

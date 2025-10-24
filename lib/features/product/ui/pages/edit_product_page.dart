@@ -12,7 +12,7 @@ class EditProductPage extends StatefulWidget {
   State<EditProductPage> createState() => _EditProductPageState();
 }
 
-class _EditProductPageState extends State<EditProductPage> {
+class _EditProductPageState extends State<EditProductPage> with UiLoggy {
   Product product = Get.arguments[0];
   final controllerProductName = TextEditingController();
   final controllerProductDesc = TextEditingController();
@@ -24,7 +24,7 @@ class _EditProductPageState extends State<EditProductPage> {
     controllerProductName.text = product.name;
     controllerProductDesc.text = product.description;
     controllerProductQuantity.text = product.quantity.toString();
-    logInfo("Update page product $product");
+    loggy.info("Update page product $product");
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name),
