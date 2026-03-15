@@ -2,7 +2,7 @@ import 'package:f_web_authentication/features/auth/ui/pages/forgot_password_page
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-import '../controller/authentication_controller.dart';
+import '../viewmodels/authentication_controller.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {

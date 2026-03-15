@@ -12,8 +12,7 @@ import 'features/auth/data/datasources/remote/authentication_source_service_robl
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/repositories/i_auth_repository.dart';
-import 'features/auth/domain/use_case/authentication_usecase.dart';
-import 'features/auth/ui/controller/authentication_controller.dart';
+import 'features/auth/ui/viewmodels/authentication_controller.dart';
 import 'features/product/data/datasources/i_product_source.dart';
 import 'features/product/data/datasources/remote_product_roble_source.dart';
 import 'features/product/data/repositories/product_repository.dart';
@@ -42,7 +41,6 @@ void main() {
   );
 
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
-  Get.put(AuthenticationUseCase(Get.find()));
   Get.put(AuthenticationController(Get.find()));
 
   Get.lazyPut<IProductSource>(

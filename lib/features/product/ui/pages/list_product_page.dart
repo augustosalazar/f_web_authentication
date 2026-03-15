@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
-import '../../../auth/ui/controller/authentication_controller.dart';
+import '../../../auth/ui/viewmodels/authentication_controller.dart';
 import '../../domain/models/product.dart';
 
 import '../controller/product_controller.dart';
