@@ -2,7 +2,7 @@ import 'package:f_web_authentication/features/auth/ui/pages/forgot_password_page
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-import '../controller/authentication_controller.dart';
+import '../viewmodels/authentication_controller.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,9 +14,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final controllerEmail =
-      TextEditingController(text: 'augustosalazar@uninorte.edu.co');
-  final controllerPassword = TextEditingController(text: 'ThePassword1!');
+  final controllerEmail = TextEditingController(text: 'a@a.com');
+  final controllerPassword = TextEditingController(text: 'ThePassword!1');
   AuthenticationController authenticationController = Get.find();
 
   _login(theEmail, thePassword) async {

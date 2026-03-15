@@ -7,11 +7,14 @@ import 'package:http/http.dart' as http;
 import '../../../../../core/i_local_preferences.dart';
 import '../../../domain/models/authentication_user.dart';
 import 'i_authentication_source.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   final http.Client httpClient;
-  final String baseUrl =
-      'https://roble-api.openlab.uninorte.edu.co/auth/contract_flutterdemo_ebabe79ab0';
+  final contract =
+      dotenv.get('EXPO_PUBLIC_ROBLE_PROJECT_ID', fallback: "NO_ENV");
+  late final String baseUrl =
+      'https://roble-api.openlab.uninorte.edu.co/auth/$contract';
 
   AuthenticationSourceServiceRoble({http.Client? client})
       : httpClient = client ?? http.Client();

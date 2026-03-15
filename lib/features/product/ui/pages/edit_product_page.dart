@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
 import '../../domain/models/product.dart';
-import '../controller/product_controller.dart';
+import '../viewmodels/product_controller.dart';
 
 class EditProductPage extends StatefulWidget {
   const EditProductPage({super.key});

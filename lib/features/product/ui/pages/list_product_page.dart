@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
-import '../../../auth/ui/controller/authentication_controller.dart';
+import '../../../auth/ui/viewmodels/authentication_controller.dart';
 import '../../domain/models/product.dart';
 
-import '../controller/product_controller.dart';
+import '../viewmodels/product_controller.dart';
 import 'edit_product_page.dart';
 import 'add_product_page.dart';
 

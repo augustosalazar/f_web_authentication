@@ -39,7 +39,7 @@ class RefreshClient extends http.BaseClient {
           final retry = http.Request(request.method, request.url)
             ..headers.addAll(request.headers)
             ..headers['Authorization'] = 'Bearer $newToken'
-            ..bodyBytes = bodyBytes ?? Uint8List(0)
+            ..bodyBytes = bodyBytes
             ..followRedirects = request.followRedirects
             ..maxRedirects = request.maxRedirects
             ..persistentConnection = request.persistentConnection;

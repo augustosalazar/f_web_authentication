@@ -1,11 +1,12 @@
+import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:get/get.dart';
 
 import 'package:loggy/loggy.dart';
 
-import '../../domain/use_case/authentication_usecase.dart';
+import '../../domain/repositories/i_auth_repository.dart';
 
 class AuthenticationController extends GetxController {
-  final AuthenticationUseCase authentication;
+  final IAuthRepository authentication;
   final logged = false.obs;
 
   AuthenticationController(this.authentication);
@@ -28,7 +29,11 @@ class AuthenticationController extends GetxController {
 
   Future<bool> signUp(email, password) async {
     logInfo('AuthenticationController: Sign Up $email $password');
-    await authentication.signUp(email, password);
+    await authentication.signUp(AuthenticationUser(
+        firstName: email,
+        lastName: email,
+        password: password,
+        username: email));
     return true;
   }
 
