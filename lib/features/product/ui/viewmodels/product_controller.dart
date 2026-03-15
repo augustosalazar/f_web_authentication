@@ -1,13 +1,14 @@
+import 'package:f_web_authentication/features/product/domain/repositories/i_product_repository.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-
 import '../../domain/models/product.dart';
-import '../../domain/use_case/product_usecase.dart';
 
 class ProductController extends GetxController {
   final RxList<Product> _products = <Product>[].obs;
-  final ProductUseCase productUseCase = Get.find();
+  final IProductRepository productUseCase;
   final RxBool isLoading = false.obs;
+
+  ProductController(this.productUseCase);
   List<Product> get products => _products;
 
   @override
@@ -25,7 +26,8 @@ class ProductController extends GetxController {
 
   addProduct(String name, String desc, String quantity) async {
     logInfo("ProductController: Add product");
-    await productUseCase.addProduct(name, desc, quantity);
+    await productUseCase.addProduct(
+        Product(name: name, description: desc, quantity: int.parse(quantity)));
     getProducts();
   }
 

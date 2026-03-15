@@ -1,5 +1,6 @@
 import 'package:f_web_authentication/core/local_preferences_secured.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
@@ -17,10 +18,10 @@ import 'features/product/data/datasources/i_product_source.dart';
 import 'features/product/data/datasources/remote_product_roble_source.dart';
 import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
-import 'features/product/domain/use_case/product_usecase.dart';
-import 'features/product/ui/controller/product_controller.dart';
+import 'features/product/ui/viewmodels/product_controller.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   Loggy.initLoggy(
     logPrinter: const PrettyPrinter(
       showColors: true,
@@ -47,8 +48,7 @@ void main() {
       () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')));
 
   Get.put<IProductRepository>(ProductRepository(Get.find()));
-  Get.put(ProductUseCase(Get.find()));
-  Get.lazyPut(() => ProductController());
+  Get.lazyPut(() => ProductController(Get.find()));
   runApp(const MyApp());
 }
 

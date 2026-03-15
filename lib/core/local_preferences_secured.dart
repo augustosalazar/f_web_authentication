@@ -4,9 +4,7 @@ import 'i_local_preferences.dart';
 
 class LocalPreferencesSecured implements ILocalPreferences {
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
+    aOptions: AndroidOptions(),
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.unlocked,
     ),
@@ -14,7 +12,7 @@ class LocalPreferencesSecured implements ILocalPreferences {
 
   @override
   Future<T?> retrieveData<T>(String key) async {
-    final raw = await _storage.read(key: key);
+    final String? raw = await _storage.read(key: key);
     if (raw == null) return null;
 
     if (T == String) {
