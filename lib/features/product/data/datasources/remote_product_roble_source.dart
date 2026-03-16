@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import '../../../../core/i_local_preferences.dart';
@@ -10,7 +11,8 @@ import 'i_product_source.dart';
 class RemoteProductRobleSource implements IProductSource {
   final http.Client httpClient;
 
-  final String contract = 'contract_flutterdemo_ebabe79ab0';
+  final String contract =
+      dotenv.get('EXPO_PUBLIC_ROBLE_PROJECT_ID', fallback: "NO_ENV");
   final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
   String get contractUrl => '$baseUrl/$contract';
   final String table = 'Product';
