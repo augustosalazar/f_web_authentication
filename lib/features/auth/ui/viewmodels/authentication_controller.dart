@@ -23,18 +23,14 @@ class AuthenticationController extends GetxController {
   Future<bool> login(email, password) async {
     logInfo('AuthenticationController: Login $email $password');
     var rta = await authentication.login(email, password);
-    logged.value = rta;
-    return rta;
+    logged.value = true;
+    return true;
   }
 
   Future<bool> signUp(email, password, bool direct) async {
     logInfo('AuthenticationController: Sign Up $email $password');
     await authentication.signUp(
-        AuthenticationUser(
-            firstName: email,
-            lastName: email,
-            password: password,
-            username: email),
+        AuthenticationUser(name: email, password: password, username: email),
         direct);
     return true;
   }
@@ -47,6 +43,7 @@ class AuthenticationController extends GetxController {
 
   Future<void> logOut() async {
     logInfo('AuthenticationController: Log Out');
+    logged.value = false;
     await authentication.logOut();
     logged.value = false;
   }

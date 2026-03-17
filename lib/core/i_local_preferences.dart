@@ -1,9 +1,19 @@
 abstract class ILocalPreferences {
-  Future<T?> retrieveData<T>(String key);
+  Future<String?> getString(String key);
+  Future<void> setString(String key, String value);
 
-  Future<void> storeData(String key, dynamic value);
+  Future<int?> getInt(String key);
+  Future<void> setInt(String key, int value);
 
-  Future<void> removeData(String key);
+  Future<double?> getDouble(String key);
+  Future<void> setDouble(String key, double value);
 
-  Future<void> clearAll();
+  Future<bool?> getBool(String key);
+  Future<void> setBool(String key, bool value);
+
+  Future<List<String>?> getStringList(String key);
+  Future<void> setStringList(String key, List<String> value);
+
+  Future<void> remove(String key);
+  Future<void> clear();
 }

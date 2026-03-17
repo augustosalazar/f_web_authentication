@@ -144,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextButton(
                         onPressed: () {
-                          Get.off(() => const SignUpPage());
+                          Get.to(() => const SignUpPage());
                         },
                         child: const Text("Create account"))
                   ]),

@@ -11,8 +11,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final controllerEmail =
-      TextEditingController(text: 'augustosalazar@uninorte.edu.co');
+  final controllerEmail = TextEditingController(text: 'a@a.com');
   final controllerPassword = TextEditingController(text: 'ThePassword1!');
   final controllerValidation = TextEditingController();
   AuthenticationController authenticationController = Get.find();
@@ -28,7 +27,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   _signup(theEmail, thePassword) async {
     try {
-      await authenticationController.signUp(theEmail, thePassword, true);
+      await authenticationController.signUp(theEmail, thePassword, false);
 
       setState(() {
         registerPhase = false;
@@ -53,7 +52,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   _signupDirect(theEmail, thePassword) async {
     try {
-      await authenticationController.signUp(theEmail, thePassword, false);
+      await authenticationController.signUp(theEmail, thePassword, true);
 
       Get.snackbar(
         "Sign Up",
@@ -223,24 +222,31 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(
           height: 20,
         ),
-        Row(
+        Column(
           children: [
-            Expanded(
-              child: FilledButton.tonal(
-                  onPressed: () async {
-                    final form = key.currentState;
-                    form!.save();
-                    FocusScope.of(context).requestFocus(FocusNode());
-                    if (key.currentState!.validate()) {
-                      logInfo('SignUp validation form ok');
-                      await _signup(
-                          controllerEmail.text, controllerPassword.text);
-                    } else {
-                      logError('SignUp validation form nok');
-                    }
-                  },
-                  child: const Text("Submit")),
+            FilledButton.tonal(
+              onPressed: () async {
+                final form = key.currentState;
+                form!.save();
+                FocusScope.of(context).requestFocus(FocusNode());
+                if (key.currentState!.validate()) {
+                  logInfo('SignUp validation form ok');
+                  await _signupDirect(
+                      controllerEmail.text, controllerPassword.text);
+                } else {
+                  logError('SignUp validation form nok');
+                }
+              },
+              child: const Text("Submit"),
             ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: const Text("Atras"))
           ],
         ),
       ]),

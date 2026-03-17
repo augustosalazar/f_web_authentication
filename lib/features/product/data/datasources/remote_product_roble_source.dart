@@ -29,7 +29,7 @@ class RemoteProductRobleSource implements IProductSource {
       {'tableName': table},
     );
     final ILocalPreferences sharedPreferences = Get.find();
-    final token = await sharedPreferences.retrieveData<String>('token');
+    final token = await sharedPreferences.getString('token');
     var response =
         await httpClient.get(uri, headers: {'Authorization': 'Bearer $token'});
 
@@ -57,7 +57,7 @@ class RemoteProductRobleSource implements IProductSource {
       '/database/$contract/insert',
     );
     final ILocalPreferences sharedPreferences = Get.find();
-    final token = await sharedPreferences.retrieveData<String>('token');
+    final token = await sharedPreferences.getString('token');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -86,7 +86,7 @@ class RemoteProductRobleSource implements IProductSource {
   Future<bool> updateProduct(Product product) async {
     logInfo("Web service, Updating product with id $product");
     final ILocalPreferences sharedPreferences = Get.find();
-    final token = await sharedPreferences.retrieveData<String>('token');
+    final token = await sharedPreferences.getString('token');
 
     final uri = Uri.https(
       baseUrl,
@@ -127,7 +127,7 @@ class RemoteProductRobleSource implements IProductSource {
   Future<bool> deleteProduct(Product product) async {
     logInfo("Web service, Deleting product with id $product");
     final ILocalPreferences sharedPreferences = Get.find();
-    final token = await sharedPreferences.retrieveData<String>('token');
+    final token = await sharedPreferences.getString('token');
 
     final uri = Uri.https(
       baseUrl,

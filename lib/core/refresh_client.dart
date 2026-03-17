@@ -15,7 +15,7 @@ class RefreshClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final prefs = Get.find<ILocalPreferences>();
-    final token = await prefs.retrieveData<String>('token');
+    final token = await prefs.getString('token');
     if (token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     }
@@ -34,7 +34,7 @@ class RefreshClient extends http.BaseClient {
     if (response.statusCode == 401) {
       final ok = await _auth.refreshToken();
       if (ok) {
-        final newToken = await prefs.retrieveData<String>('token');
+        final newToken = await prefs.getString('token');
         if (newToken != null) {
           final retry = http.Request(request.method, request.url)
             ..headers.addAll(request.headers)

@@ -1,15 +1,13 @@
 class AuthenticationUser {
-  int? id;
+  String? id;
   final String username;
-  final String firstName;
-  final String lastName;
+  final String name;
   final String password;
 
   AuthenticationUser({
     this.id,
     required this.username,
-    required this.firstName,
-    required this.lastName,
+    required this.name,
     required this.password,
   });
 
@@ -17,18 +15,16 @@ class AuthenticationUser {
     return AuthenticationUser(
       id: json['id'],
       username: json['username'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
+      name: json['name'],
       password: json['password'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'username': username,
-      'firstName': firstName,
-      'lastName': lastName,
-      'password': password,
+      'userId': id,
+      'email': username,
+      'name': name,
     };
   }
 }

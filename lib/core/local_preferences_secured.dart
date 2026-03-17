@@ -1,55 +1,82 @@
 import 'dart:convert';
+import 'package:f_web_authentication/core/i_local_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'i_local_preferences.dart';
 
 class LocalPreferencesSecured implements ILocalPreferences {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.unlocked,
-    ),
-  );
+  LocalPreferencesSecured({FlutterSecureStorage? storage})
+      : _storage = storage ??
+            const FlutterSecureStorage(
+              aOptions: AndroidOptions(),
+              iOptions: IOSOptions(
+                accessibility: KeychainAccessibility.unlocked,
+              ),
+            );
+
+  final FlutterSecureStorage _storage;
 
   @override
-  Future<T?> retrieveData<T>(String key) async {
-    final String? raw = await _storage.read(key: key);
+  Future<String?> getString(String key) => _storage.read(key: key);
+
+  @override
+  Future<void> setString(String key, String value) =>
+      _storage.write(key: key, value: value);
+
+  @override
+  Future<int?> getInt(String key) async {
+    final raw = await _storage.read(key: key);
+    return raw == null ? null : int.tryParse(raw);
+  }
+
+  @override
+  Future<void> setInt(String key, int value) =>
+      _storage.write(key: key, value: value.toString());
+
+  @override
+  Future<double?> getDouble(String key) async {
+    final raw = await _storage.read(key: key);
+    return raw == null ? null : double.tryParse(raw);
+  }
+
+  @override
+  Future<void> setDouble(String key, double value) =>
+      _storage.write(key: key, value: value.toString());
+
+  @override
+  Future<bool?> getBool(String key) async {
+    final raw = await _storage.read(key: key);
     if (raw == null) return null;
 
-    if (T == String) {
-      return raw as T;
-    } else if (T == bool) {
-      return (raw.toLowerCase() == 'true') as T;
-    } else if (T == int) {
-      return int.tryParse(raw) as T?;
-    } else if (T == double) {
-      return double.tryParse(raw) as T?;
-    } else if (T == List<String>) {
-      final List<dynamic> decoded = jsonDecode(raw);
-      return decoded.cast<String>() as T;
-    } else {
-      throw UnsupportedError('Type $T is not supported');
+    final v = raw.toLowerCase();
+    if (v == 'true') return true;
+    if (v == 'false') return false;
+    return null; // contenido inválido
+  }
+
+  @override
+  Future<void> setBool(String key, bool value) =>
+      _storage.write(key: key, value: value.toString());
+
+  @override
+  Future<List<String>?> getStringList(String key) async {
+    final raw = await _storage.read(key: key);
+    if (raw == null) return null;
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return null;
+      return decoded.cast<String>();
+    } on FormatException {
+      return null;
     }
   }
 
   @override
-  Future<void> storeData(String key, dynamic value) async {
-    if (value is bool) {
-      await _storage.write(key: key, value: value.toString());
-    } else if (value is double) {
-      await _storage.write(key: key, value: value.toString());
-    } else if (value is int) {
-      await _storage.write(key: key, value: value.toString());
-    } else if (value is String) {
-      await _storage.write(key: key, value: value);
-    } else if (value is List<String>) {
-      await _storage.write(key: key, value: jsonEncode(value));
-    } else {
-      throw UnsupportedError('Type ${value.runtimeType} is not supported');
-    }
-  }
+  Future<void> setStringList(String key, List<String> value) =>
+      _storage.write(key: key, value: jsonEncode(value));
 
   @override
-  Future<void> removeData(String key) async => await _storage.delete(key: key);
+  Future<void> remove(String key) => _storage.delete(key: key);
+
   @override
-  Future<void> clearAll() async => await _storage.deleteAll();
+  Future<void> clear() => _storage.deleteAll();
 }
