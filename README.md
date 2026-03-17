@@ -2,7 +2,14 @@
 
 A Flutter project to test authentication and data services based on Roble 
 
-Authentication server:   
+
+
+Add this on the AndroidManifest.xml (just bellow <manifest xmlns:android="http://schemas.android.com/apk/res/android">)
+```
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+Backend server:   
 
 ```
 https://roble.openlab.uninorte.edu.co/

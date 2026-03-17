@@ -1,10 +1,11 @@
 import 'package:f_web_authentication/core/local_preferences_secured.dart';
+import 'package:f_web_authentication/core/local_preferences_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'central.dart';
 import 'core/app_theme.dart';
 import 'core/i_local_preferences.dart';
@@ -28,7 +29,11 @@ void main() async {
     ),
   );
 
-  Get.put<ILocalPreferences>(LocalPreferencesSecured());
+  if (!kIsWeb) {
+    Get.put<ILocalPreferences>(LocalPreferencesSecured());
+  } else {
+    Get.put<ILocalPreferences>(LocalPreferencesShared());
+  }
 
   Get.lazyPut<IAuthenticationSource>(
     () => AuthenticationSourceServiceRoble(),
