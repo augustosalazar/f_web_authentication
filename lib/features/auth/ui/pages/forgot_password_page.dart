@@ -16,6 +16,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       TextEditingController(text: 'augustosalazar@uninorte.edu.co');
   final AuthenticationController authenticationController = Get.find();
 
+  @override
+  void dispose() {
+    controllerEmail.dispose();
+    super.dispose();
+  }
+
   Future<void> _sendResetLink(String email) async {
     logInfo('_sendResetLink $email');
     try {

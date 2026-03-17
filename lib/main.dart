@@ -47,7 +47,7 @@ void main() async {
   Get.lazyPut<IProductSource>(
       () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')));
 
-  Get.put<IProductRepository>(ProductRepository(Get.find()));
+  Get.lazyPut<IProductRepository>(() => ProductRepository(Get.find()));
   Get.lazyPut(() => ProductController(Get.find()));
   runApp(const MyApp());
 }

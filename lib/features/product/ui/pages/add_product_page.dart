@@ -15,6 +15,14 @@ class _AddProductPageState extends State<AddProductPage> {
   final controllerQuantity = TextEditingController();
 
   @override
+  void dispose() {
+    controllerName.dispose();
+    controllerDesc.dispose();
+    controllerQuantity.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ProductController productController = Get.find();
 

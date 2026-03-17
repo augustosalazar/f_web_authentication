@@ -18,6 +18,13 @@ class _LoginPageState extends State<LoginPage> {
   final controllerPassword = TextEditingController(text: 'ThePassword!1');
   AuthenticationController authenticationController = Get.find();
 
+  @override
+  void dispose() {
+    controllerEmail.dispose();
+    controllerPassword.dispose();
+    super.dispose();
+  }
+
   _login(theEmail, thePassword) async {
     logInfo('_login $theEmail $thePassword');
     try {
@@ -106,11 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         TextButton(
                             onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ForgotPasswordPage()));
+                              Get.off(() => const ForgotPasswordPage());
                             },
                             child: const Text("Forgot password?")),
                       ],
@@ -141,10 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextButton(
                         onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const SignUpPage()));
+                          Get.off(() => const SignUpPage());
                         },
                         child: const Text("Create account"))
                   ]),

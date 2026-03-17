@@ -18,9 +18,17 @@ class _SignUpPageState extends State<SignUpPage> {
   AuthenticationController authenticationController = Get.find();
   bool registerPhase = true;
 
+  @override
+  void dispose() {
+    controllerEmail.dispose();
+    controllerPassword.dispose();
+    controllerValidation.dispose();
+    super.dispose();
+  }
+
   _signup(theEmail, thePassword) async {
     try {
-      await authenticationController.signUp(theEmail, thePassword);
+      await authenticationController.signUp(theEmail, thePassword, true);
 
       setState(() {
         registerPhase = false;
@@ -29,6 +37,27 @@ class _SignUpPageState extends State<SignUpPage> {
       Get.snackbar(
         "Sign Up",
         'User created successfully, check your email for verification',
+        icon: const Icon(Icons.person, color: Colors.red),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (err) {
+      logError('SignUp error $err');
+      Get.snackbar(
+        "Sign Up",
+        err.toString(),
+        icon: const Icon(Icons.person, color: Colors.red),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  _signupDirect(theEmail, thePassword) async {
+    try {
+      await authenticationController.signUp(theEmail, thePassword, false);
+
+      Get.snackbar(
+        "Sign Up",
+        'User created successfully',
         icon: const Icon(Icons.person, color: Colors.red),
         snackPosition: SnackPosition.BOTTOM,
       );

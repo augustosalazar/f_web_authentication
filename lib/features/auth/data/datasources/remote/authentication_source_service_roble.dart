@@ -54,9 +54,17 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   }
 
   @override
-  Future<bool> signUp(AuthenticationUser user) async {
+  Future<bool> signUp(AuthenticationUser user, bool direct) async {
+    late final String endpoint;
+    if (direct) {
+      logInfo("Signing up directly");
+      endpoint = "$baseUrl/signup-direct";
+    } else {
+      logInfo("Signing up with validation");
+      endpoint = "$baseUrl/signup";
+    }
     final response = await http.post(
-      Uri.parse("$baseUrl/signup"),
+      Uri.parse(endpoint),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -145,7 +153,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         await sharedPreferences.retrieveData<String>('refreshToken');
     if (refreshToken == null) {
       logError("No refresh token found, cannot refresh.");
-      return Future.error('No refresh token found');
+      return Future.value(false);
     }
 
     final response = await http.post(
