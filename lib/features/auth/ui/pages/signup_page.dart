@@ -11,6 +11,9 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final _registerKey = GlobalKey<FormState>();
+  final _validationKey = GlobalKey<FormState>();
+
   final controllerName = TextEditingController(text: 'One name');
   final controllerEmail = TextEditingController(text: 'a@a.com');
   final controllerPassword = TextEditingController(text: 'ThePassword!1');
@@ -49,7 +52,12 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  Future<void> _signup(theName, theEmail, thePassword, direct) async {
+  Future<void> _signup(
+    String theName,
+    String theEmail,
+    String thePassword,
+    bool direct,
+  ) async {
     try {
       await authenticationController.signUp(
           theName, theEmail, thePassword, direct);
@@ -83,7 +91,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  Future<void> _validate(email, validationCode) async {
+  Future<void> _validate(String email, String validationCode) async {
     try {
       await authenticationController.validate(email, validationCode);
       Get.snackbar(
@@ -100,6 +108,34 @@ class _SignUpPageState extends State<SignUpPage> {
         err.toString(),
         icon: const Icon(Icons.error, color: Colors.red),
         snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> _submitRegister() async {
+    FocusScope.of(context).unfocus();
+    final form = _registerKey.currentState;
+    form!.save();
+
+    if (_registerKey.currentState!.validate()) {
+      await _signup(
+        controllerName.text.trim(),
+        controllerEmail.text.trim(),
+        controllerPassword.text,
+        true,
+      );
+    }
+  }
+
+  Future<void> _submitValidation() async {
+    FocusScope.of(context).unfocus();
+    final form = _validationKey.currentState;
+    form!.save();
+
+    if (_validationKey.currentState!.validate()) {
+      await _validate(
+        controllerEmail.text.trim(),
+        controllerValidation.text.trim(),
       );
     }
   }
@@ -124,10 +160,12 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: registerPhase
-                      ? registerPhaseWidget(context, GlobalKey<FormState>())
-                      : validationPhaseWidget(context, GlobalKey<FormState>()),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: registerPhase ? _registerForm() : _validationForm(),
+                  ),
                 ),
               ),
             );
@@ -137,35 +175,22 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Form validationPhaseWidget(BuildContext context, GlobalKey<FormState> key) {
+  Widget _validationForm() {
     return Form(
-      key: key,
+      key: _validationKey,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text("Validate your email", style: TextStyle(fontSize: 20)),
           const SizedBox(height: 20),
           TextFormField(
             focusNode: _validationFocus,
             controller: controllerValidation,
-            keyboardType: TextInputType.text,
             textInputAction: TextInputAction.done,
             decoration: const InputDecoration(labelText: "Validation code"),
-            onFieldSubmitted: (_) async {
-              FocusScope.of(context).unfocus();
-              final form = key.currentState;
-              form!.save();
-              if (key.currentState!.validate()) {
-                logInfo('Validation form ok');
-                await _validate(controllerEmail.text.trim(),
-                    controllerValidation.text.trim());
-              } else {
-                logError('Validation form nok');
-              }
-            },
+            onFieldSubmitted: (_) => _submitValidation(),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                logError('Validation code is empty');
                 return "Enter validation code";
               }
               return null;
@@ -176,25 +201,13 @@ class _SignUpPageState extends State<SignUpPage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TextButton(
-                onPressed: () async {
-                  final form = key.currentState;
-                  form!.save();
-                  FocusScope.of(context).unfocus();
-
-                  if (key.currentState!.validate()) {
-                    logInfo('Validation form ok');
-                    await _validate(controllerEmail.text.trim(),
-                        controllerValidation.text.trim());
-                  } else {
-                    logError('Validation form nok');
-                  }
-                },
+                onPressed: _submitValidation,
                 child: const Text("Validate"),
               ),
               TextButton(
                 onPressed: () => setState(() => registerPhase = true),
                 child: const Text("Back"),
-              )
+              ),
             ],
           ),
         ],
@@ -202,17 +215,17 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Form registerPhaseWidget(BuildContext context, GlobalKey<FormState> key) {
+  Widget _registerForm() {
     return Form(
-      key: key,
+      key: _registerKey,
       child: AutofillGroup(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Text("Sign Up Information", style: TextStyle(fontSize: 20)),
             const SizedBox(height: 20),
 
-            // NOMBRE
+            // NAME
             TextFormField(
               focusNode: _nameFocus,
               controller: controllerName,
@@ -250,13 +263,9 @@ class _SignUpPageState extends State<SignUpPage> {
               autofillHints: const [AutofillHints.email],
               onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  logError('SignUp validation empty email');
-                  return "Enter email";
-                } else if (!value.contains('@')) {
-                  logError('SignUp validation invalid email');
-                  return "Enter valid email address";
-                }
+                final v = value?.trim() ?? '';
+                if (v.isEmpty) return "Enter email";
+                if (!v.contains('@')) return "Enter valid email address";
                 return null;
               },
             ),
@@ -293,16 +302,15 @@ class _SignUpPageState extends State<SignUpPage> {
               validator: (value) {
                 final v = value ?? '';
                 if (v.isEmpty) return "Enter password";
-                if (v.length < 6) {
+                if (v.length < 6)
                   return "Password should have at least 6 characters";
-                }
                 return null;
               },
             ),
 
             const SizedBox(height: 20),
 
-            // CONFIRM PASSWORD (valida que coincidan)
+            // CONFIRM PASSWORD (matches password)
             TextFormField(
               focusNode: _confirmPasswordFocus,
               controller: controllerConfirmPassword,
@@ -319,7 +327,8 @@ class _SignUpPageState extends State<SignUpPage> {
                         : Icons.visibility_off_outlined,
                   ),
                   onPressed: () => setState(
-                      () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
                   tooltip: _obscureConfirmPassword
                       ? 'Mostrar contraseña'
                       : 'Ocultar contraseña',
@@ -328,23 +337,7 @@ class _SignUpPageState extends State<SignUpPage> {
               obscureText: _obscureConfirmPassword,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.newPassword],
-              onFieldSubmitted: (_) async {
-                FocusScope.of(context).unfocus();
-                final form = key.currentState;
-                form!.save();
-
-                if (key.currentState!.validate()) {
-                  logInfo('SignUp validation form ok');
-                  await _signup(
-                    controllerName.text.trim(),
-                    controllerEmail.text.trim(),
-                    controllerPassword.text,
-                    true,
-                  );
-                } else {
-                  logError('SignUp validation form nok');
-                }
-              },
+              onFieldSubmitted: (_) => _submitRegister(),
               validator: (value) {
                 final v = value ?? '';
                 if (v.isEmpty) return "Confirm your password";
@@ -361,24 +354,7 @@ class _SignUpPageState extends State<SignUpPage> {
               children: [
                 Expanded(
                   child: FilledButton.tonal(
-                    onPressed: () async {
-                      final form = key.currentState;
-                      form!.save();
-                      FocusScope.of(context).unfocus();
-
-                      if (key.currentState!.validate()) {
-                        logInfo('SignUp validation form ok');
-
-                        await _signup(
-                          controllerName.text.trim(),
-                          controllerEmail.text.trim(),
-                          controllerPassword.text,
-                          true,
-                        );
-                      } else {
-                        logError('SignUp validation form nok');
-                      }
-                    },
+                    onPressed: _submitRegister,
                     child: const Text("Submit"),
                   ),
                 ),
