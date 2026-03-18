@@ -30,7 +30,7 @@ class AuthenticationController extends GetxController {
 
   Future<bool> login(email, password) async {
     logInfo('AuthenticationController: Login $email $password');
-    var rta = await authentication.login(email, password);
+    await authentication.login(email, password);
     await getLoggedUser();
     logged.value = true;
 

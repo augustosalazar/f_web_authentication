@@ -1,4 +1,3 @@
-import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';

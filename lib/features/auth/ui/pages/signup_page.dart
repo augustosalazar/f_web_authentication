@@ -28,9 +28,19 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  _signup(theEmail, thePassword) async {
+  _signup(theEmail, thePassword, direct) async {
     try {
-      await authenticationController.signUp(theEmail, thePassword, false);
+      await authenticationController.signUp(theEmail, thePassword, direct);
+
+      if (direct) {
+        Get.snackbar(
+          "Sign Up",
+          'User created successfully',
+          icon: const Icon(Icons.person, color: Colors.red),
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
 
       setState(() {
         registerPhase = false;
@@ -39,27 +49,6 @@ class _SignUpPageState extends State<SignUpPage> {
       Get.snackbar(
         "Sign Up",
         'User created successfully, check your email for verification',
-        icon: const Icon(Icons.person, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (err) {
-      logError('SignUp error $err');
-      Get.snackbar(
-        "Sign Up",
-        err.toString(),
-        icon: const Icon(Icons.person, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  _signupDirect(theEmail, thePassword) async {
-    try {
-      await authenticationController.signUp(theEmail, thePassword, true);
-
-      Get.snackbar(
-        "Sign Up",
-        'User created successfully',
         icon: const Icon(Icons.person, color: Colors.red),
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -263,8 +252,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   FocusScope.of(context).requestFocus(FocusNode());
                   if (key.currentState!.validate()) {
                     logInfo('SignUp validation form ok');
-                    await _signupDirect(
-                        controllerEmail.text, controllerPassword.text);
+                    await _signup(
+                        controllerEmail.text, controllerPassword.text, true);
                   } else {
                     logError('SignUp validation form nok');
                   }
@@ -275,11 +264,6 @@ class _SignUpPageState extends State<SignUpPage> {
             const SizedBox(
               height: 20,
             ),
-            TextButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text("Atras"))
           ],
         ),
       ]),

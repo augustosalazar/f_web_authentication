@@ -20,7 +20,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       : httpClient = client ?? http.Client();
 
   @override
-  Future<AuthenticationUser> login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     final response = await http.post(
       Uri.parse("$baseUrl/login"),
       headers: <String, String>{
@@ -44,14 +44,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       await sharedPreferences.setString('userId', data['user']['id']);
       logInfo("Token: $token"
           "\nRefresh Token: $refreshToken");
-
-      AuthenticationUser user = AuthenticationUser(
-        email: data['user']['email'],
-        name: data['user']['name'],
-        id: data['user']['id'],
-      );
-
-      return Future.value(user);
+      return Future.value();
     } else {
       final Map<String, dynamic> body = json.decode(response.body);
       final String errorMessage = body['message'];
@@ -86,8 +79,8 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
     logInfo(response.statusCode);
     if (response.statusCode == 201) {
-      AuthenticationUser loggedUser = await login(email, password);
-      await addUser(loggedUser);
+      await login(email, password);
+      await addUser(email, name);
       return Future.value();
     } else {
       logError(response.body);
@@ -250,7 +243,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     }
   }
 
-  Future<bool> addUser(AuthenticationUser user) async {
+  Future<bool> addUser(String email, String name) async {
     logInfo("Web service, Adding user");
     final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
     final uri = Uri.https(
@@ -267,7 +260,11 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     final body = jsonEncode({
       "tableName": 'Users',
       "records": [
-        user.toJson(),
+        {
+          "userId": await sharedPreferences.getString('userId'),
+          "email": email,
+          "name": name,
+        }
       ],
     });
 
