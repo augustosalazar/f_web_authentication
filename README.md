@@ -1,10 +1,10 @@
-# f_web_authentication
+# Flutter web template with Roble services
 
-A Flutter project to test authentication and data services based on Roble 
+A Flutter project to test authentication and data services based on Roble following clean architecture principles.
 
 
 
-Add this on the AndroidManifest.xml (just bellow <manifest xmlns:android="http://schemas.android.com/apk/res/android">)
+Add this on the AndroidManifest.xml (just bellow the manifest xmlns:android="http://schemas.android.com/apk/res/android" line)
 ```
 <uses-permission android:name="android.permission.INTERNET" />
 ```
