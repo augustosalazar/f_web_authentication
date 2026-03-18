@@ -114,6 +114,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       final ILocalPreferences sharedPreferences = Get.find();
       await sharedPreferences.remove('token');
       await sharedPreferences.remove('refreshToken');
+      await sharedPreferences.remove('userId');
       logInfo("Logged out successfully");
       return Future.value(true);
     } else {
@@ -279,6 +280,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     }
   }
 
+  @override
   Future<AuthenticationUser> getLoggedUser() async {
     final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
 
@@ -310,6 +312,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     }
   }
 
+  @override
   Future<List<AuthenticationUser>> getUsers() async {
     final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
     final ILocalPreferences sharedPreferences = Get.find();

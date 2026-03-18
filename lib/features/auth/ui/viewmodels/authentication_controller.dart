@@ -37,9 +37,9 @@ class AuthenticationController extends GetxController {
     return true;
   }
 
-  Future<bool> signUp(email, password, bool direct) async {
+  Future<bool> signUp(name, email, password, bool direct) async {
     logInfo('AuthenticationController: Sign Up $email $password');
-    await authentication.signUp(email, password, email.split('@')[0], direct);
+    await authentication.signUp(email, password, name, direct);
     return true;
   }
 

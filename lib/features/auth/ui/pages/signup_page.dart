@@ -11,26 +11,48 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final controllerName = TextEditingController(text: 'One name');
   final controllerEmail = TextEditingController(text: 'a@a.com');
-  final controllerPassword = TextEditingController(text: 'ThePassword1!');
+  final controllerPassword = TextEditingController(text: 'ThePassword!1');
+  final controllerConfirmPassword =
+      TextEditingController(text: 'ThePassword!1');
   final controllerValidation = TextEditingController();
-  AuthenticationController authenticationController = Get.find();
+
+  final AuthenticationController authenticationController = Get.find();
+
+  // Focus para navegación rápida
+  final _nameFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
+  final _validationFocus = FocusNode();
+
   bool registerPhase = true;
 
-  // Variable para controlar la visibilidad de la contraseña
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
+    controllerName.dispose();
     controllerEmail.dispose();
     controllerPassword.dispose();
+    controllerConfirmPassword.dispose();
     controllerValidation.dispose();
+
+    _nameFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    _validationFocus.dispose();
+
     super.dispose();
   }
 
-  _signup(theEmail, thePassword, direct) async {
+  Future<void> _signup(theName, theEmail, thePassword, direct) async {
     try {
-      await authenticationController.signUp(theEmail, thePassword, direct);
+      await authenticationController.signUp(
+          theName, theEmail, thePassword, direct);
 
       if (direct) {
         Get.snackbar(
@@ -42,9 +64,7 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      setState(() {
-        registerPhase = false;
-      });
+      setState(() => registerPhase = false);
 
       Get.snackbar(
         "Sign Up",
@@ -63,7 +83,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  _validate(email, validationCode) async {
+  Future<void> _validate(email, validationCode) async {
     try {
       await authenticationController.validate(email, validationCode);
       Get.snackbar(
@@ -72,10 +92,7 @@ class _SignUpPageState extends State<SignUpPage> {
         icon: const Icon(Icons.check, color: Colors.green),
         snackPosition: SnackPosition.BOTTOM,
       );
-      setState(() {
-        registerPhase = true;
-      });
-      //Get.offAllNamed('/login');
+      setState(() => registerPhase = true);
     } catch (err) {
       logError('Validation error $err');
       Get.snackbar(
@@ -90,183 +107,286 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Sign Up"),
-          centerTitle: true,
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        title: const Text("Sign Up"),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 20 + MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: registerPhase
+                      ? registerPhaseWidget(context, GlobalKey<FormState>())
+                      : validationPhaseWidget(context, GlobalKey<FormState>()),
+                ),
+              ),
+            );
+          },
         ),
-        body: Center(
-            child: Container(
-                padding: const EdgeInsets.all(20),
-                child: registerPhase
-                    ? registerPhaseWidget(context, GlobalKey<FormState>())
-                    : validationPhaseWidget(context, GlobalKey<FormState>()))));
+      ),
+    );
   }
 
   Form validationPhaseWidget(BuildContext context, GlobalKey<FormState> key) {
     return Form(
       key: key,
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Text(
-          "Validate your email",
-          style: TextStyle(fontSize: 20),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        TextFormField(
-          keyboardType: TextInputType.emailAddress,
-          controller: controllerValidation,
-          decoration: const InputDecoration(
-            labelText: "Validation code",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            prefixIcon: Icon(Icons.verified_outlined),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Validate your email", style: TextStyle(fontSize: 20)),
+          const SizedBox(height: 20),
+          TextFormField(
+            focusNode: _validationFocus,
+            controller: controllerValidation,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(labelText: "Validation code"),
+            onFieldSubmitted: (_) async {
+              FocusScope.of(context).unfocus();
+              final form = key.currentState;
+              form!.save();
+              if (key.currentState!.validate()) {
+                logInfo('Validation form ok');
+                await _validate(controllerEmail.text.trim(),
+                    controllerValidation.text.trim());
+              } else {
+                logError('Validation form nok');
+              }
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                logError('Validation code is empty');
+                return "Enter validation code";
+              }
+              return null;
+            },
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              logError('Validation code is empty');
-              return "Enter validation code";
-            }
-            return null;
-          },
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-              child: FilledButton.tonal(
-                  onPressed: () async {
-                    final form = key.currentState;
-                    form!.save();
-                    FocusScope.of(context).requestFocus(FocusNode());
-                    if (key.currentState!.validate()) {
-                      logInfo('Validation form ok');
-                      await _validate(
-                          controllerEmail.text, controllerValidation.text);
-                    } else {
-                      logError('Validation form nok');
-                    }
-                  },
-                  child: const Text("Validate")),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      registerPhase = true;
-                    });
-                  },
-                  child: const Text("Back")),
-            ),
-          ],
-        ),
-      ]),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton(
+                onPressed: () async {
+                  final form = key.currentState;
+                  form!.save();
+                  FocusScope.of(context).unfocus();
+
+                  if (key.currentState!.validate()) {
+                    logInfo('Validation form ok');
+                    await _validate(controllerEmail.text.trim(),
+                        controllerValidation.text.trim());
+                  } else {
+                    logError('Validation form nok');
+                  }
+                },
+                child: const Text("Validate"),
+              ),
+              TextButton(
+                onPressed: () => setState(() => registerPhase = true),
+                child: const Text("Back"),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Form registerPhaseWidget(BuildContext context, GlobalKey<FormState> key) {
     return Form(
       key: key,
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Text(
-          "Sign Up Information",
-          style: TextStyle(fontSize: 20),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        TextFormField(
-          keyboardType: TextInputType.emailAddress,
-          controller: controllerEmail,
-          decoration: const InputDecoration(
-            labelText: "Email address",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            prefixIcon: Icon(Icons.email_outlined),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              logError('SignUp validation empty email');
-              return "Enter email";
-            } else if (!value.contains('@')) {
-              logError('SignUp validation invalid email');
-              return "Enter valid email address";
-            }
-            return null;
-          },
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        TextFormField(
-          controller: controllerPassword,
-          decoration: InputDecoration(
-            labelText: "Password",
-            border: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
-              tooltip: _obscurePassword
-                  ? 'Mostrar contraseña'
-                  : 'Ocultar contraseña',
-            ),
-          ),
-          obscureText: _obscurePassword,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return "Enter password";
-            } else if (value.length < 6) {
-              return "Password should have at least 6 characters";
-            }
-            return null;
-          },
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Column(
+      child: AutofillGroup(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.tonal(
-                onPressed: () async {
-                  final form = key.currentState;
-                  form!.save();
-                  FocusScope.of(context).requestFocus(FocusNode());
-                  if (key.currentState!.validate()) {
-                    logInfo('SignUp validation form ok');
-                    await _signup(
-                        controllerEmail.text, controllerPassword.text, true);
-                  } else {
-                    logError('SignUp validation form nok');
-                  }
-                },
-                child: const Text("Submit"),
+            const Text("Sign Up Information", style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 20),
+
+            // NOMBRE
+            TextFormField(
+              focusNode: _nameFocus,
+              controller: controllerName,
+              decoration: const InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                prefixIcon: Icon(Icons.badge_outlined),
               ),
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.name],
+              onFieldSubmitted: (_) => _emailFocus.requestFocus(),
+              validator: (value) {
+                final v = value?.trim() ?? '';
+                if (v.isEmpty) return "Enter your name";
+                return null;
+              },
             ),
-            const SizedBox(
-              height: 20,
+
+            const SizedBox(height: 20),
+
+            // EMAIL
+            TextFormField(
+              focusNode: _emailFocus,
+              controller: controllerEmail,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: "Email address",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  logError('SignUp validation empty email');
+                  return "Enter email";
+                } else if (!value.contains('@')) {
+                  logError('SignUp validation invalid email');
+                  return "Enter valid email address";
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // PASSWORD
+            TextFormField(
+              focusNode: _passwordFocus,
+              controller: controllerPassword,
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  tooltip: _obscurePassword
+                      ? 'Mostrar contraseña'
+                      : 'Ocultar contraseña',
+                ),
+              ),
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.newPassword],
+              onFieldSubmitted: (_) => _confirmPasswordFocus.requestFocus(),
+              validator: (value) {
+                final v = value ?? '';
+                if (v.isEmpty) return "Enter password";
+                if (v.length < 6) {
+                  return "Password should have at least 6 characters";
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // CONFIRM PASSWORD (valida que coincidan)
+            TextFormField(
+              focusNode: _confirmPasswordFocus,
+              controller: controllerConfirmPassword,
+              decoration: InputDecoration(
+                labelText: "Confirm password",
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  tooltip: _obscureConfirmPassword
+                      ? 'Mostrar contraseña'
+                      : 'Ocultar contraseña',
+                ),
+              ),
+              obscureText: _obscureConfirmPassword,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.newPassword],
+              onFieldSubmitted: (_) async {
+                FocusScope.of(context).unfocus();
+                final form = key.currentState;
+                form!.save();
+
+                if (key.currentState!.validate()) {
+                  logInfo('SignUp validation form ok');
+                  await _signup(
+                    controllerName.text.trim(),
+                    controllerEmail.text.trim(),
+                    controllerPassword.text,
+                    true,
+                  );
+                } else {
+                  logError('SignUp validation form nok');
+                }
+              },
+              validator: (value) {
+                final v = value ?? '';
+                if (v.isEmpty) return "Confirm your password";
+                if (v != controllerPassword.text) {
+                  return "Passwords do not match";
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonal(
+                    onPressed: () async {
+                      final form = key.currentState;
+                      form!.save();
+                      FocusScope.of(context).unfocus();
+
+                      if (key.currentState!.validate()) {
+                        logInfo('SignUp validation form ok');
+
+                        await _signup(
+                          controllerName.text.trim(),
+                          controllerEmail.text.trim(),
+                          controllerPassword.text,
+                          true,
+                        );
+                      } else {
+                        logError('SignUp validation form nok');
+                      }
+                    },
+                    child: const Text("Submit"),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ]),
+      ),
     );
   }
 }

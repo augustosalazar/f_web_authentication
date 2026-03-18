@@ -14,21 +14,28 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+
   final controllerEmail = TextEditingController(text: 'a@a.com');
   final controllerPassword = TextEditingController(text: 'ThePassword!1');
-  AuthenticationController authenticationController = Get.find();
 
-  // Variable para controlar la visibilidad de la contraseña
+  final AuthenticationController authenticationController = Get.find();
+
+  // FocusNodes para navegación rápida
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     controllerEmail.dispose();
     controllerPassword.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
-  _login(theEmail, thePassword) async {
+  Future<void> _login(String theEmail, String thePassword) async {
     logInfo('_login $theEmail $thePassword');
     try {
       await authenticationController.login(theEmail, thePassword);
@@ -42,134 +49,163 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
+
+    final form = _formKey.currentState;
+    form!.save();
+
+    if (_formKey.currentState!.validate()) {
+      await _login(
+        controllerEmail.text.trim(),
+        controllerPassword.text,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Login to access your account",
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.emailAddress,
-                      controller: controllerEmail,
-                      decoration: const InputDecoration(
-                        labelText: "Email address",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 20 + MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Login to access your account",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            const SizedBox(height: 30),
+
+                            // EMAIL
+                            TextFormField(
+                              focusNode: _emailFocus,
+                              keyboardType: TextInputType.emailAddress,
+                              controller: controllerEmail,
+                              decoration: const InputDecoration(
+                                labelText: "Email address",
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20)),
+                                ),
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              textInputAction: TextInputAction.next,
+                              onFieldSubmitted: (_) => FocusScope.of(context)
+                                  .requestFocus(_passwordFocus),
+                              validator: (String? value) {
+                                final v = value?.trim() ?? '';
+                                if (v.isEmpty) return "Enter email";
+                                if (!v.contains('@'))
+                                  return "Enter valid email address";
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // PASSWORD
+                            TextFormField(
+                              focusNode: _passwordFocus,
+                              controller: controllerPassword,
+                              decoration: InputDecoration(
+                                labelText: "Password",
+                                border: const OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20)),
+                                ),
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                  tooltip: _obscurePassword
+                                      ? 'Mostrar contraseña'
+                                      : 'Ocultar contraseña',
+                                ),
+                              ),
+                              obscureText: _obscurePassword,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _submit(),
+                              validator: (String? value) {
+                                final v = value ?? '';
+                                if (v.isEmpty) return "Enter password";
+                                if (v.length < 6) {
+                                  return "Password should have at least 6 characters";
+                                }
+                                return null;
+                              },
+                            ),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    FocusScope.of(context).unfocus();
+                                    Get.off(() => const ForgotPasswordPage());
+                                  },
+                                  child: const Text("Forgot password?"),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: FilledButton.tonal(
+                                    onPressed: _submit,
+                                    child: const Text("Login"),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            TextButton(
+                              onPressed: () {
+                                FocusScope.of(context).unfocus();
+                                Get.to(() => const SignUpPage());
+                              },
+                              child: const Text("Create account"),
+                            )
+                          ],
                         ),
-                        prefixIcon: Icon(Icons.email_outlined),
                       ),
-                      validator: (String? value) {
-                        if (value!.isEmpty) {
-                          return "Enter email";
-                        } else if (!value.contains('@')) {
-                          return "Enter valid email address";
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    TextFormField(
-                      controller: controllerPassword,
-                      decoration: InputDecoration(
-                        labelText: "Password",
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                        ),
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                          tooltip: _obscurePassword
-                              ? 'Mostrar contraseña'
-                              : 'Ocultar contraseña',
-                        ),
-                      ),
-                      obscureText: _obscurePassword,
-                      validator: (String? value) {
-                        if (value!.isEmpty) {
-                          return "Enter password";
-                        } else if (value.length < 6) {
-                          return "Password should have at least 6 characters";
-                        }
-                        return null;
-                      },
-                      onFieldSubmitted: (value) async {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        final form = _formKey.currentState;
-                        form!.save();
-                        if (_formKey.currentState!.validate()) {
-                          await _login(
-                              controllerEmail.text, controllerPassword.text);
-                        }
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                            onPressed: () {
-                              Get.off(() => const ForgotPasswordPage());
-                            },
-                            child: const Text("Forgot password?")),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: FilledButton.tonal(
-                                onPressed: () async {
-                                  // this line dismiss the keyboard by taking away the focus of the TextFormField and giving it to an unused
-                                  FocusScope.of(context)
-                                      .requestFocus(FocusNode());
-                                  final form = _formKey.currentState;
-                                  form!.save();
-                                  if (_formKey.currentState!.validate()) {
-                                    await _login(controllerEmail.text,
-                                        controllerPassword.text);
-                                  }
-                                },
-                                child: const Text("Login"))),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    TextButton(
-                        onPressed: () {
-                          Get.to(() => const SignUpPage());
-                        },
-                        child: const Text("Create account"))
-                  ]),
-            ),
-          ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
