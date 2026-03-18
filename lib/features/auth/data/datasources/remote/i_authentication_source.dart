@@ -3,7 +3,7 @@ import '../../../domain/models/authentication_user.dart';
 abstract class IAuthenticationSource {
   Future<AuthenticationUser> login(String username, String password);
 
-  Future<bool> signUp(AuthenticationUser user, bool direct);
+  Future<void> signUp(String email, String password, String name, bool direct);
 
   Future<bool> logOut();
 
@@ -17,4 +17,8 @@ abstract class IAuthenticationSource {
       String email, String newPassword, String validationCode);
 
   Future<bool> verifyToken();
+
+  Future<AuthenticationUser> getLoggedUser();
+
+  Future<List<AuthenticationUser>> getUsers();
 }

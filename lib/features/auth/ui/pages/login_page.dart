@@ -18,6 +18,9 @@ class _LoginPageState extends State<LoginPage> {
   final controllerPassword = TextEditingController(text: 'ThePassword!1');
   AuthenticationController authenticationController = Get.find();
 
+  // Variable para controlar la visibilidad de la contraseña
+  bool _obscurePassword = true;
+
   @override
   void dispose() {
     controllerEmail.dispose();
@@ -68,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                         ),
+                        prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (String? value) {
                         if (value!.isEmpty) {
@@ -83,13 +87,29 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextFormField(
                       controller: controllerPassword,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: "Password",
-                        border: OutlineInputBorder(
+                        border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                         ),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          tooltip: _obscurePassword
+                              ? 'Mostrar contraseña'
+                              : 'Ocultar contraseña',
+                        ),
                       ),
-                      obscureText: true,
+                      obscureText: _obscurePassword,
                       validator: (String? value) {
                         if (value!.isEmpty) {
                           return "Enter password";

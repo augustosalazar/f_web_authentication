@@ -1,3 +1,4 @@
+import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
@@ -31,22 +32,23 @@ class _ListProductPageState extends State<ListProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Welcome"), actions: [
-        IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              _logout();
-            }),
-        IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              userController.deleteProducts();
-            }),
-      ]),
+      appBar: AppBar(
+          title: Text("Welcome ${authenticationController.loggedUser?.name}"),
+          actions: [
+            IconButton(
+                icon: const Icon(Icons.exit_to_app),
+                onPressed: () {
+                  _logout();
+                }),
+            IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  userController.deleteProducts();
+                }),
+          ]),
       body: Center(child: _getXlistView()),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          logInfo("Add user from UI");
           Get.to(() => const AddProductPage());
         },
         child: const Icon(Icons.add),

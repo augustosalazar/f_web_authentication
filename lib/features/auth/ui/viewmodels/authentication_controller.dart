@@ -8,8 +8,16 @@ import '../../domain/repositories/i_auth_repository.dart';
 class AuthenticationController extends GetxController {
   final IAuthRepository authentication;
   final logged = false.obs;
+  final _loggedUser = Rxn<AuthenticationUser>();
+  final RxBool isLoading = false.obs;
 
   AuthenticationController(this.authentication);
+
+  AuthenticationUser? get loggedUser => _loggedUser.value;
+
+  set loggedUser(AuthenticationUser? user) {
+    _loggedUser.value = user;
+  }
 
   @override
   Future<void> onInit() async {
@@ -23,15 +31,15 @@ class AuthenticationController extends GetxController {
   Future<bool> login(email, password) async {
     logInfo('AuthenticationController: Login $email $password');
     var rta = await authentication.login(email, password);
+    await getLoggedUser();
     logged.value = true;
+
     return true;
   }
 
   Future<bool> signUp(email, password, bool direct) async {
     logInfo('AuthenticationController: Sign Up $email $password');
-    await authentication.signUp(
-        AuthenticationUser(name: email, password: password, username: email),
-        direct);
+    await authentication.signUp(email, password, email.split('@')[0], direct);
     return true;
   }
 
@@ -57,5 +65,20 @@ class AuthenticationController extends GetxController {
   Future<void> forgotPassword(String email) async {
     logInfo('AuthenticationController: Forgot Password $email');
     await authentication.forgotPassword(email);
+  }
+
+  Future<AuthenticationUser> getLoggedUser() async {
+    logInfo('AuthenticationController: Get Logged User');
+    isLoading.value = true;
+    var rta = await authentication.getLoggedUser();
+    _loggedUser.value = rta;
+    isLoading.value = false;
+    return rta;
+  }
+
+  Future<List<AuthenticationUser>> getUsers() async {
+    logInfo('AuthenticationController: Get Users');
+    var rta = await authentication.getUsers();
+    return rta;
   }
 }

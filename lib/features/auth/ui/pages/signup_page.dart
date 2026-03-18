@@ -17,6 +17,9 @@ class _SignUpPageState extends State<SignUpPage> {
   AuthenticationController authenticationController = Get.find();
   bool registerPhase = true;
 
+  // Variable para controlar la visibilidad de la contraseña
+  bool _obscurePassword = true;
+
   @override
   void dispose() {
     controllerEmail.dispose();
@@ -124,7 +127,13 @@ class _SignUpPageState extends State<SignUpPage> {
         TextFormField(
           keyboardType: TextInputType.emailAddress,
           controller: controllerValidation,
-          decoration: const InputDecoration(labelText: "Validation code"),
+          decoration: const InputDecoration(
+            labelText: "Validation code",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            prefixIcon: Icon(Icons.verified_outlined),
+          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               logError('Validation code is empty');
@@ -139,27 +148,32 @@ class _SignUpPageState extends State<SignUpPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            TextButton(
-                onPressed: () async {
-                  final form = key.currentState;
-                  form!.save();
-                  FocusScope.of(context).requestFocus(FocusNode());
-                  if (key.currentState!.validate()) {
-                    logInfo('Validation form ok');
-                    await _validate(
-                        controllerEmail.text, controllerValidation.text);
-                  } else {
-                    logError('Validation form nok');
-                  }
-                },
-                child: const Text("Validate")),
-            TextButton(
-                onPressed: () {
-                  setState(() {
-                    registerPhase = true;
-                  });
-                },
-                child: const Text("Back"))
+            Expanded(
+              child: FilledButton.tonal(
+                  onPressed: () async {
+                    final form = key.currentState;
+                    form!.save();
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    if (key.currentState!.validate()) {
+                      logInfo('Validation form ok');
+                      await _validate(
+                          controllerEmail.text, controllerValidation.text);
+                    } else {
+                      logError('Validation form nok');
+                    }
+                  },
+                  child: const Text("Validate")),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      registerPhase = true;
+                    });
+                  },
+                  child: const Text("Back")),
+            ),
           ],
         ),
       ]),
@@ -185,6 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
+            prefixIcon: Icon(Icons.email_outlined),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -202,14 +217,29 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         TextFormField(
           controller: controllerPassword,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: "Password",
-            border: OutlineInputBorder(
+            border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
+            prefixIcon: const Icon(Icons.lock_outline),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+              tooltip: _obscurePassword
+                  ? 'Mostrar contraseña'
+                  : 'Ocultar contraseña',
+            ),
           ),
-          keyboardType: TextInputType.number,
-          obscureText: true,
+          obscureText: _obscurePassword,
           validator: (value) {
             if (value!.isEmpty) {
               return "Enter password";
@@ -224,20 +254,23 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         Column(
           children: [
-            FilledButton.tonal(
-              onPressed: () async {
-                final form = key.currentState;
-                form!.save();
-                FocusScope.of(context).requestFocus(FocusNode());
-                if (key.currentState!.validate()) {
-                  logInfo('SignUp validation form ok');
-                  await _signupDirect(
-                      controllerEmail.text, controllerPassword.text);
-                } else {
-                  logError('SignUp validation form nok');
-                }
-              },
-              child: const Text("Submit"),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonal(
+                onPressed: () async {
+                  final form = key.currentState;
+                  form!.save();
+                  FocusScope.of(context).requestFocus(FocusNode());
+                  if (key.currentState!.validate()) {
+                    logInfo('SignUp validation form ok');
+                    await _signupDirect(
+                        controllerEmail.text, controllerPassword.text);
+                  } else {
+                    logError('SignUp validation form nok');
+                  }
+                },
+                child: const Text("Submit"),
+              ),
             ),
             const SizedBox(
               height: 20,

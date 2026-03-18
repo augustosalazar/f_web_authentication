@@ -41,12 +41,12 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       final ILocalPreferences sharedPreferences = Get.find();
       await sharedPreferences.setString('token', token);
       await sharedPreferences.setString('refreshToken', refreshToken);
+      await sharedPreferences.setString('userId', data['user']['id']);
       logInfo("Token: $token"
           "\nRefresh Token: $refreshToken");
 
       AuthenticationUser user = AuthenticationUser(
-        username: data['user']['email'],
-        password: password,
+        email: data['user']['email'],
         name: data['user']['name'],
         id: data['user']['id'],
       );
@@ -62,7 +62,8 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   }
 
   @override
-  Future<bool> signUp(AuthenticationUser user, bool direct) async {
+  Future<void> signUp(
+      String email, String password, String name, bool direct) async {
     late final String endpoint;
     if (direct) {
       logInfo("Signing up directly");
@@ -77,17 +78,17 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
-        "email": user.username,
-        "name": user.username,
-        "password": user.password,
+        "email": email,
+        "name": name,
+        "password": password,
       }),
     );
 
     logInfo(response.statusCode);
     if (response.statusCode == 201) {
-      AuthenticationUser loggedUser = await login(user.username, user.password);
+      AuthenticationUser loggedUser = await login(email, password);
       await addUser(loggedUser);
-      return Future.value(true);
+      return Future.value();
     } else {
       logError(response.body);
       final Map<String, dynamic> body = json.decode(response.body);
@@ -278,6 +279,66 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
       final String errorMessage = body['message'];
       logError("addUser got error code ${response.statusCode}: $errorMessage");
       return Future.error('AddUser error code ${response.statusCode}');
+    }
+  }
+
+  Future<AuthenticationUser> getLoggedUser() async {
+    final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
+
+    final ILocalPreferences sharedPreferences = Get.find();
+    final userId = await sharedPreferences.getString('userId');
+
+    var uri = Uri.https(
+      baseUrl,
+      '/database/$contract/read',
+      {'tableName': 'Users', 'userId': userId},
+    );
+
+    final token = await sharedPreferences.getString('token');
+    var response =
+        await httpClient.get(uri, headers: {'Authorization': 'Bearer $token'});
+
+    if (response.statusCode == 200) {
+      List<dynamic> decodedJson = jsonDecode(response.body);
+
+      //logInfo(decodedJson);
+
+      List<AuthenticationUser> users = List<AuthenticationUser>.from(
+          decodedJson.map((x) => AuthenticationUser.fromJson(x)));
+
+      return Future.value(users.first);
+    } else {
+      logError("Got error code ${response.statusCode}");
+      return Future.error('Error code ${response.statusCode}');
+    }
+  }
+
+  Future<List<AuthenticationUser>> getUsers() async {
+    final String baseUrl = 'roble-api.openlab.uninorte.edu.co';
+    final ILocalPreferences sharedPreferences = Get.find();
+
+    var uri = Uri.https(
+      baseUrl,
+      '/database/$contract/read',
+      {'tableName': 'Users'},
+    );
+
+    final token = await sharedPreferences.getString('token');
+    var response =
+        await httpClient.get(uri, headers: {'Authorization': 'Bearer $token'});
+
+    if (response.statusCode == 200) {
+      List<dynamic> decodedJson = jsonDecode(response.body);
+
+      //logInfo(decodedJson);
+
+      List<AuthenticationUser> users = List<AuthenticationUser>.from(
+          decodedJson.map((x) => AuthenticationUser.fromJson(x)));
+
+      return Future.value(users);
+    } else {
+      logError("Got error code ${response.statusCode}");
+      return Future.error('Error code ${response.statusCode}');
     }
   }
 }
