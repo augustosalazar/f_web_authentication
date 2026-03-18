@@ -59,6 +59,9 @@ class AuthenticationController extends GetxController {
   Future<bool> validateToken() async {
     logInfo('validateToken: validateToken');
     var rta = await authentication.validateToken();
+    if (rta) {
+      await getLoggedUser();
+    }
     return rta;
   }
 
