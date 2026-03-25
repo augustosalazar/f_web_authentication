@@ -2,7 +2,9 @@
 
 A Flutter project to test authentication and data services based on Roble following clean architecture principles.
 
+An improved immplementation of the datasources has beeen implemented, using an unified error handling and reducing code repetition.
 
+Now we use Flutter's snackbar implementation instead of GetX's one to help with error messaging and testing.
 
 Add this on the AndroidManifest.xml (just bellow the manifest xmlns:android="http://schemas.android.com/apk/res/android" line)
 ```
@@ -53,3 +55,15 @@ On this test we test the data sources using mockito to mock the http client and 
 On this test we verify the UI, controllers, repositories, and the data source, but we mock the http client and shared preferences.
 
 1. add_product_page_integration_test
+
+Run all tests with:
+
+```
+flutter test
+```
+
+Or run a specific test with:
+
+```
+flutter test test/path_to_test.dart
+```
