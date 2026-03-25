@@ -1,3 +1,4 @@
+import 'package:f_web_authentication/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
@@ -63,30 +64,25 @@ class _SignUpPageState extends State<SignUpPage> {
           theName, theEmail, thePassword, direct);
 
       if (direct) {
-        Get.snackbar(
-          "Sign Up",
-          'User created successfully',
-          icon: const Icon(Icons.person, color: Colors.red),
-          snackPosition: SnackPosition.BOTTOM,
+        messengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text('User created successfully')),
         );
+
         return;
       }
 
       setState(() => registerPhase = false);
 
-      Get.snackbar(
-        "Sign Up",
-        'User created successfully, check your email for verification',
-        icon: const Icon(Icons.person, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(
+            content: Text(
+                'User created successfully, check your email for verification')),
       );
     } catch (err) {
       logError('SignUp error $err');
-      Get.snackbar(
-        "Sign Up",
-        err.toString(),
-        icon: const Icon(Icons.person, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
+
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text(err.toString())),
       );
     }
   }
@@ -94,20 +90,15 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _validate(String email, String validationCode) async {
     try {
       await authenticationController.validate(email, validationCode);
-      Get.snackbar(
-        "Validation",
-        'Email validated successfully',
-        icon: const Icon(Icons.check, color: Colors.green),
-        snackPosition: SnackPosition.BOTTOM,
+
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text('Email validated successfully')),
       );
       setState(() => registerPhase = true);
     } catch (err) {
       logError('Validation error $err');
-      Get.snackbar(
-        "Validation",
-        err.toString(),
-        icon: const Icon(Icons.error, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text(err.toString())),
       );
     }
   }

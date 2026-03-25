@@ -21,6 +21,8 @@ import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
 import 'features/product/ui/viewmodels/product_controller.dart';
 
+final messengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   await dotenv.load(fileName: ".env");
   Loggy.initLoggy(
@@ -54,7 +56,7 @@ void main() async {
 
   Get.lazyPut<IProductRepository>(() => ProductRepository(Get.find()));
   Get.lazyPut(() => ProductController(Get.find()));
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -63,6 +65,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      scaffoldMessengerKey: messengerKey,
       title: 'Web service Demo',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

@@ -1,3 +1,4 @@
+import 'package:f_web_authentication/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../viewmodels/product_controller.dart';
@@ -83,11 +84,9 @@ class _AddProductPageState extends State<AddProductPage> {
                                 controllerQuantity.text);
                             Get.back();
                           } catch (err) {
-                            Get.snackbar(
-                              "Error",
-                              err.toString(),
-                              icon: const Icon(Icons.error, color: Colors.red),
-                              snackPosition: SnackPosition.BOTTOM,
+                            messengerKey.currentState?.showSnackBar(
+                              SnackBar(
+                                  content: Text('Error adding product: $err')),
                             );
                           }
                         },

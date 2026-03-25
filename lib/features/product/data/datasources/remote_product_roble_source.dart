@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:f_web_authentication/core/roble_exception.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
@@ -41,8 +42,7 @@ class RemoteProductRobleSource implements IProductSource {
       products =
           List<Product>.from(decodedJson.map((x) => Product.fromJson(x)));
     } else {
-      logError("Got error code ${response.statusCode}");
-      return Future.error('Error code ${response.statusCode}');
+      _handleError(response, "getProducts");
     }
 
     return Future.value(products);
@@ -74,11 +74,7 @@ class RemoteProductRobleSource implements IProductSource {
     if (response.statusCode == 201) {
       return Future.value(true);
     } else {
-      final Map<String, dynamic> body = json.decode(response.body);
-      final String errorMessage = body['message'];
-      logError(
-          "addProduct got error code ${response.statusCode}: $errorMessage");
-      return Future.error('AddProduct error code ${response.statusCode}');
+      _handleError(response, "addProduct");
     }
   }
 
@@ -114,12 +110,7 @@ class RemoteProductRobleSource implements IProductSource {
     if (response.statusCode == 200) {
       return Future.value(true);
     } else {
-      final Map<String, dynamic> body = json.decode(response.body);
-      final String errorMessage = body['message'];
-      logError(
-          "UpdateProduct got error code ${response.statusCode}: $errorMessage");
-      return Future.error(
-          'UpdateProduct error code ${response.statusCode}: $errorMessage');
+      _handleError(response, "updateProduct");
     }
   }
 
@@ -152,12 +143,7 @@ class RemoteProductRobleSource implements IProductSource {
     if (response.statusCode == 200) {
       return Future.value(true);
     } else {
-      final Map<String, dynamic> body = json.decode(response.body);
-      final String errorMessage = body['message'];
-      logError(
-          "deleteProduct got error code ${response.statusCode}: $errorMessage");
-      return Future.error(
-          'DeleteProduct error code ${response.statusCode}: $errorMessage');
+      _handleError(response, "deleteProduct");
     }
   }
 
@@ -168,5 +154,19 @@ class RemoteProductRobleSource implements IProductSource {
       await deleteProduct(product);
     }
     return Future.value(true);
+  }
+
+  Never _handleError(http.Response response, String context) {
+    String errorMessage;
+    try {
+      final body = jsonDecode(response.body);
+      errorMessage = body['message'] ?? 'Unknown error';
+    } catch (_) {
+      errorMessage = 'Invalid server response';
+    }
+
+    logError("$context failed (${response.statusCode}): $errorMessage");
+
+    throw RobleException(errorMessage, statusCode: response.statusCode);
   }
 }

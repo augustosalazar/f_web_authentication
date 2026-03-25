@@ -1,3 +1,4 @@
+import 'package:f_web_authentication/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
@@ -26,18 +27,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     logInfo('_sendResetLink $email');
     try {
       await authenticationController.forgotPassword(email);
-      Get.snackbar(
-        "Password Reset",
-        "A password reset link has been sent to $email",
-        icon: const Icon(Icons.email, color: Colors.green),
-        snackPosition: SnackPosition.BOTTOM,
+
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text('Password reset link sent to $email')),
       );
     } catch (err) {
-      Get.snackbar(
-        "Password Reset Failed",
-        err.toString(),
-        icon: const Icon(Icons.error, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text('Failed to send password reset link')),
       );
     }
   }

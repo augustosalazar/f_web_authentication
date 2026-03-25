@@ -1,4 +1,5 @@
 import 'package:f_web_authentication/features/auth/ui/pages/forgot_password_page.dart';
+import 'package:f_web_authentication/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
@@ -34,16 +35,14 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _login(String theEmail, String thePassword) async {
-    logInfo('_login $theEmail $thePassword');
+  Future<void> _login(
+      BuildContext context, String email, String password) async {
+    logInfo('_login $email $password');
     try {
-      await authenticationController.login(theEmail, thePassword);
+      await authenticationController.login(email, password);
     } catch (err) {
-      Get.snackbar(
-        "Login",
-        err.toString(),
-        icon: const Icon(Icons.person, color: Colors.red),
-        snackPosition: SnackPosition.BOTTOM,
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text(err.toString())),
       );
     }
   }
@@ -56,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (_formKey.currentState!.validate()) {
       await _login(
+        context,
         controllerEmail.text.trim(),
         controllerPassword.text,
       );
