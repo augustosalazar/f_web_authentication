@@ -39,6 +39,7 @@ class _AddProductPageState extends State<AddProductPage> {
               height: 20,
             ),
             TextField(
+                key: const Key('nameField'),
                 controller: controllerName,
                 decoration: const InputDecoration(
                   labelText: 'Product Name',
@@ -50,6 +51,7 @@ class _AddProductPageState extends State<AddProductPage> {
               height: 20,
             ),
             TextField(
+                key: const Key('descField'),
                 controller: controllerDesc,
                 decoration: const InputDecoration(
                   labelText: 'Product Description',
@@ -61,6 +63,7 @@ class _AddProductPageState extends State<AddProductPage> {
               height: 20,
             ),
             TextField(
+                key: const Key('quantityField'),
                 controller: controllerQuantity,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -76,6 +79,7 @@ class _AddProductPageState extends State<AddProductPage> {
               children: [
                 Expanded(
                     child: FilledButton.tonal(
+                        key: const Key('saveButton'),
                         onPressed: () async {
                           try {
                             await productController.addProduct(
