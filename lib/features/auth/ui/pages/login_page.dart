@@ -168,7 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                               TextButton(
                                 onPressed: () {
                                   FocusScope.of(context).unfocus();
-                                  Get.off(() => const ForgotPasswordPage());
+                                  Get.to(() => const ForgotPasswordPage());
                                 },
                                 child: const Text("Forgot password?"),
                               ),
