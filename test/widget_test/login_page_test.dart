@@ -38,6 +38,8 @@ void main() {
   late MockAuthenticationController mockAuthController;
 
   setUp(() {
+    Get.testMode = true;
+    Get.reset();
     mockAuthController = MockAuthenticationController();
     // Registramos el mock en el DI de Get
     Get.put<AuthenticationController>(mockAuthController);

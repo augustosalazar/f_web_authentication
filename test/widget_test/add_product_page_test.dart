@@ -27,6 +27,8 @@ void main() {
   late MockProductController mockProductController;
 
   setUp(() {
+    Get.testMode = true;
+    Get.reset();
     mockProductController = MockProductController();
     Get.put<ProductController>(mockProductController);
   });

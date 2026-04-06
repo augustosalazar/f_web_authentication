@@ -71,6 +71,8 @@ void main() {
   late MockProductController mockProductController;
 
   setUp(() {
+    Get.testMode = true;
+    Get.reset();
     mockAuthController = MockAuthenticationCon();
     mockProductController = MockProductController();
 
