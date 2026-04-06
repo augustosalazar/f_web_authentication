@@ -7,9 +7,11 @@ import 'package:f_web_authentication/features/auth/data/repositories/auth_reposi
 import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:f_web_authentication/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
-import 'package:f_web_authentication/features/product/data/datasources/i_product_source.dart';
-import 'package:f_web_authentication/features/product/data/datasources/remote_product_roble_source.dart';
+import 'package:f_web_authentication/features/product/data/datasources/cache/local_product_cache_source.dart';
+import 'package:f_web_authentication/features/product/data/datasources/remote/i_product_source.dart';
+import 'package:f_web_authentication/features/product/data/datasources/remote/remote_product_roble_source.dart';
 import 'package:f_web_authentication/features/product/data/repositories/product_repository.dart';
+import 'package:f_web_authentication/features/product/domain/models/product.dart';
 import 'package:f_web_authentication/features/product/domain/repositories/i_product_repository.dart';
 import 'package:f_web_authentication/features/product/ui/pages/add_product_page.dart';
 import 'package:f_web_authentication/features/product/ui/pages/list_product_page.dart';
@@ -123,6 +125,29 @@ class MockLocalPreferences extends GetxService
   }
 }
 
+class MockLocalProductCacheSource extends Mock
+    implements LocalProductCacheSource {
+  MockLocalProductCacheSource(ILocalPreferences prefs) : super();
+
+  @override
+  Future<bool> isCacheValid() async => false;
+
+  @override
+  Future<void> cacheProductData(List<Product> products) async {
+    // No hacer nada en el mock
+  }
+
+  @override
+  Future<List<Product>> getCachedProductData() async {
+    throw Exception('Cache error');
+  }
+
+  @override
+  Future<void> clearCache() async {
+    // No hacer nada en el mock
+  }
+}
+
 // ✅ Mock de AuthenticationSource (para evitar llamadas reales de auth)
 class MockAuthenticationSource extends Mock implements IAuthenticationSource {
   @override
@@ -192,7 +217,13 @@ void main() {
       () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')),
     );
 
-    Get.lazyPut<IProductRepository>(() => ProductRepository(Get.find()));
+    // ✅ Mock del LocalProductCacheSource para evitar problemas de cache en tests
+    Get.lazyPut<LocalProductCacheSource>(
+      () => MockLocalProductCacheSource(Get.find()),
+    );
+
+    Get.lazyPut<IProductRepository>(
+        () => ProductRepository(Get.find(), Get.find()));
     Get.lazyPut(() => ProductController(Get.find()));
   });
 

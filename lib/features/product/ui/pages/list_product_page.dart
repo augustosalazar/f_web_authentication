@@ -61,7 +61,7 @@ class _ListProductPageState extends State<ListProductPage> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
-                await userController.getProducts();
+                await userController.forceRefresh();
               },
               child: ListView.builder(
                 itemCount: userController.products.length,

@@ -45,16 +45,16 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         }),
       );
 
-      logInfo(response.statusCode);
+      // logInfo(response.statusCode);
       if (response.statusCode == 201) {
-        logInfo(response.body);
+        // logInfo(response.body);
         final data = jsonDecode(response.body);
         final token = data['accessToken'];
         final refreshToken = data['refreshToken'];
         await _prefs.setString('token', token);
         await _prefs.setString('refreshToken', refreshToken);
         await _prefs.setString('userId', data['user']['id']);
-        logInfo("Token: $token\nRefresh Token: $refreshToken");
+        //logInfo("Token: $token\nRefresh Token: $refreshToken");
         return;
       } else {
         _handleError(response, "login");
@@ -87,7 +87,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         }),
       );
 
-      logInfo(response.statusCode);
+      // logInfo(response.statusCode);
       if (response.statusCode == 201) {
         await login(email, password);
         await addUser(email, name);
@@ -115,7 +115,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         },
       );
 
-      logInfo(response.statusCode);
+      //logInfo(response.statusCode);
       if (response.statusCode == 201) {
         await _prefs.remove('token');
         await _prefs.remove('refreshToken');
@@ -142,7 +142,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         }),
       );
 
-      logInfo(response.statusCode);
+      //logInfo(response.statusCode);
       if (response.statusCode == 201) {
         return true;
       } else {
@@ -170,7 +170,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         }),
       );
 
-      logInfo(response.statusCode);
+      //logInfo(response.statusCode);
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final newToken = data['accessToken'];
@@ -196,7 +196,7 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
         }),
       );
 
-      logInfo(response.statusCode);
+      //logInfo(response.statusCode);
       if (response.statusCode == 201) {
         return true;
       } else {
@@ -209,9 +209,24 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   Future<bool> resetPassword(
       String email, String newPassword, String validationCode) async {
     return _executeHttpCall(() async {
-      // TODO: Implementar endpoint de reset password
-      return true;
-    }, 'resetPassword');
+      final response = await httpClient.post(
+        Uri.parse("$authBaseUrl/reset-password"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          "token": validationCode,
+          "newPassword": newPassword,
+        }),
+      );
+
+      //logInfo(response.statusCode);
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        _handleError(response, "forgotPassword");
+      }
+    }, 'forgotPassword');
   }
 
   @override

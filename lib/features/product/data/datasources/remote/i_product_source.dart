@@ -1,4 +1,4 @@
-import '../../domain/models/product.dart';
+import '../../../domain/models/product.dart';
 
 abstract class IProductSource {
   Future<List<Product>> getProducts();

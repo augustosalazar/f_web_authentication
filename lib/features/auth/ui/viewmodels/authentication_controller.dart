@@ -1,4 +1,6 @@
 import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
+import 'package:f_web_authentication/features/product/domain/models/product.dart';
+import 'package:f_web_authentication/features/product/ui/viewmodels/product_controller.dart';
 import 'package:get/get.dart';
 
 import 'package:loggy/loggy.dart';
@@ -51,8 +53,10 @@ class AuthenticationController extends GetxController {
 
   Future<void> logOut() async {
     logInfo('AuthenticationController: Log Out');
+    ProductController productController = Get.find();
     logged.value = false;
     await authentication.logOut();
+    await productController.clearCache();
     logged.value = false;
   }
 

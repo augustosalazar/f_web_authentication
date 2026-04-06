@@ -17,38 +17,50 @@ class ProductController extends GetxController {
     super.onInit();
   }
 
-  getProducts() async {
+  Future<void> getProducts() async {
     logInfo("ProductController: Getting products");
     isLoading.value = true;
     _products.value = await productUseCase.getProducts();
     isLoading.value = false;
   }
 
-  addProduct(String name, String desc, String quantity) async {
+  Future<void> forceRefresh() async {
+    logInfo("ProductController: Force refreshing products");
+    isLoading.value = true;
+    _products.value = await productUseCase.forceRefresh();
+    isLoading.value = false;
+  }
+
+  Future<void> addProduct(String name, String desc, String quantity) async {
     logInfo("ProductController: Add product");
     await productUseCase.addProduct(
         Product(name: name, description: desc, quantity: int.parse(quantity)));
     getProducts();
   }
 
-  updateProduct(Product product) async {
+  Future<void> updateProduct(Product product) async {
     logInfo("ProductController: Update product");
     await productUseCase.updateProduct(product);
     await getProducts();
   }
 
-  void deleteProduct(Product p) async {
+  Future<void> deleteProduct(Product p) async {
     logInfo("ProductController: Delete product");
 
     await productUseCase.deleteProduct(p);
     await getProducts();
   }
 
-  void deleteProducts() async {
+  Future<void> deleteProducts() async {
     logInfo("ProductController: Delete all products");
     isLoading.value = true;
     await productUseCase.deleteProducts();
     await getProducts();
     isLoading.value = false;
+  }
+
+  Future<void> clearCache() async {
+    logInfo("ProductController: Clear product cache");
+    await productUseCase.clearCache();
   }
 }

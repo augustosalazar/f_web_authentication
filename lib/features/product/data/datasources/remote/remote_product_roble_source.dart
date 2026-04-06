@@ -5,8 +5,8 @@ import 'package:f_web_authentication/core/roble_exception.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-import '../../../../core/i_local_preferences.dart';
-import '../../domain/models/product.dart';
+import '../../../../../core/i_local_preferences.dart';
+import '../../../domain/models/product.dart';
 import 'package:http/http.dart' as http;
 
 import 'i_product_source.dart';
