@@ -74,6 +74,7 @@ class MyApp extends StatelessWidget {
       title: 'Web service Demo',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       home: const Central(),
     );
