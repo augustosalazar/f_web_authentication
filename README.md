@@ -68,6 +68,16 @@ On this test we verify the entire flow of the app, from the UI to the backend, u
 
 Run the integration test with:
 
-```flutter test integration_test/app_test.dart
+```
+flutter test integration_test/app_test.dart
 ```
 
+or for web:
+
+```
+flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d chrome
+```
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4a397431-a45b-4d43-b6ed-a5f9f9b1bc50" alt="pruebaTodoApp" width="350"/>
+</p>
