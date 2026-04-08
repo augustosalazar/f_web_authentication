@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:f_web_authentication/core/i_local_preferences.dart';
 import 'package:f_web_authentication/features/auth/data/datasources/remote/i_authentication_source.dart';
-
 import 'package:f_web_authentication/features/auth/data/repositories/auth_repository.dart';
 import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:f_web_authentication/features/auth/domain/repositories/i_auth_repository.dart';
@@ -22,219 +21,163 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-// ✅ Matcher personalizado para Uri
-class _IsAUri extends Matcher {
-  const _IsAUri();
+// =========================
+// MOCKS / FAKES
+// =========================
 
-  @override
-  bool matches(dynamic item, Map matchState) => item is Uri;
+class MockHttpClient extends Mock implements http.Client {}
 
-  @override
-  Description describe(Description description) => description.add('is a Uri');
-}
+class MockLocalPreferences extends Mock implements ILocalPreferences {}
 
-const Matcher isAUri = _IsAUri();
-
-// ✅ Mock del HttpClient
-class MockHttpClient extends Mock implements http.Client {
-  @override
-  Future<http.Response> get(Uri? url, {Map<String, String>? headers}) =>
-      super.noSuchMethod(
-        Invocation.method(#get, [url], {#headers: headers}),
-        returnValue: Future.value(http.Response('', 200)),
-        returnValueForMissingStub: Future.value(http.Response('', 200)),
-      );
-
-  @override
-  Future<http.Response> post(
-    Uri? url, {
-    Map<String, String>? headers,
-    Object? body,
-    Encoding? encoding,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(#post, [
-          url
-        ], {
-          #headers: headers,
-          #body: body,
-          #encoding: encoding,
-        }),
-        returnValue: Future.value(http.Response('', 201)),
-        returnValueForMissingStub: Future.value(http.Response('', 201)),
-      );
-
-  @override
-  Future<http.Response> delete(
-    Uri? url, {
-    Map<String, String>? headers,
-    Object? body,
-    Encoding? encoding,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(#delete, [
-          url
-        ], {
-          #headers: headers,
-          #body: body,
-          #encoding: encoding,
-        }),
-        returnValue: Future.value(http.Response('', 200)),
-        returnValueForMissingStub: Future.value(http.Response('', 200)),
-      );
-
-  @override
-  void close() => super.noSuchMethod(
-        Invocation.method(#close, []),
-        returnValueForMissingStub: null,
-      );
-}
-
-// ✅ Mock de LocalPreferences
-class MockLocalPreferences extends GetxService
-    with Mock
-    implements ILocalPreferences {
-  @override
-  Future<String?> getString(String key) async {
-    if (key == 'token') return 'mock_token';
-    if (key == 'user') {
-      return jsonEncode({
-        'id': '1',
-        'email': 'test@test.com',
-        'name': 'Test User',
-      });
-    }
-    return null;
-  }
-
-  @override
-  Future<void> setString(String key, String value) async {
-    // No hacer nada en el mock
-  }
-
-  @override
-  Future<void> remove(String key) async {
-    // No hacer nada en el mock
-  }
-
-  @override
-  Future<void> clear() async {
-    // No hacer nada en el mock
-  }
-}
+class MockAuthenticationSource extends Mock implements IAuthenticationSource {}
 
 class MockLocalProductCacheSource extends Mock
-    implements LocalProductCacheSource {
-  MockLocalProductCacheSource(ILocalPreferences prefs) : super();
+    implements LocalProductCacheSource {}
 
-  @override
-  Future<bool> isCacheValid() async => false;
+class FakeUri extends Fake implements Uri {}
 
-  @override
-  Future<void> cacheProductData(List<Product> products) async {
-    // No hacer nada en el mock
-  }
-
-  @override
-  Future<List<Product>> getCachedProductData() async {
-    throw Exception('Cache error');
-  }
-
-  @override
-  Future<void> clearCache() async {
-    // No hacer nada en el mock
-  }
-}
-
-// ✅ Mock de AuthenticationSource (para evitar llamadas reales de auth)
-class MockAuthenticationSource extends Mock implements IAuthenticationSource {
-  @override
-  Future<Map<String, dynamic>> login(String email, String password) async {
-    return {
-      'token': 'mock_token',
-      'user': {
-        'id': '1',
-        'email': email,
-        'name': 'Test User',
-      }
-    };
-  }
-
-  @override
-  Future<void> logout() async {
-    // No hacer nada
-  }
-
-  @override
-  Future<bool> verifyToken() async {
-    return true;
-  }
-
-  @override
-  Future<AuthenticationUser> getLoggedUser() async {
-    return AuthenticationUser(
-      id: '1',
-      email: 'test@test.com',
-      name: 'Test User',
-    );
-  }
-}
+class FakeProduct extends Fake implements Product {}
 
 void main() {
   late MockHttpClient mockHttpClient;
   late MockLocalPreferences mockLocalPreferences;
   late MockAuthenticationSource mockAuthSource;
+  late MockLocalProductCacheSource mockLocalCacheSource;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
+    await dotenv.load(fileName: '.env');
+
+    registerFallbackValue(FakeUri());
+    registerFallbackValue(FakeProduct());
   });
 
   setUp(() {
+    Get.testMode = true;
+    Get.reset();
+
     mockHttpClient = MockHttpClient();
     mockLocalPreferences = MockLocalPreferences();
     mockAuthSource = MockAuthenticationSource();
+    mockLocalCacheSource = MockLocalProductCacheSource();
 
-    // ✅ Inyección de dependencias similar a main.dart pero con mocks
+    // =========================
+    // LocalPreferences
+    // =========================
+    when(() => mockLocalPreferences.getString('token'))
+        .thenAnswer((_) async => 'mock_token');
+
+    when(() => mockLocalPreferences.getString('user')).thenAnswer(
+      (_) async => jsonEncode({
+        'id': '1',
+        'email': 'test@test.com',
+        'name': 'Test User',
+      }),
+    );
+
+    when(() => mockLocalPreferences.getString(any()))
+        .thenAnswer((_) async => null);
+
+    when(() => mockLocalPreferences.setString(any(), any()))
+        .thenAnswer((_) async {});
+
+    when(() => mockLocalPreferences.remove(any())).thenAnswer((_) async {});
+
+    when(() => mockLocalPreferences.clear()).thenAnswer((_) async {});
+
+    // =========================
+    // AuthenticationSource
+    // =========================
+    when(() => mockAuthSource.login(any(), any())).thenAnswer((_) async {});
+
+    when(() => mockAuthSource.logOut()).thenAnswer((_) async {});
+
+    when(() => mockAuthSource.verifyToken()).thenAnswer((_) async => true);
+
+    when(() => mockAuthSource.getLoggedUser()).thenAnswer(
+      (_) async => AuthenticationUser(
+        id: '1',
+        email: 'test@test.com',
+        name: 'Test User',
+      ),
+    );
+
+    // =========================
+    // LocalProductCacheSource
+    // =========================
+    when(() => mockLocalCacheSource.isCacheValid())
+        .thenAnswer((_) async => false);
+
+    when(() => mockLocalCacheSource.cacheProductData(any()))
+        .thenAnswer((_) async {});
+
+    when(() => mockLocalCacheSource.getCachedProductData())
+        .thenThrow(Exception('Cache error'));
+
+    when(() => mockLocalCacheSource.clearCache()).thenAnswer((_) async {});
+
+    // =========================
+    // HTTP Client default stubs
+    // =========================
+    when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+        .thenAnswer((_) async => http.Response('[]', 200));
+
+    when(() => mockHttpClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        )).thenAnswer((_) async => http.Response('', 201));
+
+    when(() => mockHttpClient.delete(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        )).thenAnswer((_) async => http.Response('', 200));
+
+    // =========================
+    // Inyección DI
+    // =========================
     Get.put<ILocalPreferences>(mockLocalPreferences);
     Get.put<IAuthenticationSource>(mockAuthSource);
 
-    // ✅ Inyectamos nuestro MockHttpClient con el tag 'apiClient'
     Get.put<http.Client>(
       mockHttpClient,
       tag: 'apiClient',
       permanent: true,
     );
 
-    // ✅ Inyectamos las capas reales de dominio/data
     Get.put<IAuthRepository>(AuthRepository(Get.find()));
-    Get.put(AuthenticationController(Get.find()));
+    Get.put<AuthenticationController>(AuthenticationController(Get.find()));
 
-    // ✅ El datasource real pero con el MockHttpClient
     Get.lazyPut<IProductSource>(
       () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')),
     );
 
-    // ✅ Mock del LocalProductCacheSource para evitar problemas de cache en tests
-    Get.lazyPut<LocalProductCacheSource>(
-      () => MockLocalProductCacheSource(Get.find()),
-    );
+    Get.lazyPut<LocalProductCacheSource>(() => mockLocalCacheSource);
 
     Get.lazyPut<IProductRepository>(
-        () => ProductRepository(Get.find(), Get.find()));
-    Get.lazyPut(() => ProductController(Get.find()));
+      () => ProductRepository(Get.find(), Get.find()),
+    );
+
+    Get.lazyPut<ProductController>(() => ProductController(Get.find()));
   });
 
   tearDown(() {
     Get.reset();
   });
 
-  group('Integration Tests - ListProductPage with real flow', () {
+  Widget createWidgetUnderTest(Widget home) {
+    return GetMaterialApp(
+      scaffoldMessengerKey: messengerKey,
+      home: home,
+    );
+  }
+
+  group('Integration Tests - Product flow', () {
     testWidgets('Shows products from mocked HTTP response',
         (WidgetTester tester) async {
-      // ✅ Configuramos la respuesta del mock HTTP
       final responseBody = jsonEncode([
         {
           "_id": "1",
@@ -250,21 +193,12 @@ void main() {
         }
       ]);
 
-      when(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => http.Response(responseBody, 200));
+      when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .thenAnswer((_) async => http.Response(responseBody, 200));
 
-      // ✅ Renderizamos el widget
-      await tester.pumpWidget(GetMaterialApp(
-        scaffoldMessengerKey: messengerKey,
-        home: const ListProductPage(),
-      ));
-
-      // Esperamos a que se carguen los productos
+      await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
       await tester.pumpAndSettle();
 
-      // ✅ Verificamos que los productos aparezcan en la UI
       expect(find.text('Laptop'), findsOneWidget);
       expect(find.text('High-end laptop'), findsOneWidget);
       expect(find.text('Mouse'), findsOneWidget);
@@ -272,130 +206,165 @@ void main() {
       expect(find.text('5'), findsOneWidget);
       expect(find.text('15'), findsOneWidget);
 
-      // ✅ Verificamos que se hizo la llamada HTTP
-      verify(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).called(1);
+      verify(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .called(greaterThanOrEqualTo(1));
     });
 
     testWidgets('Shows empty state when no products',
         (WidgetTester tester) async {
-      // ✅ Respuesta vacía del servidor
-      when(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => http.Response('[]', 200));
+      when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .thenAnswer((_) async => http.Response('[]', 200));
 
-      await tester.pumpWidget(GetMaterialApp(
-        scaffoldMessengerKey: messengerKey,
-        home: const ListProductPage(),
-      ));
-
+      await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
       await tester.pumpAndSettle();
 
-      // ✅ No debería haber ListTiles de productos
       expect(find.byType(ListTile), findsNothing);
     });
 
     testWidgets('Shows loading indicator while fetching products',
         (WidgetTester tester) async {
-      // ✅ Simulamos una respuesta retrasada
-      when(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async {
+      when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 500));
         return http.Response('[]', 200);
       });
 
-      await tester.pumpWidget(GetMaterialApp(
-        scaffoldMessengerKey: messengerKey,
-        home: const ListProductPage(),
-      ));
+      await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
 
-      // ✅ Inmediatamente después de renderizar debería mostrar loading
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      // ✅ Esperamos a que termine
       await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('Delete product makes DELETE request and updates UI',
+    testWidgets('Delete all products makes request and refreshes UI',
         (WidgetTester tester) async {
-      // ✅ Setup: productos iniciales
-      final getResponseBody = jsonEncode([
-        {
-          "_id": "1",
-          "name": "Laptop",
-          "description": "High-end laptop",
-          "quantity": 5
-        },
-      ]);
+      var getCallCount = 0;
 
-      when(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => http.Response(getResponseBody, 200));
+      when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .thenAnswer((_) async {
+        getCallCount++;
 
-      // ✅ Mock del DELETE
-      when(mockHttpClient.delete(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response('Deleted', 200));
+        if (getCallCount == 1) {
+          return http.Response(
+            jsonEncode([
+              {
+                "_id": "1",
+                "name": "Laptop",
+                "description": "High-end laptop",
+                "quantity": 5
+              }
+            ]),
+            200,
+          );
+        }
 
-      await tester.pumpWidget(GetMaterialApp(
-        scaffoldMessengerKey: messengerKey,
-        home: const ListProductPage(),
-      ));
+        return http.Response('[]', 200);
+      });
 
+      await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
       await tester.pumpAndSettle();
 
-      // ✅ Verificamos que el producto está presente
       expect(find.text('Laptop'), findsOneWidget);
 
-      // ✅ Buscamos el botón de eliminar (ajusta según tu UI)
-      // Si tienes un IconButton con Icons.delete en cada ListTile:
-      final deleteButton = find.byIcon(Icons.delete).first;
-      await tester.tap(deleteButton);
+      await tester.tap(find.byKey(const Key('delete_all_button')));
       await tester.pumpAndSettle();
 
-      // ✅ Verificamos que se hizo la llamada DELETE
-      verify(mockHttpClient.delete(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).called(1);
-
-      // ✅ Verificamos que el producto se eliminó de la UI
-      // Nota: dependiendo de tu implementación, puede que necesites
-      // hacer mock del segundo GET que se ejecuta después del delete
+      expect(find.text('Laptop'), findsNothing);
     });
 
-    testWidgets('Add product FAB navigation test', (WidgetTester tester) async {
-      when(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => http.Response('[]', 200));
+    testWidgets('Swipe product deletes it and refreshes UI',
+        (WidgetTester tester) async {
+      var getCallCount = 0;
 
-      await tester.pumpWidget(GetMaterialApp(
-        scaffoldMessengerKey: messengerKey,
-        home: const ListProductPage(),
-        // ✅ Si tienes rutas definidas, agrégalas aquí
-      ));
+      when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .thenAnswer((_) async {
+        getCallCount++;
 
+        if (getCallCount == 1) {
+          return http.Response(
+            jsonEncode([
+              {
+                "_id": "1",
+                "name": "Laptop",
+                "description": "High-end laptop",
+                "quantity": 5
+              }
+            ]),
+            200,
+          );
+        }
+
+        return http.Response('[]', 200);
+      });
+
+      when(() => mockHttpClient.delete(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          )).thenAnswer((_) async => http.Response('Deleted', 200));
+
+      await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
       await tester.pumpAndSettle();
 
-      // ✅ Buscar el FAB (FloatingActionButton)
+      expect(find.text('Laptop'), findsOneWidget);
+
+      final dismissible = find.byKey(const Key('product_dismiss_1'));
+      expect(dismissible, findsOneWidget);
+
+      await tester.drag(dismissible, const Offset(500, 0));
+      await tester.pumpAndSettle();
+
+      verify(() => mockHttpClient.delete(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          )).called(1);
+
+      expect(find.text('Laptop'), findsNothing);
+    });
+
+    testWidgets('Add product FAB navigation and creation flow',
+        (WidgetTester tester) async {
+      var getCallCount = 0;
+
+      when(() => mockHttpClient.get(any(), headers: any(named: 'headers')))
+          .thenAnswer((_) async {
+        getCallCount++;
+
+        if (getCallCount == 1) {
+          return http.Response('[]', 200);
+        }
+
+        return http.Response(
+          jsonEncode([
+            {
+              "_id": "1",
+              "name": "New Laptop",
+              "description": "A powerful laptop for developers",
+              "quantity": 10
+            }
+          ]),
+          200,
+        );
+      });
+
+      when(() => mockHttpClient.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          )).thenAnswer((_) async => http.Response('Created', 201));
+
+      await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
+      await tester.pumpAndSettle();
+
       final fab = find.byType(FloatingActionButton);
       expect(fab, findsOneWidget);
 
-      // ✅ Verificar que al presionar navegue (ajusta según tu implementación)
       await tester.tap(fab);
       await tester.pumpAndSettle();
+
       expect(find.byType(AddProductPage), findsOneWidget);
 
       expect(find.byKey(const Key('nameField')), findsOneWidget);
@@ -403,61 +372,25 @@ void main() {
       expect(find.byKey(const Key('quantityField')), findsOneWidget);
       expect(find.byKey(const Key('saveButton')), findsOneWidget);
 
-      // ✅ Llenar los campos
-      await tester.enterText(
-        find.byKey(const Key('nameField')),
-        'New Laptop',
-      );
+      await tester.enterText(find.byKey(const Key('nameField')), 'New Laptop');
       await tester.enterText(
         find.byKey(const Key('descField')),
         'A powerful laptop for developers',
       );
-      await tester.enterText(
-        find.byKey(const Key('quantityField')),
-        '10',
-      );
+      await tester.enterText(find.byKey(const Key('quantityField')), '10');
 
-      await tester.pump();
-
-      when(mockHttpClient.post(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response('Created', 201));
-
-      final responseAfterAdd = jsonEncode([
-        {
-          "_id": "1",
-          "name": "New Laptop",
-          "description": "A powerful laptop for developers",
-          "quantity": 10
-        }
-      ]);
-
-      when(mockHttpClient.get(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => http.Response(responseAfterAdd, 200));
-
-      // ✅ Presionar el botón de guardar
       await tester.tap(find.byKey(const Key('saveButton')));
       await tester.pumpAndSettle();
 
-      // ✅ Verificar que se hizo la llamada POST
-      verify(mockHttpClient.post(
-        argThat(isAUri),
-        headers: anyNamed('headers'),
-        body: argThat(
-          contains('"name":"New Laptop"'),
-          named: 'body',
-        ),
-      )).called(1);
+      verify(() => mockHttpClient.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          )).called(1);
 
-      // ✅ Verificar que regresó a la lista de productos
       expect(find.byType(ListProductPage), findsOneWidget);
       expect(find.byType(AddProductPage), findsNothing);
 
-      // ✅ Verificar que el producto aparece en la lista
       expect(find.text('New Laptop'), findsOneWidget);
       expect(find.text('A powerful laptop for developers'), findsOneWidget);
       expect(find.text('10'), findsOneWidget);

@@ -5,7 +5,7 @@ abstract class IAuthenticationSource {
 
   Future<void> signUp(String email, String password, String name, bool direct);
 
-  Future<bool> logOut();
+  Future<void> logOut();
 
   Future<bool> validate(String email, String validationCode);
 

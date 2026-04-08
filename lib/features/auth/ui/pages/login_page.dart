@@ -96,6 +96,7 @@ class _LoginPageState extends State<LoginPage> {
 
                           // EMAIL
                           TextFormField(
+                            key: const Key('login_email_field'),
                             focusNode: _emailFocus,
                             keyboardType: TextInputType.emailAddress,
                             controller: controllerEmail,
@@ -124,6 +125,7 @@ class _LoginPageState extends State<LoginPage> {
 
                           // PASSWORD
                           TextFormField(
+                            key: const Key('login_password_field'),
                             focusNode: _passwordFocus,
                             controller: controllerPassword,
                             decoration: InputDecoration(
@@ -134,6 +136,8 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
+                                key: const Key(
+                                    'toggle_login_password_visibility'),
                                 icon: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_outlined
@@ -166,6 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton(
+                                key: const Key('forgot_password_button'),
                                 onPressed: () {
                                   FocusScope.of(context).unfocus();
                                   Get.to(() => const ForgotPasswordPage());
@@ -181,6 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               Expanded(
                                 child: FilledButton.tonal(
+                                  key: const Key('login_button'),
                                   onPressed: _submit,
                                   child: const Text("Login"),
                                 ),
@@ -191,6 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 20),
 
                           TextButton(
+                            key: const Key('create_account_button'),
                             onPressed: () {
                               FocusScope.of(context).unfocus();
                               Get.to(() => const SignUpPage());

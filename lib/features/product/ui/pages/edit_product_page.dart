@@ -46,36 +46,42 @@ class _EditProductPageState extends State<EditProductPage> {
               height: 20,
             ),
             TextField(
-                controller: controllerProductName,
-                decoration: const InputDecoration(
-                  labelText: 'Product Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                )),
+              key: const Key('edit_name_field'),
+              controller: controllerProductName,
+              decoration: const InputDecoration(
+                labelText: 'Product Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
             TextField(
-                controller: controllerProductDesc,
-                decoration: const InputDecoration(
-                  labelText: 'Product Description',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                )),
+              key: const Key('edit_desc_field'),
+              controller: controllerProductDesc,
+              decoration: const InputDecoration(
+                labelText: 'Product Description',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
             TextField(
-                controller: controllerProductQuantity,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Quantity',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                )),
+              key: const Key('edit_quantity_field'),
+              controller: controllerProductQuantity,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Quantity',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -83,25 +89,28 @@ class _EditProductPageState extends State<EditProductPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Expanded(
-                    flex: 2,
-                    child: FilledButton.tonal(
-                        onPressed: () async {
-                          product.name = controllerProductName.text;
-                          product.description = controllerProductDesc.text;
-                          product.quantity =
-                              int.tryParse(controllerProductQuantity.text) ?? 0;
-                          try {
-                            await productController.updateProduct(product);
-                            Get.back();
-                          } catch (err) {
-                            messengerKey.currentState?.showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text('Error updating product: $err')),
-                            );
-                          }
-                        },
-                        child: const Text("Update")))
+                  flex: 2,
+                  child: FilledButton.tonal(
+                    key: const Key('update_button'),
+                    onPressed: () async {
+                      product.name = controllerProductName.text;
+                      product.description = controllerProductDesc.text;
+                      product.quantity =
+                          int.tryParse(controllerProductQuantity.text) ?? 0;
+                      try {
+                        await productController.updateProduct(product);
+                        Get.back();
+                      } catch (err) {
+                        messengerKey.currentState?.showSnackBar(
+                          SnackBar(
+                            content: Text('Error updating product: $err'),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text("Update"),
+                  ),
+                )
               ],
             )
           ],
