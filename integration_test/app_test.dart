@@ -707,15 +707,21 @@ void main() {
       // =========================
       // LOGIN
       // =========================
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('login_email_field')),
         'a@a.com',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('login_password_field')),
         'ThePassword!1',
       );
-      await tester.tap(find.byKey(const Key('login_button')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('login_button')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(ListProductPage), findsOneWidget);
@@ -724,22 +730,33 @@ void main() {
       // =========================
       // ADD PRODUCT 1
       // =========================
-      await tester.tap(find.byKey(const Key('add_product_fab')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('add_product_fab')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('nameField')),
         'Laptop',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('descField')),
         'Gaming laptop',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('quantityField')),
         '5',
       );
-      await tester.tap(find.byKey(const Key('saveButton')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('saveButton')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Laptop'), findsOneWidget);
@@ -749,22 +766,32 @@ void main() {
       // =========================
       // ADD PRODUCT 2
       // =========================
-      await tester.tap(find.byKey(const Key('add_product_fab')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('add_product_fab')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('nameField')),
         'Mouse',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('descField')),
         'Wireless mouse',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('quantityField')),
         '10',
       );
-      await tester.tap(find.byKey(const Key('saveButton')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('saveButton')),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Laptop'), findsOneWidget);
@@ -776,23 +803,34 @@ void main() {
       // =========================
       // EDIT FIRST PRODUCT
       // =========================
-      await tester.tap(find.byKey(const Key('product_tile_1')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('product_tile_1')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('edit_name_field')),
         'Laptop Pro',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('edit_desc_field')),
         'High-end gaming laptop',
       );
-      await tester.enterText(
+      await enterTextAndPause(
+        tester,
         find.byKey(const Key('edit_quantity_field')),
         '7',
       );
 
-      await tester.tap(find.byKey(const Key('update_button')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('update_button')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Laptop Pro'), findsOneWidget);
@@ -819,7 +857,11 @@ void main() {
       // =========================
       // DELETE ALL
       // =========================
-      await tester.tap(find.byKey(const Key('delete_all_button')));
+      await tapAndPause(
+        tester,
+        find.byKey(const Key('delete_all_button')),
+        milliseconds: 1500,
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(ListTile), findsNothing);
