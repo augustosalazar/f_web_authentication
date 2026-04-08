@@ -280,10 +280,11 @@ void main() {
     final signUpConfirmPasswordField =
         find.widgetWithText(TextFormField, 'Confirm password');
 
-    await tester.enterText(signUpNameField, 'One name');
-    await tester.enterText(signUpEmailField, 'a@a.com');
-    await tester.enterText(signUpPasswordField, 'ThePassword!1');
-    await tester.enterText(signUpConfirmPasswordField, 'ThePassword!1');
+    await enterTextAndPause(tester, signUpNameField, 'One name');
+    await enterTextAndPause(tester, signUpEmailField, 'a@a.com');
+    await enterTextAndPause(tester, signUpPasswordField, 'ThePassword!1');
+    await enterTextAndPause(
+        tester, signUpConfirmPasswordField, 'ThePassword!1');
 
     await tapAndPause(tester, find.widgetWithText(FilledButton, 'Submit'),
         milliseconds: 1500);
@@ -313,8 +314,8 @@ void main() {
     final loginEmailField = find.widgetWithText(TextFormField, 'Email address');
     final loginPasswordField = find.widgetWithText(TextFormField, 'Password');
 
-    await tester.enterText(loginEmailField, 'a@a.com');
-    await tester.enterText(loginPasswordField, 'ThePassword!1');
+    await enterTextAndPause(tester, loginEmailField, 'a@a.com');
+    await enterTextAndPause(tester, loginPasswordField, 'ThePassword!1');
 
     await tapAndPause(tester, find.widgetWithText(FilledButton, 'Login'),
         milliseconds: 1500);
@@ -455,16 +456,19 @@ void main() {
     // =========================
     expect(find.text('Login to access your account'), findsOneWidget);
 
-    await tester.enterText(
+    await enterTextAndPause(
+      tester,
       find.byKey(const Key('login_email_field')),
       'a@a.com',
     );
-    await tester.enterText(
+    await enterTextAndPause(
+      tester,
       find.byKey(const Key('login_password_field')),
       'ThePassword!1',
     );
 
-    await tester.tap(find.byKey(const Key('login_button')));
+    await tapAndPause(tester, find.byKey(const Key('login_button')),
+        milliseconds: 1500);
     await tester.pumpAndSettle();
 
     verify(() => mockHttpClient.post(
@@ -483,7 +487,8 @@ void main() {
     // =========================
     // Ir a AddProductPage
     // =========================
-    await tester.tap(find.byKey(const Key('add_product_fab')));
+    await tapAndPause(tester, find.byKey(const Key('add_product_fab')),
+        milliseconds: 1500);
     await tester.pumpAndSettle();
 
     expect(find.byType(ListProductPage), findsNothing);
@@ -491,15 +496,18 @@ void main() {
     // =========================
     // Llenar formulario
     // =========================
-    await tester.enterText(
+    await enterTextAndPause(
+      tester,
       find.byKey(const Key('nameField')),
       'New Laptop',
     );
-    await tester.enterText(
+    await enterTextAndPause(
+      tester,
       find.byKey(const Key('descField')),
       'A powerful laptop for developers',
     );
-    await tester.enterText(
+    await enterTextAndPause(
+      tester,
       find.byKey(const Key('quantityField')),
       '10',
     );
@@ -507,7 +515,8 @@ void main() {
     // =========================
     // Guardar
     // =========================
-    await tester.tap(find.byKey(const Key('saveButton')));
+    await tapAndPause(tester, find.byKey(const Key('saveButton')),
+        milliseconds: 1500);
     await tester.pumpAndSettle();
 
     verify(() => mockHttpClient.post(
