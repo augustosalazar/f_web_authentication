@@ -44,17 +44,11 @@ On these test we test the UI mocking the controllers.
 2. list_product_page_test
 3. login_page_test
 
-### Data source tests
-
-On this test we test the data sources using mockito to mock the http client and shared preferences.
-
-1. product_data_source_test
-
-### Almost integration test
+### Widget test up to data source 
 
 On this test we verify the UI, controllers, repositories, and the data source, but we mock the http client and shared preferences.
 
-1. add_product_page_integration_test
+1. product_data_source_test
 
 Run all tests with:
 
@@ -67,3 +61,13 @@ Or run a specific test with:
 ```
 flutter test test/path_to_test.dart
 ```
+
+### Integration test
+
+On this test we verify the entire flow of the app, from the UI to the backend, using a mock http client and shared preferences.
+
+Run the integration test with:
+
+```flutter test integration_test/app_test.dart
+```
+
