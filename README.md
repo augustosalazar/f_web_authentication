@@ -79,5 +79,8 @@ flutter drive --driver=test_driver/integration_test.dart --target=integration_te
 ```
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4a397431-a45b-4d43-b6ed-a5f9f9b1bc50" alt="pruebaTodoApp" width="350"/>
+  <img src="[https://github.com/user-attachments/assets/4a397431-a45b-4d43-b6ed-a5f9f9b1bc50](https://github.com/user-attachments/assets/211904b7-abc7-4cbe-8a85-6e1ff0a28654)" alt="pruebaTodoApp" width="350"/>
 </p>
+
+
+
