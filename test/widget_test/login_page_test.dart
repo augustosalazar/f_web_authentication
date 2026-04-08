@@ -1,47 +1,40 @@
 import 'package:f_web_authentication/core/roble_exception.dart';
+import 'package:f_web_authentication/features/auth/ui/pages/login_page.dart';
+import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
 import 'package:f_web_authentication/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:mockito/mockito.dart';
-import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
-import 'package:f_web_authentication/features/auth/ui/pages/login_page.dart';
+import 'package:mocktail/mocktail.dart';
 
-class MockAuthenticationController extends GetxService
+class MockAuthenticationController extends GetxController
     with Mock
-    implements AuthenticationController {
-  @override
-  final logged = false.obs;
-
-  @override
-  final RxBool isLoading = false.obs;
-
-  @override
-  Future<bool> login(dynamic email, dynamic password) async {
-    if (email == 'error@test.com') {
-      throw RobleException('Login failed');
-    }
-    logged.value = true;
-    return true;
-  }
-
-  @override
-  bool get isLogged => logged.value;
-
-  @override
-  Future<void> onInit() async {
-    // No hacer nada en el mock
-  }
-}
+    implements AuthenticationController {}
 
 void main() {
   late MockAuthenticationController mockAuthController;
 
+  late RxBool logged;
+  late RxBool isLoading;
+
   setUp(() {
     Get.testMode = true;
     Get.reset();
+
     mockAuthController = MockAuthenticationController();
-    // Registramos el mock en el DI de Get
+
+    logged = false.obs;
+    isLoading = false.obs;
+
+    when(() => mockAuthController.logged).thenReturn(logged);
+    when(() => mockAuthController.isLoading).thenReturn(isLoading);
+    when(() => mockAuthController.isLogged).thenAnswer((_) => logged.value);
+
+    when(() => mockAuthController.login(any(), any())).thenAnswer((_) async {
+      logged.value = true;
+      return true;
+    });
+
     Get.put<AuthenticationController>(mockAuthController);
   });
 
@@ -49,69 +42,75 @@ void main() {
     Get.reset();
   });
 
+  Widget createWidgetUnderTest() {
+    return GetMaterialApp(
+      scaffoldMessengerKey: messengerKey,
+      home: LoginPage(),
+    );
+  }
+
   testWidgets('Login page validation and interaction test',
       (WidgetTester tester) async {
-    // Cargamos el widget envuelto en GetMaterialApp para que funcione GetX
-    await tester.pumpWidget(GetMaterialApp(
-      scaffoldMessengerKey: messengerKey, //esta llave se usa para los snackbars
-      home: LoginPage(),
-    ));
+    await tester.pumpWidget(createWidgetUnderTest());
 
-    // Verificamos que los elementos iniciales estén presentes
-    expect(find.text("Login to access your account"), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, "Login"), findsOneWidget);
+    expect(find.text('Login to access your account'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Login'), findsOneWidget);
 
-    // Buscamos los campos de texto
-    final emailField = find.widgetWithText(TextFormField, "Email address");
-    final passwordField = find.widgetWithText(TextFormField, "Password");
+    final emailField = find.widgetWithText(TextFormField, 'Email address');
+    final passwordField = find.widgetWithText(TextFormField, 'Password');
 
-    // 1. Probar validación de email vacío
+    // 1. Email vacío
     await tester.enterText(emailField, '');
-    await tester.tap(find.widgetWithText(FilledButton, "Login"));
+    await tester.tap(find.widgetWithText(FilledButton, 'Login'));
     await tester.pump();
-    expect(find.text("Enter email"), findsOneWidget);
 
-    // 2. Probar validación de email inválido
+    expect(find.text('Enter email'), findsOneWidget);
+
+    // 2. Email inválido
     await tester.enterText(emailField, 'not-an-email');
-    await tester.tap(find.widgetWithText(FilledButton, "Login"));
+    await tester.tap(find.widgetWithText(FilledButton, 'Login'));
     await tester.pump();
-    expect(find.text("Enter valid email address"), findsOneWidget);
 
-    // 3. Probar validación de password corto
+    expect(find.text('Enter valid email address'), findsOneWidget);
+
+    // 3. Password corto
     await tester.enterText(emailField, 'test@test.com');
     await tester.enterText(passwordField, '123');
-    await tester.tap(find.widgetWithText(FilledButton, "Login"));
+    await tester.tap(find.widgetWithText(FilledButton, 'Login'));
     await tester.pump();
-    expect(find.text("Password should have at least 6 characters"),
+
+    expect(find.text('Password should have at least 6 characters'),
         findsOneWidget);
 
-    // 4. Probar login exitoso
+    // 4. Login exitoso
     await tester.enterText(passwordField, 'password123');
-    await tester.tap(find.widgetWithText(FilledButton, "Login"));
+    await tester.tap(find.widgetWithText(FilledButton, 'Login'));
     await tester.pump();
 
-    // Verificamos que se haya llamado al método login (en el mock cambia el estado)
-    expect(mockAuthController.isLogged, true);
+    verify(() => mockAuthController.login('test@test.com', 'password123'))
+        .called(1);
+
+    expect(logged.value, true);
   });
 
   testWidgets('Login failure shows snackbar', (WidgetTester tester) async {
-    await tester.pumpWidget(GetMaterialApp(
-      scaffoldMessengerKey: messengerKey, //esta llave se usa para los snackbars
-      home: LoginPage(),
-    ));
+    when(() => mockAuthController.login('error@test.com', 'password123'))
+        .thenThrow(RobleException('Login failed'));
 
-    final emailField = find.widgetWithText(TextFormField, "Email address");
-    final passwordField = find.widgetWithText(TextFormField, "Password");
+    await tester.pumpWidget(createWidgetUnderTest());
 
-    // Ingresar credenciales que disparan el error en nuestro mock
+    final emailField = find.widgetWithText(TextFormField, 'Email address');
+    final passwordField = find.widgetWithText(TextFormField, 'Password');
+
     await tester.enterText(emailField, 'error@test.com');
     await tester.enterText(passwordField, 'password123');
 
-    await tester.tap(find.widgetWithText(FilledButton, "Login"));
-    // pumpAndSettle para esperar a que las animaciones (como el snackbar) terminen
+    await tester.tap(find.widgetWithText(FilledButton, 'Login'));
     await tester.pumpAndSettle();
 
-    // Verificamos que aparezca el mensaje de error en el snackbar
-    expect(find.textContaining("Login failed"), findsOneWidget);
+    verify(() => mockAuthController.login('error@test.com', 'password123'))
+        .called(1);
+
+    expect(find.textContaining('Login failed'), findsOneWidget);
   });
 }

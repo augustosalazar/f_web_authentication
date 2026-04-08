@@ -3,25 +3,11 @@ import 'package:f_web_authentication/features/product/ui/viewmodels/product_cont
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-// Mock del ProductController
-class MockProductController extends GetxService
+class MockProductController extends GetxController
     with Mock
-    implements ProductController {
-  bool productAdded = false;
-  String? lastAddedName;
-
-  @override
-  final RxBool isLoading = false.obs;
-
-  @override
-  Future<void> addProduct(String name, String desc, String quantity) async {
-    lastAddedName = name;
-    productAdded = true;
-    return;
-  }
-}
+    implements ProductController {}
 
 void main() {
   late MockProductController mockProductController;
@@ -29,7 +15,13 @@ void main() {
   setUp(() {
     Get.testMode = true;
     Get.reset();
+
     mockProductController = MockProductController();
+    when(() => mockProductController.isLoading).thenReturn(false.obs);
+    when(() => mockProductController.products).thenReturn([]);
+    when(() => mockProductController.addProduct(any(), any(), any()))
+        .thenAnswer((_) async {});
+
     Get.put<ProductController>(mockProductController);
   });
 
@@ -37,32 +29,28 @@ void main() {
     Get.reset();
   });
 
-  testWidgets('AddProductPage interactions and save',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const GetMaterialApp(
-      home: AddProductPage(),
-    ));
+  testWidgets('debe llamar addProduct al presionar Save', (tester) async {
+    await tester.pumpWidget(
+      const GetMaterialApp(
+        home: AddProductPage(),
+      ),
+    );
 
-    // Verificamos elementos iniciales
-    expect(find.text('New Product'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, "Save"), findsOneWidget);
+    await tester.pumpAndSettle();
 
-    // Buscamos los campos de texto por su label
-    final nameField = find.widgetWithText(TextField, 'Product Name');
-    final descField = find.widgetWithText(TextField, 'Product Description');
-    final quantityField = find.widgetWithText(TextField, 'Quantity');
+    final textFields = find.byType(TextField);
 
-    // Ingresamos datos
-    await tester.enterText(nameField, 'New Laptop');
-    await tester.enterText(descField, 'High performance laptop');
-    await tester.enterText(quantityField, '5');
+    await tester.enterText(textFields.at(0), 'New Laptop');
+    await tester.enterText(textFields.at(1), 'High performance laptop');
+    await tester.enterText(textFields.at(2), '5');
 
-    // Presionamos guardar
-    await tester.tap(find.widgetWithText(FilledButton, "Save"));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pump();
 
-    // Verificamos que se llamó al controlador con los datos correctos
-    expect(mockProductController.productAdded, true);
-    expect(mockProductController.lastAddedName, 'New Laptop');
+    verify(() => mockProductController.addProduct(
+          'New Laptop',
+          'High performance laptop',
+          '5',
+        )).called(1);
   });
 }

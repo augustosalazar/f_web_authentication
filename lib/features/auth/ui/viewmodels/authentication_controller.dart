@@ -21,11 +21,15 @@ class AuthenticationController extends GetxController {
     _loggedUser.value = user;
   }
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  Future<void> _initialize() async {
     logInfo('AuthenticationController initialized');
     logged.value = await validateToken();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initialize();
   }
 
   bool get isLogged => logged.value;
