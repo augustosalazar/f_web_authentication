@@ -1,5 +1,4 @@
 import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
-import 'package:f_web_authentication/features/product/domain/models/product.dart';
 import 'package:f_web_authentication/features/product/ui/viewmodels/product_controller.dart';
 import 'package:get/get.dart';
 
@@ -84,12 +83,6 @@ class AuthenticationController extends GetxController {
     var rta = await authentication.getLoggedUser();
     _loggedUser.value = rta;
     isLoading.value = false;
-    return rta;
-  }
-
-  Future<List<AuthenticationUser>> getUsers() async {
-    logInfo('AuthenticationController: Get Users');
-    var rta = await authentication.getUsers();
     return rta;
   }
 }

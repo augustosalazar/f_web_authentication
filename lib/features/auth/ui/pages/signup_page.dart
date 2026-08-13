@@ -293,8 +293,9 @@ class _SignUpPageState extends State<SignUpPage> {
               validator: (value) {
                 final v = value ?? '';
                 if (v.isEmpty) return "Enter password";
-                if (v.length < 6)
+                if (v.length < 6) {
                   return "Password should have at least 6 characters";
+                }
                 return null;
               },
             ),

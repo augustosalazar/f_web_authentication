@@ -4,13 +4,13 @@ import 'package:f_web_authentication/features/product/data/datasources/cache/loc
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:roble/roble.dart';
 import 'central.dart';
 import 'core/app_theme.dart';
 import 'core/i_local_preferences.dart';
-import 'core/refresh_client.dart';
+import 'core/roble_client.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
@@ -25,6 +25,7 @@ import 'features/product/ui/viewmodels/product_controller.dart';
 final messengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   Loggy.initLoggy(
     logPrinter: const PrettyPrinter(
@@ -32,28 +33,21 @@ void main() async {
     ),
   );
 
-  if (!kIsWeb) {
-    Get.put<ILocalPreferences>(LocalPreferencesSecured());
-  } else {
-    Get.put<ILocalPreferences>(LocalPreferencesShared());
-  }
+  final ILocalPreferences preferences =
+      kIsWeb ? LocalPreferencesShared() : LocalPreferencesSecured();
+  Get.put<ILocalPreferences>(preferences);
 
-  Get.lazyPut<IAuthenticationSource>(
-    () => AuthenticationSourceServiceRoble(),
-    fenix: true,
-  );
+  final roble = createRobleClient(preferences);
+  Get.put<RobleApiDataBase>(roble, permanent: true);
 
-  Get.put<http.Client>(
-    RefreshClient(http.Client(), Get.find<IAuthenticationSource>()),
-    tag: 'apiClient',
-    permanent: true,
-  );
+  final authentication = AuthenticationSourceServiceRoble(roble);
+  await authentication.restoreSession();
+  Get.put<IAuthenticationSource>(authentication, permanent: true);
 
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
   Get.put(AuthenticationController(Get.find()));
 
-  Get.lazyPut<IProductSource>(
-      () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')));
+  Get.lazyPut<IProductSource>(() => RemoteProductRobleSource(roble));
 
   Get.lazyPut<LocalProductCacheSource>(
       () => LocalProductCacheSource(Get.find()));

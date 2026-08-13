@@ -14,6 +14,4 @@ abstract class IAuthRepository {
   Future<void> forgotPassword(String email);
 
   Future<AuthenticationUser> getLoggedUser();
-
-  Future<List<AuthenticationUser>> getUsers();
 }

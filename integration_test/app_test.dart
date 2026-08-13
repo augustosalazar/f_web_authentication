@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:f_web_authentication/core/i_local_preferences.dart';
+import 'package:f_web_authentication/core/roble_client.dart';
 import 'package:f_web_authentication/features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'package:f_web_authentication/features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'package:f_web_authentication/features/auth/data/repositories/auth_repository.dart';
@@ -22,6 +23,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:roble/roble.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
@@ -41,11 +43,7 @@ Future<Widget> createAuthApp() async {
   mockHttpClient = MockHttpClient();
   mockLocalPreferences = MockLocalPreferences();
 
-  final storage = <String, String?>{
-    'token': null,
-    'refreshToken': null,
-    'userId': null,
-  };
+  final storage = <String, String?>{};
 
   when(() => mockLocalPreferences.getString(any()))
       .thenAnswer((invocation) async {
@@ -94,21 +92,24 @@ Future<Widget> createAuthApp() async {
 
   Get.put<ILocalPreferences>(mockLocalPreferences);
 
-  Get.put<IAuthenticationSource>(
-    AuthenticationSourceServiceRoble(
-      client: mockHttpClient,
-      rawClient: mockHttpClient,
+  final roble = RobleApiDataBase(
+    config: RobleApiConfig.fromContract(
+      baseUrl: 'https://roble-api.test-openlab.uninorte.edu.co',
+      contractId: 'test-contract',
     ),
+    client: mockHttpClient,
+    storage: RoblePreferencesStorage(mockLocalPreferences),
   );
+  final authentication = AuthenticationSourceServiceRoble(roble);
+  await authentication.restoreSession();
+
+  Get.put<RobleApiDataBase>(roble);
+  Get.put<IAuthenticationSource>(authentication);
 
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
   Get.put<AuthenticationController>(AuthenticationController(Get.find()));
 
-  Get.put<http.Client>(mockHttpClient, tag: 'apiClient', permanent: true);
-
-  Get.put<IProductSource>(
-    RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')),
-  );
+  Get.put<IProductSource>(RemoteProductRobleSource(roble));
   Get.put<LocalProductCacheSource>(LocalProductCacheSource(Get.find()));
   Get.put<IProductRepository>(ProductRepository(Get.find(), Get.find()));
   Get.put<ProductController>(ProductController(Get.find()));
@@ -161,7 +162,7 @@ void main() {
   testWidgets('sign up -> login -> logout flow', (WidgetTester tester) async {
     final widget = await createAuthApp();
 
-    // 1. verify-token inicial: sin sesión
+    // Roble identity used after login.
     when(() => mockHttpClient.get(
           any(
               that: predicate<Uri>(
@@ -169,8 +170,10 @@ void main() {
           )),
           headers: any(named: 'headers'),
         )).thenAnswer((_) async => http.Response(
-          jsonEncode({'message': 'unauthorized'}),
-          401,
+          jsonEncode({
+            'user': {'sub': '1', 'email': 'a@a.com', 'name': 'One name'}
+          }),
+          200,
         ));
 
     // 2. signup-direct
@@ -200,40 +203,7 @@ void main() {
           201,
         ));
 
-    // 4. addUser (database insert)
-    when(() => mockHttpClient.post(
-          any(
-              that: predicate<Uri>(
-            (uri) =>
-                uri.toString().contains('/database/') &&
-                uri.toString().contains('/insert'),
-          )),
-          headers: any(named: 'headers'),
-          body: any(named: 'body'),
-        )).thenAnswer((_) async => http.Response('{}', 201));
-
-    // 5. getLoggedUser
-    when(() => mockHttpClient.get(
-          any(
-              that: predicate<Uri>(
-            (uri) =>
-                uri.toString().contains('/database/') &&
-                uri.toString().contains('tableName=Users'),
-          )),
-          headers: any(named: 'headers'),
-        )).thenAnswer((_) async => http.Response(
-          jsonEncode([
-            {
-              '_id': 'db_user_1',
-              'userId': '1',
-              'email': 'a@a.com',
-              'name': 'One name',
-            }
-          ]),
-          200,
-        ));
-
-    // 6. products luego de login
+    // 4. products luego de login
     when(() => mockHttpClient.get(
           any(
               that: predicate<Uri>(
@@ -244,7 +214,7 @@ void main() {
           headers: any(named: 'headers'),
         )).thenAnswer((_) async => http.Response('[]', 200));
 
-    // 7. logout
+    // 5. logout
     when(() => mockHttpClient.post(
           any(
               that: predicate<Uri>(
@@ -299,6 +269,21 @@ void main() {
           headers: any(named: 'headers'),
           body: any(named: 'body'),
         )).called(1);
+    verifyNever(() => mockHttpClient.post(
+          any(that: predicate<Uri>((uri) => uri.toString().contains('/login'))),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ));
+    verifyNever(() => mockHttpClient.post(
+          any(
+              that: predicate<Uri>(
+            (uri) =>
+                uri.toString().contains('/database/') &&
+                uri.toString().contains('/insert'),
+          )),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ));
 
     // =========================
     // Volver a login
@@ -355,7 +340,7 @@ void main() {
 
     var productGetCount = 0;
 
-    // 1. verify-token inicial: sin sesión
+    // Roble identity used after login.
     when(() => mockHttpClient.get(
           any(
               that: predicate<Uri>(
@@ -363,8 +348,10 @@ void main() {
           )),
           headers: any(named: 'headers'),
         )).thenAnswer((_) async => http.Response(
-          jsonEncode({'message': 'unauthorized'}),
-          401,
+          jsonEncode({
+            'user': {'sub': '1', 'email': 'a@a.com', 'name': 'One name'}
+          }),
+          200,
         ));
 
     // 2. login
@@ -384,28 +371,7 @@ void main() {
           201,
         ));
 
-    // 3. getLoggedUser
-    when(() => mockHttpClient.get(
-          any(
-              that: predicate<Uri>(
-            (uri) =>
-                uri.toString().contains('/database/') &&
-                uri.toString().contains('tableName=Users'),
-          )),
-          headers: any(named: 'headers'),
-        )).thenAnswer((_) async => http.Response(
-          jsonEncode([
-            {
-              '_id': 'db_user_1',
-              'userId': '1',
-              'email': 'a@a.com',
-              'name': 'One name',
-            }
-          ]),
-          200,
-        ));
-
-    // 4. getProducts secuencial:
+    // 3. getProducts secuencial:
     //    - primera vez: vacío
     //    - segunda vez: producto agregado
     when(() => mockHttpClient.get(
@@ -555,7 +521,7 @@ void main() {
       // AUTH STUBS
       // =========================
 
-      // verify-token inicial: sin sesión
+      // Roble identity used after login.
       when(() => mockHttpClient.get(
             any(
                 that: predicate<Uri>(
@@ -563,8 +529,10 @@ void main() {
             )),
             headers: any(named: 'headers'),
           )).thenAnswer((_) async => http.Response(
-            jsonEncode({'message': 'unauthorized'}),
-            401,
+            jsonEncode({
+              'user': {'sub': '1', 'email': 'a@a.com', 'name': 'One name'}
+            }),
+            200,
           ));
 
       // login
@@ -582,27 +550,6 @@ void main() {
               'user': {'id': '1'}
             }),
             201,
-          ));
-
-      // getLoggedUser
-      when(() => mockHttpClient.get(
-            any(
-                that: predicate<Uri>(
-              (uri) =>
-                  uri.toString().contains('/database/') &&
-                  uri.toString().contains('tableName=Users'),
-            )),
-            headers: any(named: 'headers'),
-          )).thenAnswer((_) async => http.Response(
-            jsonEncode([
-              {
-                '_id': 'db_user_1',
-                'userId': '1',
-                'email': 'a@a.com',
-                'name': 'One name',
-              }
-            ]),
-            200,
           ));
 
       // =========================
@@ -636,15 +583,15 @@ void main() {
           )).thenAnswer((invocation) async {
         final body = invocation.namedArguments[#body] as String;
         final decoded = jsonDecode(body) as Map<String, dynamic>;
-        final records = decoded['records'] as List<dynamic>;
-        final record = Map<String, dynamic>.from(records.first);
+        final record = Map<String, dynamic>.from(decoded['record'] as Map);
 
-        backendProducts.add({
+        final created = {
           '_id': '${nextId++}',
           ...record,
-        });
+        };
+        backendProducts.add(created);
 
-        return http.Response('{}', 201);
+        return http.Response(jsonEncode(created), 201);
       });
 
       // =========================

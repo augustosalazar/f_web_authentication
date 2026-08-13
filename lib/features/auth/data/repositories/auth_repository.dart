@@ -34,8 +34,4 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<AuthenticationUser> getLoggedUser() async =>
       await authenticationSource.getLoggedUser();
-
-  @override
-  Future<List<AuthenticationUser>> getUsers() async =>
-      await authenticationSource.getUsers();
 }

@@ -1,4 +1,4 @@
-import 'package:f_web_authentication/core/roble_exception.dart';
+import 'package:roble/roble.dart';
 import 'package:f_web_authentication/features/auth/ui/pages/login_page.dart';
 import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
 import 'package:f_web_authentication/main.dart';
@@ -95,7 +95,7 @@ void main() {
 
   testWidgets('Login failure shows snackbar', (WidgetTester tester) async {
     when(() => mockAuthController.login('error@test.com', 'password123'))
-        .thenThrow(RobleException('Login failed'));
+        .thenThrow(const RobleApiException('Login failed'));
 
     await tester.pumpWidget(createWidgetUnderTest());
 

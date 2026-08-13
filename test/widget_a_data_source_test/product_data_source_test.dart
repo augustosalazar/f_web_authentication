@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
+import 'package:roble/roble.dart';
 
 // =========================
 // MOCKS / FAKES
@@ -128,7 +129,7 @@ void main() {
           any(),
           headers: any(named: 'headers'),
           body: any(named: 'body'),
-        )).thenAnswer((_) async => http.Response('', 201));
+        )).thenAnswer((_) async => http.Response('{}', 201));
 
     when(() => mockHttpClient.delete(
           any(),
@@ -142,17 +143,21 @@ void main() {
     Get.put<ILocalPreferences>(mockLocalPreferences);
     Get.put<IAuthenticationSource>(mockAuthSource);
 
-    Get.put<http.Client>(
-      mockHttpClient,
-      tag: 'apiClient',
-      permanent: true,
-    );
+    final roble = RobleApiDataBase(
+      config: RobleApiConfig.fromContract(
+        baseUrl: 'https://roble-api.test-openlab.uninorte.edu.co',
+        contractId: 'test-contract',
+      ),
+      client: mockHttpClient,
+      storage: RobleMemoryStorage(),
+    )..setTokens(accessToken: 'mock_token', refreshToken: 'mock_refresh');
+    Get.put<RobleApiDataBase>(roble);
 
     Get.put<IAuthRepository>(AuthRepository(Get.find()));
     Get.put<AuthenticationController>(AuthenticationController(Get.find()));
 
     Get.lazyPut<IProductSource>(
-      () => RemoteProductRobleSource(Get.find<http.Client>(tag: 'apiClient')),
+      () => RemoteProductRobleSource(roble),
     );
 
     Get.lazyPut<LocalProductCacheSource>(() => mockLocalCacheSource);
@@ -354,7 +359,7 @@ void main() {
             any(),
             headers: any(named: 'headers'),
             body: any(named: 'body'),
-          )).thenAnswer((_) async => http.Response('Created', 201));
+          )).thenAnswer((_) async => http.Response('{}', 201));
 
       await tester.pumpWidget(createWidgetUnderTest(const ListProductPage()));
       await tester.pumpAndSettle();
