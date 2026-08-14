@@ -43,7 +43,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0  
   flutter_dotenv: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-  roble: ^1.1.0
+  roble: ^1.2.0
 
 
 dev_dependencies:

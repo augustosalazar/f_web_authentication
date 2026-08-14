@@ -619,10 +619,10 @@ packages:
     dependency: "direct main"
     description:
       name: roble
-      sha256: "9c103ff6b85d3e54e8392b541c6e26cc978f88204f64f0db1f87873f6adb1a85"
+      sha256: fbf9d81a4d2b550a45c1d3102c28bbe5ac4428c571d36c1c0f66e426e0c92abf
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.2.0"
   shared_preferences:
     dependency: "direct main"
     description:

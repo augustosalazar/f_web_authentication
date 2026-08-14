@@ -8,48 +8,18 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   AuthenticationSourceServiceRoble(this._database);
 
   final RobleApiDataBase _database;
-  Map<String, dynamic>? _currentIdentity;
 
   Future<void> restoreSession() async {
-    _currentIdentity = null;
     await _database.restoreSession();
   }
 
   @override
-  Future<void> login(String email, String password) async {
-    await _database.login(email: email, password: password);
-    final accessToken = _database.accessToken;
-    final refreshToken = _database.refreshToken;
-
-    if (accessToken == null ||
-        accessToken.isEmpty ||
-        refreshToken == null ||
-        refreshToken.isEmpty) {
-      _database.clearTokens();
-      throw const RobleApiFormatException(
-        'Roble did not return a refresh token.',
-      );
-    }
-
-    try {
-      _currentIdentity = await _database.currentUser();
-      await _authenticatedUserId();
-    } catch (_) {
-      _currentIdentity = null;
-      _database.clearTokens();
-      rethrow;
-    }
-  }
-
-  Future<String> _authenticatedUserId() async {
-    final identity = _currentIdentity ??= await _database.currentUser();
-    final userId = identity['sub'] ?? identity['id'] ?? identity['_id'];
-    if (userId == null || '$userId'.isEmpty) {
-      throw const RobleApiFormatException(
-        'Roble did not return an authenticated user id.',
-      );
-    }
-    return '$userId';
+  Future<AuthenticationUser> login(String email, String password) async {
+    Map<String, dynamic> currentIdentity = await _database.login(
+      email: email,
+      password: password,
+    );
+    return AuthenticationUser.fromJson(currentIdentity);
   }
 
   @override
@@ -76,7 +46,6 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   @override
   Future<void> logOut() async {
     await _database.logout();
-    _currentIdentity = null;
   }
 
   @override
@@ -106,29 +75,27 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
 
   @override
   Future<bool> verifyToken() async {
-    if (_database.accessToken == null) return false;
-
     try {
-      _currentIdentity = await _database.currentUser();
-      await _authenticatedUserId();
-      return true;
+      if (await _database.restoreSession()) {
+        return true;
+      }
+      return false;
     } on RobleApiHttpException catch (error) {
       if (error.statusCode == 401) {
         _database.clearTokens();
-        _currentIdentity = null;
+
         return false;
       }
       rethrow;
     } on RobleApiAuthException {
       _database.clearTokens();
-      _currentIdentity = null;
+
       return false;
     }
   }
 
   @override
   Future<AuthenticationUser> getLoggedUser() async {
-    final identity = _currentIdentity ??= await _database.currentUser();
-    return AuthenticationUser.fromJson(identity);
+    return AuthenticationUser.fromJson(await _database.currentUser());
   }
 }

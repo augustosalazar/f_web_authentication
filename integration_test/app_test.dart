@@ -162,16 +162,18 @@ void main() {
   testWidgets('sign up -> login -> logout flow', (WidgetTester tester) async {
     final widget = await createAuthApp();
 
-    // Roble identity used after login.
+    // Roble profile returned by login.
     when(() => mockHttpClient.get(
           any(
               that: predicate<Uri>(
-            (uri) => uri.toString().contains('/verify-token'),
+            (uri) => uri.toString().contains('/me'),
           )),
           headers: any(named: 'headers'),
         )).thenAnswer((_) async => http.Response(
           jsonEncode({
-            'user': {'sub': '1', 'email': 'a@a.com', 'name': 'One name'}
+            'userId': '1',
+            'email': 'a@a.com',
+            'name': 'One name',
           }),
           200,
         ));
@@ -340,16 +342,18 @@ void main() {
 
     var productGetCount = 0;
 
-    // Roble identity used after login.
+    // Roble profile returned by login.
     when(() => mockHttpClient.get(
           any(
               that: predicate<Uri>(
-            (uri) => uri.toString().contains('/verify-token'),
+            (uri) => uri.toString().contains('/me'),
           )),
           headers: any(named: 'headers'),
         )).thenAnswer((_) async => http.Response(
           jsonEncode({
-            'user': {'sub': '1', 'email': 'a@a.com', 'name': 'One name'}
+            'userId': '1',
+            'email': 'a@a.com',
+            'name': 'One name',
           }),
           200,
         ));
@@ -521,16 +525,18 @@ void main() {
       // AUTH STUBS
       // =========================
 
-      // Roble identity used after login.
+      // Roble profile returned by login.
       when(() => mockHttpClient.get(
             any(
                 that: predicate<Uri>(
-              (uri) => uri.toString().contains('/verify-token'),
+              (uri) => uri.toString().contains('/me'),
             )),
             headers: any(named: 'headers'),
           )).thenAnswer((_) async => http.Response(
             jsonEncode({
-              'user': {'sub': '1', 'email': 'a@a.com', 'name': 'One name'}
+              'userId': '1',
+              'email': 'a@a.com',
+              'name': 'One name',
             }),
             200,
           ));
