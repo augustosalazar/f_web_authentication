@@ -13,7 +13,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with UiLoggy {
   final _formKey = GlobalKey<FormState>();
 
   final controllerEmail = TextEditingController(text: 'a@a.com');
@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login(
       BuildContext context, String email, String password) async {
-    logInfo('_login $email $password');
+    loggy.debug('_login $email $password');
     try {
       await authenticationController.login(email, password);
     } catch (err) {

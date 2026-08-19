@@ -3,6 +3,7 @@ import 'package:f_web_authentication/core/local_preferences_shared.dart';
 import 'package:f_web_authentication/features/product/data/datasources/cache/local_product_cache_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_loggy/flutter_loggy.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -28,8 +29,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   Loggy.initLoggy(
-    logPrinter: const PrettyPrinter(
-      showColors: true,
+    logPrinter: StreamPrinter(const PrettyDeveloperPrinter()),
+    logOptions: const LogOptions(
+      LogLevel.all,
+      stackTraceLevel: LogLevel.error,
     ),
   );
 
@@ -37,11 +40,11 @@ void main() async {
       kIsWeb ? LocalPreferencesShared() : LocalPreferencesSecured();
   Get.put<ILocalPreferences>(preferences);
 
-  final roble = createRobleClient(preferences);
+  final roble = createRobleClient();
   Get.put<RobleApiDataBase>(roble, permanent: true);
 
   final authentication = AuthenticationSourceServiceRoble(roble);
-  await authentication.restoreSession();
+
   Get.put<IAuthenticationSource>(authentication, permanent: true);
 
   Get.put<IAuthRepository>(AuthRepository(Get.find()));

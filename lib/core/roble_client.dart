@@ -19,7 +19,7 @@ class RoblePreferencesStorage implements RobleTokenStorage {
   Future<void> removeItem(String key) => _preferences.remove(key);
 }
 
-RobleApiDataBase createRobleClient(ILocalPreferences preferences) {
+RobleApiDataBase createRobleClient() {
   final projectId = dotenv.get('EXPO_PUBLIC_ROBLE_PROJECT_ID');
   final configuredBaseUrl = dotenv.get(
     'BASE_URL',
@@ -33,10 +33,8 @@ RobleApiDataBase createRobleClient(ILocalPreferences preferences) {
     baseUrl: baseUrl,
     contractId: projectId,
   );
-  config.validate();
 
   return RobleApiDataBase(
     config: config,
-    storage: RoblePreferencesStorage(preferences),
   );
 }

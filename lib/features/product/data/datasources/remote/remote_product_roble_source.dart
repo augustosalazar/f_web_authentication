@@ -13,7 +13,7 @@ class RemoteProductRobleSource implements IProductSource {
 
   @override
   Future<List<Product>> getProducts() async {
-    final records = await _database.getAll(_table);
+    final records = await _database.read(_table);
     return records.map(Product.fromJson).toList();
   }
 

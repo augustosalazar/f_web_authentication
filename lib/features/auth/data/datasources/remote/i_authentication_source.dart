@@ -14,7 +14,7 @@ abstract class IAuthenticationSource {
   Future<bool> resetPassword(
       String email, String newPassword, String validationCode);
 
-  Future<bool> verifyToken();
-
   Future<AuthenticationUser> getLoggedUser();
+
+  Future<bool> restoreSession();
 }

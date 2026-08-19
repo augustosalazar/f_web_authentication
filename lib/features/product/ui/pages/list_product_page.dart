@@ -31,7 +31,8 @@ class _ListProductPageState extends State<ListProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Welcome ${authenticationController.loggedUser?.name}"),
+        title: Obx(
+            () => Text("Welcome ${authenticationController.loggedUser?.name}")),
         actions: [
           IconButton(
             key: const Key('logout_button'),

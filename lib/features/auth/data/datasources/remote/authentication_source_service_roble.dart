@@ -4,14 +4,12 @@ import 'package:roble/roble.dart';
 import '../../../domain/models/authentication_user.dart';
 import 'i_authentication_source.dart';
 
-class AuthenticationSourceServiceRoble implements IAuthenticationSource {
+class AuthenticationSourceServiceRoble
+    with UiLoggy
+    implements IAuthenticationSource {
   AuthenticationSourceServiceRoble(this._database);
 
   final RobleApiDataBase _database;
-
-  Future<void> restoreSession() async {
-    await _database.restoreSession();
-  }
 
   @override
   Future<AuthenticationUser> login(String email, String password) async {
@@ -30,12 +28,12 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
     bool direct,
   ) async {
     if (direct) {
-      logInfo('Signing up directly with Roble');
+      loggy.debug('Signing up directly with Roble');
       await _database.register(email: email, password: password, name: name);
       return;
     }
 
-    logInfo('Signing up with email verification through Roble');
+    loggy.debug('Signing up with email verification through Roble');
     await _database.registerWithVerification(
       email: email,
       password: password,
@@ -74,22 +72,21 @@ class AuthenticationSourceServiceRoble implements IAuthenticationSource {
   }
 
   @override
-  Future<bool> verifyToken() async {
+  Future<bool> restoreSession() async {
     try {
       if (await _database.restoreSession()) {
+        loggy.debug('Session restored successfully');
         return true;
       }
       return false;
     } on RobleApiHttpException catch (error) {
       if (error.statusCode == 401) {
-        _database.clearTokens();
-
+        loggy.error('Session is not valid');
         return false;
       }
       rethrow;
     } on RobleApiAuthException {
-      _database.clearTokens();
-
+      loggy.error('Authentication error occurred while restoring session');
       return false;
     }
   }

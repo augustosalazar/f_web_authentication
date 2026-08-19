@@ -11,7 +11,7 @@ class SignUpPage extends StatefulWidget {
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends State<SignUpPage> with UiLoggy {
   final _registerKey = GlobalKey<FormState>();
   final _validationKey = GlobalKey<FormState>();
 
@@ -79,7 +79,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 'User created successfully, check your email for verification')),
       );
     } catch (err) {
-      logError('SignUp error $err');
+      loggy.error('SignUp error $err');
 
       messengerKey.currentState?.showSnackBar(
         SnackBar(content: Text(err.toString())),

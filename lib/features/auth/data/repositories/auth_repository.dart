@@ -24,14 +24,14 @@ class AuthRepository implements IAuthRepository {
       await authenticationSource.validate(email, validationCode);
 
   @override
-  Future<bool> validateToken() async =>
-      await authenticationSource.verifyToken();
-
-  @override
   Future<void> forgotPassword(String email) async =>
       await authenticationSource.forgotPassword(email);
 
   @override
   Future<AuthenticationUser> getLoggedUser() async =>
       await authenticationSource.getLoggedUser();
+
+  @override
+  Future<bool> restoreSession() async =>
+      await authenticationSource.restoreSession();
 }
