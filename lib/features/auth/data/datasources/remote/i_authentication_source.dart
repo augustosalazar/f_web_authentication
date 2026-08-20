@@ -17,4 +17,10 @@ abstract class IAuthenticationSource {
   Future<AuthenticationUser> getLoggedUser();
 
   Future<bool> restoreSession();
+
+  /// `true` si el proyecto tiene Google configurado y activo.
+  Future<bool> isGoogleEnabled();
+
+  /// Abre Google en una ventana y devuelve el usuario ya autenticado.
+  Future<AuthenticationUser> signInWithGoogle();
 }

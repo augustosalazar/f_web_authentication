@@ -31,6 +31,18 @@
 
   <title>f_web_authentication</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    // Retorno del login social de Roble. Si esta pagina se abrio como ventana
+    // emergente, devuelve la URL a la app y se cierra sin llegar a cargar
+    // Flutter: la app principal nunca se descargo y sigue esperando.
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      if (!params.get('code') || !window.opener) return;
+      window.opener.postMessage('roble-sso:' + window.location.href,
+        window.location.origin);
+      window.close();
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

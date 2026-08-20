@@ -16,6 +16,8 @@ void main() {
 
   late RxBool logged;
   late RxBool isLoading;
+  late RxBool googleEnabled;
+  late RxBool isSocialLoading;
 
   setUp(() {
     Get.testMode = true;
@@ -25,10 +27,14 @@ void main() {
 
     logged = false.obs;
     isLoading = false.obs;
+    googleEnabled = false.obs;
+    isSocialLoading = false.obs;
 
     when(() => mockAuthController.logged).thenReturn(logged);
     when(() => mockAuthController.isLoading).thenReturn(isLoading);
     when(() => mockAuthController.isLogged).thenAnswer((_) => logged.value);
+    when(() => mockAuthController.googleEnabled).thenReturn(googleEnabled);
+    when(() => mockAuthController.isSocialLoading).thenReturn(isSocialLoading);
 
     when(() => mockAuthController.login(any(), any())).thenAnswer((_) async {
       logged.value = true;
@@ -112,5 +118,42 @@ void main() {
         .called(1);
 
     expect(find.textContaining('Login failed'), findsOneWidget);
+  });
+
+  group('Entrar con Google', () {
+    testWidgets('el boton no aparece si el proveedor esta apagado',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
+
+      expect(find.byKey(const Key('google_login_button')), findsNothing);
+    });
+
+    testWidgets('pulsarlo pide el login social y deja la sesion iniciada',
+        (WidgetTester tester) async {
+      googleEnabled.value = true;
+      when(() => mockAuthController.loginWithGoogle()).thenAnswer((_) async {
+        logged.value = true;
+      });
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.tap(find.byKey(const Key('google_login_button')));
+      await tester.pump();
+
+      verify(() => mockAuthController.loginWithGoogle()).called(1);
+      expect(logged.value, isTrue);
+    });
+
+    testWidgets('un fallo del proveedor se muestra en un snackbar',
+        (WidgetTester tester) async {
+      googleEnabled.value = true;
+      when(() => mockAuthController.loginWithGoogle()).thenThrow(
+          const RobleApiAuthException('El navegador bloqueo la ventana'));
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.tap(find.byKey(const Key('google_login_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('bloqueo la ventana'), findsOneWidget);
+    });
   });
 }

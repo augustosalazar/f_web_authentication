@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import '../viewmodels/authentication_controller.dart';
+import '../widgets/google_sign_in_button.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -41,6 +42,19 @@ class _LoginPageState extends State<LoginPage> with UiLoggy {
     try {
       await authenticationController.login(email, password);
     } catch (err) {
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text(err.toString())),
+      );
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    loggy.debug('_loginWithGoogle');
+    try {
+      await authenticationController.loginWithGoogle();
+    } catch (err) {
+      loggy.error('Error during Google login: $err');
       messengerKey.currentState?.showSnackBar(
         SnackBar(content: Text(err.toString())),
       );
@@ -193,6 +207,44 @@ class _LoginPageState extends State<LoginPage> with UiLoggy {
                               ),
                             ],
                           ),
+
+                          const SizedBox(height: 20),
+
+                          // GOOGLE: solo si el proyecto tiene el proveedor
+                          // activo, porque si no el flujo responderia 403.
+                          Obx(() {
+                            if (!authenticationController.googleEnabled.value) {
+                              return const SizedBox.shrink();
+                            }
+                            return Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    const Expanded(child: Divider()),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12),
+                                      child: Text(
+                                        'or',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        ),
+                                      ),
+                                    ),
+                                    const Expanded(child: Divider()),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                GoogleSignInButton(
+                                  onPressed: _loginWithGoogle,
+                                  isLoading: authenticationController
+                                      .isSocialLoading.value,
+                                ),
+                              ],
+                            );
+                          }),
 
                           const SizedBox(height: 20),
 

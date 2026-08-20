@@ -14,4 +14,8 @@ abstract class IAuthRepository {
   Future<AuthenticationUser> getLoggedUser();
 
   Future<bool> restoreSession();
+
+  Future<bool> isGoogleEnabled();
+
+  Future<AuthenticationUser> signInWithGoogle();
 }

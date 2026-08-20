@@ -10,6 +10,12 @@ class AuthenticationController extends GetxController with UiLoggy {
   final _loggedUser = Rxn<AuthenticationUser>();
   final RxBool isLoading = false.obs;
 
+  /// `true` cuando el proyecto tiene Google activo: decide si se pinta el boton.
+  final RxBool googleEnabled = false.obs;
+
+  /// `true` mientras la ventana del proveedor está abierta.
+  final RxBool isSocialLoading = false.obs;
+
   AuthenticationController(this.authentication);
 
   AuthenticationUser? get loggedUser => _loggedUser.value;
@@ -25,6 +31,27 @@ class AuthenticationController extends GetxController with UiLoggy {
       loggy.info('User is logged in');
       await getLoggedUser();
     }
+    await refreshGoogleAvailability();
+  }
+
+  /// Consulta si Google esta habilitado en el proyecto.
+  Future<void> refreshGoogleAvailability() async {
+    googleEnabled.value = await authentication.isGoogleEnabled();
+    loggy.debug('Google login enabled: ${googleEnabled.value}');
+  }
+
+  /// Entra con Google. Devuelve cuando la sesión ya está iniciada.
+  ///
+  /// La ventana la abre el paquete y hay que pedirla desde el gesto del
+  /// usuario, así que este método no puede hacer nada asíncrono antes.
+  Future<void> loginWithGoogle() {
+    loggy.debug('AuthenticationController: Google sign in');
+    isSocialLoading.value = true;
+
+    return authentication.signInWithGoogle().then((user) {
+      _loggedUser.value = user;
+      logged.value = true;
+    }).whenComplete(() => isSocialLoading.value = false);
   }
 
   @override

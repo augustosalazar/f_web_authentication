@@ -95,4 +95,24 @@ class AuthenticationSourceServiceRoble
   Future<AuthenticationUser> getLoggedUser() async {
     return AuthenticationUser.fromJson(await _database.currentUser());
   }
+
+  @override
+  Future<bool> isGoogleEnabled() async {
+    try {
+      final config = await _database.socialConfig(RobleSocialProvider.google);
+      loggy.debug('Google social config: $config');
+      return config.enabled;
+    } catch (error) {
+      // Si no se puede consultar, se oculta el boton en lugar de romper el login.
+      loggy.warning('Could not read Google config: $error');
+      return false;
+    }
+  }
+
+  @override
+  Future<AuthenticationUser> signInWithGoogle() async {
+    final profile =
+        await _database.signInWithProvider(RobleSocialProvider.google);
+    return AuthenticationUser.fromJson(profile);
+  }
 }

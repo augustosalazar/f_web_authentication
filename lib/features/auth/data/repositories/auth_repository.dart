@@ -34,4 +34,12 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<bool> restoreSession() async =>
       await authenticationSource.restoreSession();
+
+  @override
+  Future<bool> isGoogleEnabled() async =>
+      await authenticationSource.isGoogleEnabled();
+
+  @override
+  Future<AuthenticationUser> signInWithGoogle() async =>
+      await authenticationSource.signInWithGoogle();
 }
