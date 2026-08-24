@@ -37,9 +37,19 @@
     // Flutter: la app principal nunca se descargo y sigue esperando.
     (function () {
       var params = new URLSearchParams(window.location.search);
-      if (!params.get('code') || !window.opener) return;
-      window.opener.postMessage('roble-sso:' + window.location.href,
-        window.location.origin);
+      if (!params.get('code')) return;
+
+      // Dos vias a proposito. localStorage sobrevive a que el navegador corte
+      // el vinculo con la ventana que abrio el popup -Google ya anuncia COOP
+      // en modo Report-Only- y tambien a que el mensaje llegue tarde, porque
+      // queda escrito aunque la ventana ya se haya cerrado.
+      try { window.localStorage.setItem('roble-sso', window.location.href); }
+      catch (e) {}
+
+      if (window.opener) {
+        window.opener.postMessage('roble-sso:' + window.location.href,
+          window.location.origin);
+      }
       window.close();
     })();
   </script>

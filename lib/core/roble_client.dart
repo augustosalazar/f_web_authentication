@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:loggy/loggy.dart';
 import 'package:roble/roble.dart';
 
 import 'i_local_preferences.dart';
@@ -58,9 +59,11 @@ RobleApiDataBase createRobleClient() {
   // movil vuelven a sitios distintos -una URL y un esquema propio-, asi que
   // cada plataforma pide el suyo.
   final ssoRedirect = kIsWeb
-      ? dotenv.get('ROBLE_SSO_REDIRECT', fallback: 'f-web-authentication')
+      ? dotenv.get('ROBLE_SSO_REDIRECT', fallback: 'f-web-authentication-web')
       : dotenv.get('ROBLE_SSO_REDIRECT_MOBILE',
           fallback: 'f-web-authentication-movil');
+
+  logInfo('Roble config: $ssoRedirect');
 
   return RobleApiDataBase(
     config: config,
