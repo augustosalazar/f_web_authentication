@@ -5,11 +5,15 @@ import '../../domain/models/message.dart';
 import '../viewmodels/chat_controller.dart';
 import '../widgets/message_bubble.dart';
 
-/// Chat en tiempo real, para ver funcionar la suscripción a una tabla.
+/// Chat en tiempo real, para ver funcionar la suscripción al árbol JSON.
 ///
 /// Nada se añade a la lista al enviar: el mensaje propio vuelve por la
 /// suscripción igual que el de cualquier otro, así que si aparece es que el
 /// tiempo real funciona de extremo a extremo.
+///
+/// La disposición es la de WhatsApp, pero los colores son los del tema de la
+/// app: fijarlos aquí lo dejaba ilegible en oscuro, que es un modo que la app
+/// toma del sistema.
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
@@ -21,9 +25,6 @@ class _ChatPageState extends State<ChatPage> {
   final ChatController _chat = Get.find();
   final TextEditingController _input = TextEditingController();
   final ScrollController _scroll = ScrollController();
-
-  static const _background = Color(0xFFECE5DD);
-  static const _bar = Color(0xFF075E54);
 
   @override
   void initState() {
@@ -62,11 +63,10 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: _background,
       appBar: AppBar(
-        backgroundColor: _bar,
-        foregroundColor: Colors.white,
         title: const Text('Chat'),
         actions: [
           Obx(() => Padding(
@@ -74,7 +74,7 @@ class _ChatPageState extends State<ChatPage> {
                 child: Center(
                   child: Text(
                     _chat.me.value,
-                    style: const TextStyle(fontSize: 12),
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
               )),
@@ -86,12 +86,12 @@ class _ChatPageState extends State<ChatPage> {
               ? const SizedBox.shrink()
               : Container(
                   width: double.infinity,
-                  color: const Color(0xFFFDECEA),
+                  color: scheme.errorContainer,
                   padding: const EdgeInsets.all(8),
                   child: Text(
                     _chat.error.value,
                     key: const Key('chat_error'),
-                    style: const TextStyle(color: Color(0xFF8C1D18)),
+                    style: TextStyle(color: scheme.onErrorContainer),
                   ),
                 )),
           Expanded(
@@ -100,11 +100,11 @@ class _ChatPageState extends State<ChatPage> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (_chat.messages.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'Sin mensajes todavía.\nEscribe el primero.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFF667781)),
+                    style: TextStyle(color: scheme.onSurfaceVariant),
                   ),
                 );
               }
@@ -126,24 +126,24 @@ class _ChatPageState extends State<ChatPage> {
               );
             }),
           ),
-          _composer(),
+          _composer(scheme),
         ],
       ),
     );
   }
 
-  Widget _composer() {
+  Widget _composer(ColorScheme scheme) {
     return SafeArea(
       top: false,
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
-        color: _background,
+        color: scheme.surface,
         child: Row(
           children: [
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -165,17 +165,15 @@ class _ChatPageState extends State<ChatPage> {
             Obx(() => FloatingActionButton(
                   key: const Key('chat_send'),
                   mini: true,
-                  backgroundColor: _bar,
-                  foregroundColor: Colors.white,
                   elevation: 1,
                   onPressed: _chat.isSending.value ? null : _send,
                   child: _chat.isSending.value
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: scheme.onPrimaryContainer,
                           ),
                         )
                       : const Icon(Icons.send, size: 20),
