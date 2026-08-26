@@ -24,6 +24,8 @@ void main() {
 
   late RxBool logged;
   late RxBool isLoading;
+  late RxBool onlyOutOfStock;
+  late RxString error;
   late RxList<Product> products;
 
   setUpAll(() {
@@ -40,6 +42,8 @@ void main() {
     // Estado reactivo real, pero externo al mock
     logged = true.obs;
     isLoading = false.obs;
+    onlyOutOfStock = false.obs;
+    error = ''.obs;
     products = <Product>[
       Product(id: '1', name: 'Product 1', description: 'Desc 1', quantity: 10),
       Product(id: '2', name: 'Product 2', description: 'Desc 2', quantity: 20),
@@ -66,6 +70,10 @@ void main() {
     // ProductController
     // =========================
     when(() => mockProductController.isLoading).thenReturn(isLoading);
+    // Estado del filtro por consulta guardada, igual que el resto: reactivo de
+    // verdad, pero externo al mock.
+    when(() => mockProductController.onlyOutOfStock).thenReturn(onlyOutOfStock);
+    when(() => mockProductController.error).thenReturn(error);
 
     // products en tu controlador devuelve List<Product>
     when(() => mockProductController.products).thenAnswer((_) => products);
@@ -131,6 +139,29 @@ void main() {
 
     verify(() => mockProductController.deleteProducts()).called(1);
     expect(find.byType(ListTile), findsNothing);
+  });
+
+  testWidgets('el filtro de sin inventario pide la consulta guardada',
+      (WidgetTester tester) async {
+    when(() => mockProductController.toggleOutOfStock())
+        .thenAnswer((_) async {});
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('out_of_stock_filter')));
+    await tester.pump();
+
+    verify(() => mockProductController.toggleOutOfStock()).called(1);
+  });
+
+  testWidgets('un fallo de la consulta se muestra', (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    error.value = 'No hay ninguna consulta guardada llamada ...';
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('product_error')), findsOneWidget);
   });
 
   // El saludo y el cerrar sesion se fueron al inicio: esta es una pantalla de

@@ -8,6 +8,9 @@ abstract class IProductRepository {
   /// El catálogo tal como lo ve alguien sin cuenta.
   Future<List<Product>> getPublicProducts();
 
+  /// Productos sin inventario, segun la consulta guardada en la consola.
+  Future<List<Product>> getOutOfStockProducts();
+
   Future<void> addProduct(Product p);
 
   Future<void> updateProduct(Product p);

@@ -9,6 +9,12 @@ abstract class IProductSource {
   /// tabla está marcada como pública en la consola de Roble.
   Future<List<Product>> getPublicProducts();
 
+  /// Productos sin inventario, segun la consulta guardada en la consola.
+  ///
+  /// La lista no se calcula aqui: la decide el SQL guardado, asi que cambiar
+  /// que cuenta como «sin inventario» no obliga a publicar la app otra vez.
+  Future<List<Product>> getOutOfStockProducts();
+
   Future<bool> addProduct(Product product);
 
   Future<bool> updateProduct(Product product);

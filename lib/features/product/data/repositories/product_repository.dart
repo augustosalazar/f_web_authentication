@@ -20,6 +20,14 @@ class ProductRepository implements IProductRepository {
   }
 
   @override
+  Future<List<Product>> getOutOfStockProducts() {
+    // Sin cache: la cache guarda el catalogo entero, y esto es un subconjunto
+    // que decide el servidor. Guardarlo aqui haria que la lista completa
+    // volviera filtrada.
+    return userSource.getOutOfStockProducts();
+  }
+
+  @override
   Future<List<Product>> getProducts() async {
     try {
       if (await cacheSource.isCacheValid()) {
