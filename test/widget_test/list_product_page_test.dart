@@ -101,8 +101,6 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome Test User'), findsOneWidget);
-
     expect(find.text('Product 1'), findsOneWidget);
     expect(find.text('Desc 1'), findsOneWidget);
     expect(find.text('Product 2'), findsOneWidget);
@@ -135,14 +133,6 @@ void main() {
     expect(find.byType(ListTile), findsNothing);
   });
 
-  testWidgets('Logout button calls logOut', (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byIcon(Icons.exit_to_app));
-    await tester.pump();
-
-    verify(() => mockAuthController.logOut()).called(1);
-    expect(logged.value, false);
-  });
+  // El saludo y el cerrar sesion se fueron al inicio: esta es una pantalla de
+  // funcion, no la entrada de la app. Se comprueban en home_page_test.
 }

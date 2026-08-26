@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:loggy/loggy.dart';
 
-import '../../../auth/ui/viewmodels/authentication_controller.dart';
 import '../../domain/models/product.dart';
 import '../viewmodels/product_controller.dart';
 import 'edit_product_page.dart';
-import '../../../chat/ui/pages/chat_page.dart';
 import 'add_product_page.dart';
 
 class ListProductPage extends StatefulWidget {
@@ -18,36 +15,15 @@ class ListProductPage extends StatefulWidget {
 
 class _ListProductPageState extends State<ListProductPage> {
   ProductController productController = Get.find();
-  AuthenticationController authenticationController = Get.find();
-
-  _logout() async {
-    try {
-      await authenticationController.logOut();
-    } catch (e) {
-      logInfo(e);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Obx(
-            () => Text("Welcome ${authenticationController.loggedUser?.name}")),
+        // El saludo y el cerrar sesion viven en el inicio: esta es una
+        // pantalla de funcion, no la entrada de la app.
+        title: const Text('Productos'),
         actions: [
-          IconButton(
-            key: const Key('logout_button'),
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              _logout();
-            },
-          ),
-          IconButton(
-            key: const Key('chat_button'),
-            icon: const Icon(Icons.chat),
-            tooltip: 'Chat en tiempo real',
-            onPressed: () => Get.to(() => const ChatPage()),
-          ),
           IconButton(
             key: const Key('delete_all_button'),
             icon: const Icon(Icons.delete),
