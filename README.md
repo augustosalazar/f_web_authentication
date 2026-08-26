@@ -34,6 +34,76 @@ Using this structure:
 
 
 
+## Google sign-in
+
+Two paths, picked automatically:
+
+- **Movil**: SDK nativo (`google_sign_in`). Se abre el selector de cuentas del
+  sistema, la app recibe un `id_token` y Roble lo valida. Sin navegador, sin
+  esquema de URL propio y sin retorno que enrutar.
+- **Web, o movil sin configurar**: el flujo de navegador de siempre, que sigue
+  funcionando igual.
+
+La decision vive en `AuthenticationSourceServiceRoble`: si hay un
+`IGoogleIdTokenSource` y la plataforma lo soporta, va por el nativo. La interfaz
+de usuario y el repositorio no se enteran, siguen llamando a `signInWithGoogle`.
+
+### Configuracion
+
+**Google se configura en la consola de Roble, no aqui.** La app pide los
+proveedores a `/auth/providers` y de ahi saca el Client ID **web**, que es la
+audiencia para la que Google emite el token y la que el servidor comprueba
+despues. Al venir de un solo sitio, no hay dos copias que puedan separarse.
+
+En `.env` solo queda el de iOS, que es por plataforma y Roble no guarda:
+
+```
+GOOGLE_IOS_CLIENT_ID=<client id de iOS>.apps.googleusercontent.com   # solo iOS
+```
+
+Si el proyecto no tiene Google configurado, la app cae al flujo de navegador.
+
+### Android
+
+1. En Google Cloud, un OAuth client de tipo **Android** con el nombre del
+   paquete (`com.example.f_web_authentication`) y la huella SHA-1 de la firma.
+   Para depurar:
+
+   ```bash
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+   ```
+
+2. No hace falta ponerlo en ningun sitio: el SDK lo resuelve por la firma del
+   APK. El que Roble necesita, y el que la app recibe de `/auth/providers`, es
+   el **web**.
+3. `google_sign_in` 7 usa Credential Manager, que pide `minSdk` 23. El proyecto
+   hereda `flutter.minSdkVersion`; si el build se queja, subelo en
+   `android/app/build.gradle.kts`.
+
+### iOS
+
+1. Un OAuth client de tipo **iOS**, y su Client ID en `GOOGLE_IOS_CLIENT_ID`.
+2. En `ios/Runner/Info.plist`, el esquema inverso como URL scheme:
+
+   ```xml
+   <key>CFBundleURLTypes</key>
+   <array>
+     <dict>
+       <key>CFBundleURLSchemes</key>
+       <array>
+         <string>com.googleusercontent.apps.TU-CLIENT-ID-DE-IOS</string>
+       </array>
+     </dict>
+   </array>
+   ```
+
+### Nonce
+
+Cada intento genera uno nuevo, viaja a Google dentro de `initialize` y vuelve en
+el token; Roble compara los dos literalmente. Es lo que impide reutilizar un
+`id_token` capturado. La guia de Supabase no lo menciona para Flutter, pero el
+paquete lo admite y el servidor lo valida, asi que se manda.
+
 ## Testing
 
 ### Pure widget tests
