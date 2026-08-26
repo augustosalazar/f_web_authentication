@@ -128,7 +128,7 @@ class AuthenticationSourceServiceRoble
         // Google no esta configurado en el proyecto, o el servidor es anterior
         // a que el endpoint devolviera el clientId. El flujo de navegador no
         // necesita saberlo, asi que se intenta por ahi.
-        loggy.debug('Sin clientId de Google en Roble: se usa el navegador');
+        loggy.error('Sin clientId de Google en Roble: se usa el navegador');
       } else {
         return _signInWithGoogleNatively(google, serverClientId);
       }
@@ -143,7 +143,10 @@ class AuthenticationSourceServiceRoble
   /// El Client ID web que el proyecto tiene configurado, o `null` si no hay.
   Future<String?> _googleServerClientId() async {
     for (final provider in await _database.listProviders()) {
-      if (provider.name == 'google') return provider.clientId;
+      if (provider.name == 'google') {
+        loggy.debug('Google clientId from Roble: ${provider.clientId}');
+        return provider.clientId;
+      }
     }
     return null;
   }
@@ -161,6 +164,7 @@ class AuthenticationSourceServiceRoble
     if (idToken == null) {
       // Cancelado. Devolver el flujo del navegador aqui abriria una ventana
       // que el usuario acaba de rechazar.
+      loggy.error('Google nativo: cancelado por el usuario');
       throw const RobleApiAuthException(
           'Inicio de sesion con Google cancelado.');
     }
