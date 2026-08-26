@@ -5,6 +5,9 @@ abstract class IProductRepository {
 
   Future<List<Product>> forceRefresh();
 
+  /// El catálogo tal como lo ve alguien sin cuenta.
+  Future<List<Product>> getPublicProducts();
+
   Future<void> addProduct(Product p);
 
   Future<void> updateProduct(Product p);

@@ -18,6 +18,24 @@ class RemoteProductRobleSource implements IProductSource {
   }
 
   @override
+  Future<List<Product>> getPublicProducts() async {
+    try {
+      final records = await _database.publicRead(_table);
+      return records.map(Product.fromJson).toList();
+    } on RobleApiHttpException catch (e) {
+      // El 403 aquí no es un token malo —no se manda ninguno—: es que la tabla
+      // no está marcada como pública. Decirlo evita buscar el fallo en la
+      // sesión, que es donde nadie lo va a encontrar.
+      if (e.statusCode == 403) {
+        throw const RobleApiException(
+          'La tabla $_table no está marcada como pública en la consola de Roble.',
+        );
+      }
+      rethrow;
+    }
+  }
+
+  @override
   Future<bool> addProduct(Product product) async {
     logInfo('Adding product through the Roble client');
     await _database.create(_table, product.toJsonNoId());

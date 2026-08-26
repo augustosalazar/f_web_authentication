@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import '../viewmodels/authentication_controller.dart';
 import '../widgets/google_sign_in_button.dart';
+import '../../../product/ui/pages/public_catalog_page.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -255,6 +256,17 @@ class _LoginPageState extends State<LoginPage> with UiLoggy {
                               Get.to(() => const SignUpPage());
                             },
                             child: const Text("Create account"),
+                          ),
+
+                          // Se llega sin cuenta a proposito: que se vean
+                          // productos sin haber entrado es la demostracion de
+                          // lo que es una tabla publica.
+                          TextButton.icon(
+                            key: const Key('public_catalog_button'),
+                            icon: const Icon(Icons.storefront_outlined),
+                            onPressed: () =>
+                                Get.to(() => const PublicCatalogPage()),
+                            label: const Text('Ver catálogo sin entrar'),
                           ),
                         ],
                       ),

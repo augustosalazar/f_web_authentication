@@ -12,6 +12,14 @@ class ProductRepository implements IProductRepository {
   ProductRepository(this.userSource, this.cacheSource);
 
   @override
+  Future<List<Product>> getPublicProducts() {
+    // Sin caché a propósito: la caché guarda lo que vio una sesión, y esto se
+    // lee sin ninguna. Mezclarlas enseñaría al visitante anónimo el catálogo
+    // que se trajo la última persona que entró.
+    return userSource.getPublicProducts();
+  }
+
+  @override
   Future<List<Product>> getProducts() async {
     try {
       if (await cacheSource.isCacheValid()) {

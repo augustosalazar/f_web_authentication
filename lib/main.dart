@@ -23,6 +23,7 @@ import 'features/product/data/datasources/remote/remote_product_roble_source.dar
 import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
 import 'features/product/ui/viewmodels/product_controller.dart';
+import 'features/product/ui/viewmodels/public_catalog_controller.dart';
 
 final messengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -51,14 +52,21 @@ void main() async {
   Get.put<IAuthRepository>(AuthRepository(Get.find()));
   Get.put(AuthenticationController(Get.find()));
 
-  Get.lazyPut<IProductSource>(() => RemoteProductRobleSource(roble));
+  // fenix en toda la cadena: sin el, GetX consume la fabrica al descartar la
+  // ruta y volver a entrar falla con «not found».
+  Get.lazyPut<IProductSource>(() => RemoteProductRobleSource(roble),
+      fenix: true);
 
-  Get.lazyPut<LocalProductCacheSource>(
-      () => LocalProductCacheSource(Get.find()));
+  Get.lazyPut<LocalProductCacheSource>(() => LocalProductCacheSource(Get.find()),
+      fenix: true);
 
-  Get.lazyPut<IProductRepository>(
-      () => ProductRepository(Get.find(), Get.find()));
-  Get.lazyPut(() => ProductController(Get.find()));
+  Get.lazyPut<IProductRepository>(() => ProductRepository(Get.find(), Get.find()),
+      fenix: true);
+  Get.lazyPut(() => ProductController(Get.find()), fenix: true);
+
+  // El catalogo publico va aparte del controlador de productos: se lee sin
+  // sesion y sin cache, y no da de alta ni de baja.
+  Get.lazyPut(() => PublicCatalogController(Get.find()), fenix: true);
 
   registerChat(roble);
 
