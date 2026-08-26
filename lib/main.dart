@@ -12,11 +12,7 @@ import 'central.dart';
 import 'core/app_theme.dart';
 import 'core/i_local_preferences.dart';
 import 'core/roble_client.dart';
-import 'features/chat/data/datasources/remote/chat_source_roble.dart';
-import 'features/chat/data/datasources/remote/i_chat_source.dart';
-import 'features/chat/data/repositories/chat_repository.dart';
-import 'features/chat/domain/repositories/i_chat_repository.dart';
-import 'features/chat/ui/viewmodels/chat_controller.dart';
+import 'features/chat/chat_dependencies.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/google_id_token_source.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
@@ -75,11 +71,7 @@ void main() async {
       () => ProductRepository(Get.find(), Get.find()));
   Get.lazyPut(() => ProductController(Get.find()));
 
-  Get.lazyPut<IChatSource>(() => ChatSourceRoble(roble));
-  Get.lazyPut<IChatRepository>(() => ChatRepository(Get.find()));
-  // fenix: al salir del chat se descarta el controlador, que cancela la
-  // suscripción; volver a entrar lo reconstruye y se suscribe de nuevo.
-  Get.lazyPut(() => ChatController(Get.find()), fenix: true);
+  registerChat(roble);
 
   runApp(MyApp());
 }
