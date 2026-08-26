@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:loggy/loggy.dart';
 import 'package:roble/roble.dart';
 
@@ -26,19 +25,6 @@ class RoblePreferencesStorage implements RobleTokenStorage {
 /// mismo que el destino de retorno registrado en la consola de Roble
 /// (`com.example.fwebauthentication://sso-done`).
 const _callbackScheme = 'com.example.fwebauthentication';
-
-/// Abre el proveedor en la pestana de navegador del sistema y espera el retorno.
-///
-/// Solo se usa fuera de web: alli el paquete trae su propia ventana emergente,
-/// que no necesita plugin ni configuracion nativa.
-Future<Uri> _abrirProveedorNativo(Uri loginUrl, Duration timeout) async {
-  final retorno = await FlutterWebAuth2.authenticate(
-    url: loginUrl.toString(),
-    callbackUrlScheme: _callbackScheme,
-  ).timeout(timeout);
-
-  return Uri.parse(retorno);
-}
 
 RobleApiDataBase createRobleClient() {
   final projectId = dotenv.get('EXPO_PUBLIC_ROBLE_PROJECT_ID');
@@ -68,6 +54,16 @@ RobleApiDataBase createRobleClient() {
   return RobleApiDataBase(
     config: config,
     ssoRedirect: ssoRedirect,
-    socialOpener: kIsWeb ? null : _abrirProveedorNativo,
+    // Fuera de web hace falta abrir el navegador del sistema; en web el
+    // paquete trae su propia ventana emergente.
+    socialOpener: kIsWeb ? null : robleNativeOpener(_callbackScheme),
+    googleIosClientId: _googleIosClientId(),
   );
+}
+
+/// Client ID de iOS de Google, lo unico de Google que sigue en el build de la
+/// app: es por plataforma y Roble no lo guarda. El web lo trae `listProviders`.
+String? _googleIosClientId() {
+  final valor = dotenv.get('GOOGLE_IOS_CLIENT_ID', fallback: '');
+  return valor.isEmpty ? null : valor;
 }

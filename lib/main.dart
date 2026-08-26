@@ -14,7 +14,6 @@ import 'core/i_local_preferences.dart';
 import 'core/roble_client.dart';
 import 'features/chat/chat_dependencies.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
-import 'features/auth/data/datasources/remote/google_id_token_source.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/repositories/i_auth_repository.dart';
@@ -45,17 +44,7 @@ void main() async {
   final roble = createRobleClient();
   Get.put<RobleApiDataBase>(roble, permanent: true);
 
-  // El Client ID web lo trae Roble en `listProviders`, asi que la consola es el
-  // unico sitio donde se configura Google. Aqui solo queda el de iOS, que es
-  // por plataforma y Roble no guarda.
-  final googleIosClientId = dotenv.get('GOOGLE_IOS_CLIENT_ID', fallback: '');
-
-  final authentication = AuthenticationSourceServiceRoble(
-    roble,
-    google: GoogleIdTokenSource(
-      clientId: googleIosClientId.isEmpty ? null : googleIosClientId,
-    ),
-  );
+  final authentication = AuthenticationSourceServiceRoble(roble);
 
   Get.put<IAuthenticationSource>(authentication, permanent: true);
 

@@ -45,8 +45,6 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   roble: 
     path: ../roble_flutter_package
-  flutter_web_auth_2: ^5.1.0
-  google_sign_in: ^7.2.0
 
 
 # Mientras la API social (socialConfig / socialLoginUrl / completeSocialLogin)
