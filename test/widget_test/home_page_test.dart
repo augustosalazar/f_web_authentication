@@ -23,7 +23,7 @@ void main() {
     // un valor suelto, el Obx no leeria ningun observable y Get protestaria en
     // vez de pintar —que es como fallan las pruebas viejas de productos—.
     usuario = Rxn<AuthenticationUser>(
-      AuthenticationUser(email: 'ana@correo.com', name: 'Ana'),
+      AuthenticationUser(email: 'ana@correo.com', name: 'Ana', role: 'admin'),
     );
     auth = MockAuthenticationController();
     when(() => auth.loggedUser).thenAnswer((_) => usuario.value);
@@ -43,6 +43,24 @@ void main() {
     await montar(tester);
 
     expect(find.text('Hola, Ana'), findsOneWidget);
+    expect(find.text('ana@correo.com'), findsOneWidget);
+  });
+
+  testWidgets('muestra el rol junto al correo', (tester) async {
+    await montar(tester);
+
+    expect(find.text('admin'), findsOneWidget);
+    expect(find.byKey(const Key('home_role')), findsOneWidget);
+  });
+
+  testWidgets('sin rol asignado no pinta una etiqueta vacía', (tester) async {
+    usuario.value =
+        AuthenticationUser(email: 'ana@correo.com', name: 'Ana');
+
+    await montar(tester);
+
+    // No tener rol es normal, y una etiqueta en blanco no dice nada.
+    expect(find.byKey(const Key('home_role')), findsNothing);
     expect(find.text('ana@correo.com'), findsOneWidget);
   });
 

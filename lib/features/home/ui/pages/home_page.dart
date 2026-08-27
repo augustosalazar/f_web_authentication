@@ -51,9 +51,20 @@ class HomePage extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 if (user != null)
-                  Text(
-                    user.email,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  // Wrap y no Row: un correo largo junto a la etiqueta se sale
+                  // por la derecha en un telefono estrecho.
+                  Wrap(
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        user.email,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      // Solo si tiene rol: una etiqueta vacia no dice nada, y
+                      // no tener rol asignado es normal.
+                      if (user.role != null) _Rol(user.role!),
+                    ],
                   ),
               ],
             );
@@ -90,6 +101,34 @@ class HomePage extends StatelessWidget {
     } catch (e) {
       logInfo(e);
     }
+  }
+}
+
+/// Etiqueta con el rol de quien entro.
+class _Rol extends StatelessWidget {
+  const _Rol(this.role);
+
+  final String role;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      key: const Key('home_role'),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        role,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: scheme.onSecondaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
   }
 }
 
