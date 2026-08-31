@@ -74,13 +74,15 @@ class FilesPage extends StatelessWidget {
     BuildContext context,
     FilesController controller,
   ) async {
-    // `withData` porque el paquete sube desde memoria: en web no hay ruta de
-    // archivo que abrir, así que pedir los bytes es el único camino que sirve
-    // en las dos plataformas.
-    final resultado = await FilePicker.platform.pickFiles(withData: true);
-    final archivo = resultado?.files.singleOrNull;
-    final bytes = archivo?.bytes;
-    if (archivo == null || bytes == null) return;
+    // `pickFile` y no `pickFiles`: desde file_picker 12 el selector es estático
+    // y la selección múltiple se pide aparte. Esta pantalla sube de uno en uno.
+    final archivo = await FilePicker.pickFile(dialogTitle: 'Elige un archivo');
+    if (archivo == null) return;
+
+    // `readAsBytes()` en lugar del viejo `withData: true`, obsoleto en 12. Da
+    // igual la plataforma —en web lee del blob y en móvil del archivo— y el
+    // paquete de Roble sube desde memoria en los dos casos.
+    final bytes = await archivo.readAsBytes();
 
     await controller.upload(
       fileName: archivo.name,
