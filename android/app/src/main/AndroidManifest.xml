@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Flutter la pone sola en los manifiestos de debug y profile, pero no en
+         este. Sin ella la app compila y arranca en release, y falla al primer
+         request: el sintoma es un error de red que parece del servidor. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
     
         android:label="f_web_authentication"
