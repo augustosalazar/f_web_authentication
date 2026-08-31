@@ -4,6 +4,7 @@ import 'package:loggy/loggy.dart';
 
 import '../../../auth/ui/viewmodels/authentication_controller.dart';
 import '../../../chat/ui/pages/chat_page.dart';
+import '../../../files/ui/pages/files_page.dart';
 import '../../../product/ui/pages/list_product_page.dart';
 
 /// Pantalla de entrada de la app.
@@ -89,6 +90,15 @@ class HomePage extends StatelessWidget {
                 'cambios llegan en vivo.',
             api: 'db.json.push · db.json.watch',
             onTap: () => Get.to(() => const ChatPage()),
+          ),
+          _ModuleCard(
+            cardKey: const Key('home_card_files'),
+            icon: Icons.folder_outlined,
+            title: 'Archivos',
+            what: 'Bucket del proyecto: los bytes van directo entre el '
+                'dispositivo y el bucket, Roble solo firma el permiso.',
+            api: 'db.files.upload · list · download · remove',
+            onTap: () => Get.to(() => const FilesPage()),
           ),
         ],
       ),

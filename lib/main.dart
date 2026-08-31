@@ -13,6 +13,7 @@ import 'core/app_theme.dart';
 import 'core/i_local_preferences.dart';
 import 'core/roble_client.dart';
 import 'features/chat/chat_dependencies.dart';
+import 'features/files/files_dependencies.dart';
 import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
 import 'features/auth/data/datasources/remote/i_authentication_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
@@ -70,6 +71,8 @@ void main() async {
 
   registerChat(roble);
 
+
+  registerFiles(roble);
   runApp(MyApp());
 }
 
