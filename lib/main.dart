@@ -1,6 +1,3 @@
-import 'package:f_web_authentication/core/local_preferences_secured.dart';
-import 'package:f_web_authentication/core/local_preferences_shared.dart';
-import 'package:f_web_authentication/features/product/data/datasources/cache/local_product_cache_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_loggy/flutter_loggy.dart';
@@ -8,23 +5,19 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:roble/roble.dart';
+
 import 'central.dart';
 import 'core/app_theme.dart';
 import 'core/i_local_preferences.dart';
+import 'core/local_preferences_secured.dart';
+import 'core/local_preferences_shared.dart';
 import 'core/roble_client.dart';
+import 'features/auth/auth_dependencies.dart';
+import 'features/auth/ui/viewmodels/authentication_controller.dart';
 import 'features/chat/chat_dependencies.dart';
 import 'features/files/files_dependencies.dart';
-import 'features/auth/data/datasources/remote/authentication_source_service_roble.dart';
-import 'features/auth/data/datasources/remote/i_authentication_source.dart';
-import 'features/auth/data/repositories/auth_repository.dart';
-import 'features/auth/domain/repositories/i_auth_repository.dart';
-import 'features/auth/ui/viewmodels/authentication_controller.dart';
-import 'features/product/data/datasources/remote/i_product_source.dart';
-import 'features/product/data/datasources/remote/remote_product_roble_source.dart';
-import 'features/product/data/repositories/product_repository.dart';
 import 'features/product/domain/repositories/i_product_repository.dart';
-import 'features/product/ui/viewmodels/product_controller.dart';
-import 'features/product/ui/viewmodels/public_catalog_controller.dart';
+import 'features/product/product_dependencies.dart';
 
 final messengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -46,34 +39,33 @@ void main() async {
   final roble = createRobleClient();
   Get.put<RobleApiDataBase>(roble, permanent: true);
 
-  final authentication = AuthenticationSourceServiceRoble(roble);
-
-  Get.put<IAuthenticationSource>(authentication, permanent: true);
-
-  Get.put<IAuthRepository>(AuthRepository(Get.find()));
-  Get.put(AuthenticationController(Get.find()));
-
-  // fenix en toda la cadena: sin el, GetX consume la fabrica al descartar la
-  // ruta y volver a entrar falla con «not found».
-  Get.lazyPut<IProductSource>(() => RemoteProductRobleSource(roble),
-      fenix: true);
-
-  Get.lazyPut<LocalProductCacheSource>(() => LocalProductCacheSource(Get.find()),
-      fenix: true);
-
-  Get.lazyPut<IProductRepository>(() => ProductRepository(Get.find(), Get.find()),
-      fenix: true);
-  Get.lazyPut(() => ProductController(Get.find()), fenix: true);
-
-  // El catalogo publico va aparte del controlador de productos: se lee sin
-  // sesion y sin cache, y no da de alta ni de baja.
-  Get.lazyPut(() => PublicCatalogController(Get.find()), fenix: true);
-
+  // Cada feature se registra sola. El orden importa solo en que el cliente de
+  // Roble y las preferencias ya tienen que estar puestos.
+  registerAuth(roble);
+  registerProduct(roble);
   registerChat(roble);
-
-
   registerFiles(roble);
-  runApp(MyApp());
+
+  clearCachesOnLogOut();
+
+  runApp(const MyApp());
+}
+
+/// Al cerrar sesión, tirar lo que se guardó de la sesión anterior.
+///
+/// Esto vive aquí y no dentro de la autenticación a propósito. Quien cierra la
+/// sesión no tiene por qué saber que existen los productos, ni que tienen
+/// caché: si lo supiera, cada módulo nuevo con algo que limpiar habría que
+/// añadirlo a mano dentro de `logOut`, y cerrar sesión reventaría en cuanto ese
+/// módulo no estuviera registrado. `main` es el único sitio que conoce a todos,
+/// así que la política de «qué se limpia al salir» es suya.
+void clearCachesOnLogOut() {
+  final auth = Get.find<AuthenticationController>();
+
+  ever<bool>(auth.logged, (isLogged) {
+    if (isLogged) return;
+    Get.find<IProductRepository>().clearCache();
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -83,7 +75,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       scaffoldMessengerKey: messengerKey,
-      title: 'Web service Demo',
+      title: 'Flutter Roble with Feature Clean Architecture',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
