@@ -37,7 +37,6 @@ dependencies:
   get: ^4.7.3
   loggy: ^2.0.3
   flutter_loggy: ^2.0.3
-  #http: ^1.6.0
   shared_preferences: ^2.5.4
   flex_color_scheme: ^8.4.0
   flutter_secure_storage: ^10.0.0
@@ -60,6 +59,9 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mocktail: ^1.0.4
+  # Solo para pruebas: la app no habla HTTP por su cuenta —eso lo hace roble—,
+  # pero las pruebas de las fuentes guionizan el servidor con MockClient.
+  http: ^1.6.0
   build_runner: ^2.4.13
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
