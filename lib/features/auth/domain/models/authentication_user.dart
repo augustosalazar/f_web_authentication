@@ -1,3 +1,5 @@
+import 'package:roble/roble.dart';
+
 class AuthenticationUser {
   String? id;
   final String email;
@@ -16,6 +18,19 @@ class AuthenticationUser {
     required this.name,
     this.role,
   });
+
+  /// Desde el perfil que reparte el paquete con el estado de la sesión.
+  ///
+  /// Ya viene convertido de allí, así que esto solo se queda con lo que la app
+  /// usa. La conversión vive aquí y no en el controlador porque es lo mismo que
+  /// hace [AuthenticationUser.fromJson]: traer un perfil de fuera al modelo de
+  /// dentro.
+  factory AuthenticationUser.fromRoble(RobleUser user) => AuthenticationUser(
+        id: user.userId,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      );
 
   factory AuthenticationUser.fromJson(Map<String, dynamic> json) {
     return AuthenticationUser(

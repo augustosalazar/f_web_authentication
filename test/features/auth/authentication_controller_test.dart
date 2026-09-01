@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:f_web_authentication/features/auth/domain/models/auth_session.dart';
 import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:f_web_authentication/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
@@ -42,20 +41,23 @@ class AutenticacionFalsa implements IAuthRepository {
   Object? fallaGoogle;
   Object? fallaRestaurar;
 
-  final _sesiones = StreamController<AuthSession>.broadcast();
+  final _sesiones = StreamController<RobleAuthState>.broadcast();
 
   /// El estado que se reparte a quien se suscriba, como hace el paquete.
-  AuthSession estado = const AuthSession.signedOut();
+  RobleAuthState estado = const RobleAuthState(
+    user: null,
+    reason: RobleAuthReason.signedOut,
+  );
 
   @override
-  Stream<AuthSession> sessionChanges() {
+  Stream<RobleAuthState> sessionChanges() {
     // Igual que el paquete, y por lo mismo: con `async*` la suscripción no
     // queda viva hasta después del primer `yield`, y lo que se emitiera en ese
     // hueco no lo vería nadie.
-    late StreamController<AuthSession> salida;
-    StreamSubscription<AuthSession>? fuente;
+    late StreamController<RobleAuthState> salida;
+    StreamSubscription<RobleAuthState>? fuente;
 
-    salida = StreamController<AuthSession>(
+    salida = StreamController<RobleAuthState>(
       onListen: () {
         fuente = _sesiones.stream.listen(salida.add);
         salida.add(estado);
@@ -67,8 +69,18 @@ class AutenticacionFalsa implements IAuthRepository {
   }
 
   /// Manda un cambio de sesión, que es lo que haría el servidor.
-  void emite(AuthSessionReason reason, [AuthenticationUser? quien]) {
-    estado = AuthSession(user: quien, reason: reason);
+  void emite(RobleAuthReason reason, [AuthenticationUser? quien]) {
+    estado = RobleAuthState(
+      user: quien == null
+          ? null
+          : RobleUser(
+              userId: quien.id ?? 'u1',
+              email: quien.email,
+              name: quien.name,
+              role: quien.role,
+            ),
+      reason: reason,
+    );
     _sesiones.add(estado);
   }
 
@@ -86,7 +98,7 @@ class AutenticacionFalsa implements IAuthRepository {
     // que un perfil que falla se lleva por delante la entrada entera.
     if (fallaElPerfil != null) throw fallaElPerfil!;
     entradas.add(email);
-    emite(AuthSessionReason.signedIn, perfil);
+    emite(RobleAuthReason.signedIn, perfil);
   }
 
   @override
@@ -100,7 +112,7 @@ class AutenticacionFalsa implements IAuthRepository {
   Future<void> logOut() async {
     cierres++;
     if (fallaElLogOut != null) throw fallaElLogOut!;
-    emite(AuthSessionReason.signedOut);
+    emite(RobleAuthReason.signedOut);
   }
 
   @override
@@ -124,7 +136,7 @@ class AutenticacionFalsa implements IAuthRepository {
   @override
   Future<bool> restoreSession() async {
     if (fallaRestaurar != null) throw fallaRestaurar!;
-    if (sesionViva) emite(AuthSessionReason.restored, perfil);
+    if (sesionViva) emite(RobleAuthReason.restored, perfil);
     return sesionViva;
   }
 
@@ -134,7 +146,7 @@ class AutenticacionFalsa implements IAuthRepository {
   @override
   Future<AuthenticationUser> signInWithGoogle() async {
     if (fallaGoogle != null) throw fallaGoogle!;
-    emite(AuthSessionReason.signedIn, perfil);
+    emite(RobleAuthReason.signedIn, perfil);
     return perfil!;
   }
 }
@@ -385,7 +397,7 @@ void main() {
       expect(controller.isLogged, isTrue);
 
       // Lo que emite el paquete cuando el refresco falla.
-      auth.emite(AuthSessionReason.expired);
+      auth.emite(RobleAuthReason.expired);
       await settle();
 
       expect(controller.isLogged, isFalse);
@@ -396,7 +408,7 @@ void main() {
       auth.sesionViva = true;
       final controller = await buildArrancado();
 
-      auth.emite(AuthSessionReason.expired);
+      auth.emite(RobleAuthReason.expired);
       await settle();
 
       expect(controller.error.value, contains('caducó'));
@@ -421,7 +433,7 @@ void main() {
       final controller = build();
       await settle();
 
-      auth.emite(AuthSessionReason.restored);
+      auth.emite(RobleAuthReason.restored);
       await settle();
 
       expect(controller.isLogged, isTrue);

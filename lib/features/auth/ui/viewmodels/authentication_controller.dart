@@ -3,16 +3,18 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
+import 'package:roble/roble.dart';
+
 import '../../../../core/error_message.dart';
-import '../../domain/models/auth_session.dart';
 import '../../domain/models/authentication_user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 
 /// La sesión: quién entró y si sigue dentro.
 ///
 /// El controlador **no decide** el estado de la sesión: lo refleja. Quién está
-/// dentro lo dice `sessionChanges`, que viene del paquete, y aquí solo se
-/// copia a [logged] y [loggedUser]. Antes se ponía a mano en cinco métodos, y
+/// dentro lo dice `sessionChanges`, que es el flujo del paquete tal cual —con
+/// el perfil ya convertido en `RobleUser`—, y aquí solo se copia a [logged] y
+/// [loggedUser]. Antes se ponía a mano en cinco métodos, y
 /// bastaba con equivocarse de orden en uno para dar por iniciada una sesión que
 /// no lo estaba.
 ///
@@ -34,7 +36,7 @@ class AuthenticationController extends GetxController with UiLoggy {
   /// `true` mientras la ventana del proveedor está abierta.
   final RxBool isSocialLoading = false.obs;
 
-  StreamSubscription<AuthSession>? _sesion;
+  StreamSubscription<RobleAuthState>? _sesion;
 
   AuthenticationController(this.authentication);
 
@@ -58,13 +60,15 @@ class AuthenticationController extends GetxController with UiLoggy {
   }
 
   /// Copia lo que diga la sesión.
-  void _aplicar(AuthSession sesion) {
+  void _aplicar(RobleAuthState sesion) {
     loggy.debug('Sesión: ${sesion.reason.name}');
     logged.value = sesion.isSignedIn;
 
     // El perfil solo se pisa cuando viene: una sesión recuperada sin verificar
     // no lo trae, y borrarlo dejaría el inicio saludando a nadie.
-    if (sesion.user != null) _loggedUser.value = sesion.user;
+    if (sesion.user != null) {
+      _loggedUser.value = AuthenticationUser.fromRoble(sesion.user!);
+    }
     if (!sesion.isSignedIn) _loggedUser.value = null;
 
     // Caerse no es lo mismo que salir: a quien le pasa no ha hecho nada, y sin

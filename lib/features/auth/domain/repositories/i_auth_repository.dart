@@ -1,9 +1,10 @@
-import '../models/auth_session.dart';
+import 'package:roble/roble.dart';
+
 import '../models/authentication_user.dart';
 
 abstract class IAuthRepository {
   /// La sesión y cada cambio que le pase. Ver [IAuthenticationSource].
-  Stream<AuthSession> sessionChanges();
+  Stream<RobleAuthState> sessionChanges();
 
   Future<void> login(String email, String password);
 

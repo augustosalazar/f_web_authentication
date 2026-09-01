@@ -1,4 +1,5 @@
-import '../../../domain/models/auth_session.dart';
+import 'package:roble/roble.dart';
+
 import '../../../domain/models/authentication_user.dart';
 
 abstract class IAuthenticationSource {
@@ -6,7 +7,7 @@ abstract class IAuthenticationSource {
   ///
   /// Quien se suscribe recibe primero el estado actual, así que no hace falta
   /// preguntar aparte si hay sesión al arrancar.
-  Stream<AuthSession> sessionChanges();
+  Stream<RobleAuthState> sessionChanges();
 
   Future<AuthenticationUser> login(String username, String password);
 
