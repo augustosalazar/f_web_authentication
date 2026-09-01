@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:f_web_authentication/core/session_expiry.dart';
 import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
-import 'package:f_web_authentication/main.dart';
+import 'package:f_web_authentication/app_wiring.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';

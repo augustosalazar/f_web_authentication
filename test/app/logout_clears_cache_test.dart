@@ -1,6 +1,7 @@
 import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
 import 'package:f_web_authentication/features/product/domain/repositories/i_product_repository.dart';
-import 'package:f_web_authentication/main.dart';
+import 'package:f_web_authentication/app_wiring.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,6 +16,7 @@ void main() {
   late MockAuthenticationController auth;
   late MockProductRepository repo;
   late RxBool logged;
+  VoidCallback? soltar;
 
   setUp(() {
     Get.testMode = true;
@@ -31,10 +33,14 @@ void main() {
     Get.put<IProductRepository>(repo);
   });
 
-  tearDown(Get.reset);
+  tearDown(() {
+    soltar?.call();
+    soltar = null;
+    Get.reset();
+  });
 
   test('cerrar sesión tira la caché de productos', () async {
-    clearCachesOnLogOut();
+    soltar = clearCachesOnLogOut();
 
     logged.value = false;
     await Future<void>.delayed(Duration.zero);
@@ -44,7 +50,7 @@ void main() {
 
   test('entrar no tira nada', () async {
     logged.value = false;
-    clearCachesOnLogOut();
+    soltar = clearCachesOnLogOut();
 
     logged.value = true;
     await Future<void>.delayed(Duration.zero);
