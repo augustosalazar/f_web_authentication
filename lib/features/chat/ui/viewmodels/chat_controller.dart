@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 
-import '../../../../core/error_message.dart';
+import '../../../../core/session_expiry.dart';
 
 import '../../domain/models/message.dart';
 import '../../domain/repositories/i_chat_repository.dart';
@@ -46,7 +46,7 @@ class ChatController extends GetxController {
       // entre la lectura y la suscripción no aparecería en ninguno de los dos.
       _subscription ??= _chat.changes().listen(
             _receive,
-            onError: (Object e) => error.value = errorMessage(e),
+            onError: (Object e) => error.value = reportError(e),
           );
 
       // assignAll copia; asignar `.value` haría que la RxList envolviera la
@@ -55,7 +55,7 @@ class ChatController extends GetxController {
       // deja de recibir para siempre.
       messages.assignAll(await _chat.history());
     } catch (e) {
-      error.value = errorMessage(e);
+      error.value = reportError(e);
     } finally {
       isLoading.value = false;
     }
@@ -74,7 +74,7 @@ class ChatController extends GetxController {
       // veces, y esperar a que vuelva es también la prueba de que el tiempo
       // real funciona.
     } catch (e) {
-      error.value = errorMessage(e);
+      error.value = reportError(e);
     } finally {
       isSending.value = false;
     }

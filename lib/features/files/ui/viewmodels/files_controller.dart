@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 
-import '../../../../core/error_message.dart';
+import '../../../../core/session_expiry.dart';
 import '../../domain/models/stored_file.dart';
 import '../../domain/repositories/i_files_repository.dart';
 
@@ -44,7 +44,7 @@ class FilesController extends GetxController {
       _files.assignAll(await _repository.list());
     } catch (e) {
       logError('FilesController: no se pudo listar', e);
-      error.value = errorMessage(e, fallback: 'No se pudo completar la operación.');
+      error.value = reportError(e, fallback: 'No se pudo completar la operación.');
     } finally {
       isLoading.value = false;
     }
@@ -64,7 +64,7 @@ class FilesController extends GetxController {
       await load();
     } catch (e) {
       logError('FilesController: no se pudo subir $fileName', e);
-      error.value = errorMessage(e, fallback: 'No se pudo completar la operación.');
+      error.value = reportError(e, fallback: 'No se pudo completar la operación.');
     } finally {
       isUploading.value = false;
     }
@@ -77,7 +77,7 @@ class FilesController extends GetxController {
       return await _repository.download(file.id);
     } catch (e) {
       logError('FilesController: no se pudo bajar ${file.name}', e);
-      error.value = errorMessage(e, fallback: 'No se pudo completar la operación.');
+      error.value = reportError(e, fallback: 'No se pudo completar la operación.');
       return null;
     } finally {
       busyFileId.value = '';
@@ -92,7 +92,7 @@ class FilesController extends GetxController {
       _files.removeWhere((f) => f.id == file.id);
     } catch (e) {
       logError('FilesController: no se pudo borrar ${file.name}', e);
-      error.value = errorMessage(e, fallback: 'No se pudo completar la operación.');
+      error.value = reportError(e, fallback: 'No se pudo completar la operación.');
     } finally {
       busyFileId.value = '';
     }

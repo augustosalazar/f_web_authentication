@@ -1,7 +1,7 @@
 import 'package:f_web_authentication/features/product/domain/repositories/i_product_repository.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
-import '../../../../core/error_message.dart';
+import '../../../../core/session_expiry.dart';
 import '../../domain/models/product.dart';
 
 class ProductController extends GetxController {
@@ -35,7 +35,7 @@ class ProductController extends GetxController {
           ? await productUseCase.getOutOfStockProducts()
           : await productUseCase.getProducts());
     } catch (e) {
-      error.value = errorMessage(e);
+      error.value = reportError(e);
       // La lista se vacía: dejar la anterior mostraría el catálogo completo
       // bajo el filtro puesto, que es lo contrario de lo que se pidió.
       _products.clear();
@@ -63,7 +63,7 @@ class ProductController extends GetxController {
     try {
       _products.assignAll(await productUseCase.forceRefresh());
     } catch (e) {
-      error.value = errorMessage(e);
+      error.value = reportError(e);
       _products.clear();
     } finally {
       isLoading.value = false;
