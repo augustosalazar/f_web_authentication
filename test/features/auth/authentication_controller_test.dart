@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:f_web_authentication/features/auth/domain/models/auth_session.dart';
 import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
 import 'package:f_web_authentication/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
@@ -39,6 +42,38 @@ class AutenticacionFalsa implements IAuthRepository {
   Object? fallaGoogle;
   Object? fallaRestaurar;
 
+  final _sesiones = StreamController<AuthSession>.broadcast();
+
+  /// El estado que se reparte a quien se suscriba, como hace el paquete.
+  AuthSession estado = const AuthSession.signedOut();
+
+  @override
+  Stream<AuthSession> sessionChanges() {
+    // Igual que el paquete, y por lo mismo: con `async*` la suscripción no
+    // queda viva hasta después del primer `yield`, y lo que se emitiera en ese
+    // hueco no lo vería nadie.
+    late StreamController<AuthSession> salida;
+    StreamSubscription<AuthSession>? fuente;
+
+    salida = StreamController<AuthSession>(
+      onListen: () {
+        fuente = _sesiones.stream.listen(salida.add);
+        salida.add(estado);
+      },
+      onCancel: () => fuente?.cancel(),
+    );
+
+    return salida.stream;
+  }
+
+  /// Manda un cambio de sesión, que es lo que haría el servidor.
+  void emite(AuthSessionReason reason, [AuthenticationUser? quien]) {
+    estado = AuthSession(user: quien, reason: reason);
+    _sesiones.add(estado);
+  }
+
+  Future<void> cerrar() => _sesiones.close();
+
   final entradas = <String>[];
   final altas = <String>[];
   int cierres = 0;
@@ -47,7 +82,11 @@ class AutenticacionFalsa implements IAuthRepository {
   @override
   Future<void> login(String email, String password) async {
     if (fallaElLogin != null) throw fallaElLogin!;
+    // El paquete pide el perfil dentro del propio login y emite con él, así
+    // que un perfil que falla se lleva por delante la entrada entera.
+    if (fallaElPerfil != null) throw fallaElPerfil!;
     entradas.add(email);
+    emite(AuthSessionReason.signedIn, perfil);
   }
 
   @override
@@ -61,6 +100,7 @@ class AutenticacionFalsa implements IAuthRepository {
   Future<void> logOut() async {
     cierres++;
     if (fallaElLogOut != null) throw fallaElLogOut!;
+    emite(AuthSessionReason.signedOut);
   }
 
   @override
@@ -84,6 +124,7 @@ class AutenticacionFalsa implements IAuthRepository {
   @override
   Future<bool> restoreSession() async {
     if (fallaRestaurar != null) throw fallaRestaurar!;
+    if (sesionViva) emite(AuthSessionReason.restored, perfil);
     return sesionViva;
   }
 
@@ -93,6 +134,7 @@ class AutenticacionFalsa implements IAuthRepository {
   @override
   Future<AuthenticationUser> signInWithGoogle() async {
     if (fallaGoogle != null) throw fallaGoogle!;
+    emite(AuthSessionReason.signedIn, perfil);
     return perfil!;
   }
 }
@@ -106,13 +148,13 @@ void main() {
 
   setUp(() => auth = AutenticacionFalsa());
 
-  /// El controlador a secas. El constructor no dispara `onInit`, así que esto
-  /// deja fuera el arranque: cada prueba decide si lo quiere.
-  AuthenticationController build() => AuthenticationController(auth);
+  /// El controlador arrancado. Ya no vale construirlo a secas: la sesión llega
+  /// por el flujo, y sin `onInit` no hay nadie suscrito.
+  AuthenticationController build() => AuthenticationController(auth)..onInit();
 
-  /// El controlador ya arrancado, como cuando GetX lo mete en el contenedor.
+  /// Lo mismo, esperando a que termine el arranque.
   Future<AuthenticationController> buildArrancado() async {
-    final controller = build()..onInit();
+    final controller = build();
     await settle();
     return controller;
   }
@@ -173,6 +215,10 @@ void main() {
       final controller = build();
 
       final ok = await controller.login('ana@correo.com', 'secreto');
+      // `login` vuelve en cuanto el servidor contesta; la sesión la aplica el
+      // flujo un turno después. Para la pantalla da igual —`Central` se
+      // reconstruye cuando llega—, pero aquí hay que esperarlo.
+      await settle();
 
       expect(ok, isTrue);
       expect(controller.isLogged, isTrue);
@@ -234,6 +280,7 @@ void main() {
       expect(controller.loggedUser, isNotNull);
 
       final ok = await controller.logOut();
+      await settle();
 
       expect(ok, isTrue);
       expect(controller.isLogged, isFalse);
@@ -331,12 +378,63 @@ void main() {
     });
   });
 
+  group('la sesión se cae sola', () {
+    test('saca al usuario sin que nadie haya hecho nada', () async {
+      auth.sesionViva = true;
+      final controller = await buildArrancado();
+      expect(controller.isLogged, isTrue);
+
+      // Lo que emite el paquete cuando el refresco falla.
+      auth.emite(AuthSessionReason.expired);
+      await settle();
+
+      expect(controller.isLogged, isFalse);
+      expect(controller.loggedUser, isNull);
+    });
+
+    test('y lo dice, que si no la vuelta a la entrada no se explica', () async {
+      auth.sesionViva = true;
+      final controller = await buildArrancado();
+
+      auth.emite(AuthSessionReason.expired);
+      await settle();
+
+      expect(controller.error.value, contains('caducó'));
+    });
+
+    test('salir a propósito no deja ese aviso', () async {
+      // Es la diferencia entre `signedOut` y `expired`: quien se va sabe por
+      // qué está en la entrada.
+      auth.sesionViva = true;
+      final controller = await buildArrancado();
+
+      await controller.logOut();
+      await settle();
+
+      expect(controller.isLogged, isFalse);
+      expect(controller.error.value, isEmpty);
+    });
+
+    test('una sesión recuperada sin perfil sigue siendo una sesión', () async {
+      // `restoreSession(verify: false)` no llama al servidor, así que no hay
+      // perfil todavía; borrar el que hubiera dejaría el inicio sin saludo.
+      final controller = build();
+      await settle();
+
+      auth.emite(AuthSessionReason.restored);
+      await settle();
+
+      expect(controller.isLogged, isTrue);
+    });
+  });
+
   group('entrar con Google', () {
     test('deja la sesión iniciada', () async {
       auth.perfil = usuario(email: 'ana@gmail.com', name: 'Ana G');
       final controller = build();
 
       final ok = await controller.loginWithGoogle();
+      await settle();
 
       expect(ok, isTrue);
       expect(controller.isLogged, isTrue);

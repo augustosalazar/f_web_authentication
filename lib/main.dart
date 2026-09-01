@@ -46,7 +46,7 @@ void main() async {
   registerFiles(roble);
 
   // Las reglas que cruzan módulos van juntas en app_wiring.dart.
-  wireApp(roble);
+  wireApp();
 
   runApp(const MyApp());
 }

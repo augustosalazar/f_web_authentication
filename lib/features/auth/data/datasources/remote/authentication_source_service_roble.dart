@@ -1,6 +1,7 @@
 import 'package:loggy/loggy.dart';
 import 'package:roble/roble.dart';
 
+import '../../../domain/models/auth_session.dart';
 import '../../../domain/models/authentication_user.dart';
 import 'i_authentication_source.dart';
 
@@ -10,6 +11,27 @@ class AuthenticationSourceServiceRoble
   AuthenticationSourceServiceRoble(this._database);
 
   final RobleApiDataBase _database;
+
+  @override
+  Stream<AuthSession> sessionChanges() =>
+      _database.authStateChanges.map(_sesionDe);
+
+  /// Traduce el estado del paquete al del dominio.
+  ///
+  /// Aquí y no más arriba: es el mismo sitio donde un `Map` del servidor se
+  /// convierte en [AuthenticationUser], y por la misma razón —que `roble` no
+  /// pase de la capa de datos—.
+  AuthSession _sesionDe(RobleAuthState estado) => AuthSession(
+        user: estado.user == null
+            ? null
+            : AuthenticationUser.fromJson(estado.user!),
+        reason: switch (estado.reason) {
+          RobleAuthReason.signedIn => AuthSessionReason.signedIn,
+          RobleAuthReason.restored => AuthSessionReason.restored,
+          RobleAuthReason.signedOut => AuthSessionReason.signedOut,
+          RobleAuthReason.expired => AuthSessionReason.expired,
+        },
+      );
 
   @override
   Future<AuthenticationUser> login(String email, String password) async {

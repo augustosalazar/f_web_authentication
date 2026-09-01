@@ -1,3 +1,4 @@
+import '../../domain/models/auth_session.dart';
 import '../../domain/models/authentication_user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../datasources/remote/i_authentication_source.dart';
@@ -6,6 +7,9 @@ class AuthRepository implements IAuthRepository {
   late IAuthenticationSource authenticationSource;
 
   AuthRepository(this.authenticationSource);
+
+  @override
+  Stream<AuthSession> sessionChanges() => authenticationSource.sessionChanges();
 
   @override
   Future<void> login(String email, String password) async =>

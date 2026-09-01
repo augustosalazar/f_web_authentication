@@ -1,6 +1,13 @@
+import '../../../domain/models/auth_session.dart';
 import '../../../domain/models/authentication_user.dart';
 
 abstract class IAuthenticationSource {
+  /// La sesión y cada cambio que le pase.
+  ///
+  /// Quien se suscribe recibe primero el estado actual, así que no hace falta
+  /// preguntar aparte si hay sesión al arrancar.
+  Stream<AuthSession> sessionChanges();
+
   Future<AuthenticationUser> login(String username, String password);
 
   Future<void> signUp(String email, String password, String name, bool direct);

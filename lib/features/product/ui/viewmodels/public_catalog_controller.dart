@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 
-import '../../../../core/session_expiry.dart';
+import '../../../../core/error_message.dart';
 import '../../domain/models/product.dart';
 import '../../domain/repositories/i_product_repository.dart';
 
@@ -33,7 +33,7 @@ class PublicCatalogController extends GetxController {
       // lista de la fuente, y si esa es inmutable el primer cambio revienta.
       products.assignAll(await _products.getPublicProducts());
     } catch (e) {
-      error.value = reportError(e);
+      error.value = errorMessage(e);
     } finally {
       isLoading.value = false;
     }
