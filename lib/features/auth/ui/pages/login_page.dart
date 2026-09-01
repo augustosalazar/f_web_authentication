@@ -39,27 +39,23 @@ class _LoginPageState extends State<LoginPage> with UiLoggy {
 
   Future<void> _login(
       BuildContext context, String email, String password) async {
-    loggy.debug('_login $email $password');
-    try {
-      await authenticationController.login(email, password);
-    } catch (err) {
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text(err.toString())),
-      );
-    }
+    loggy.debug('_login $email');
+    final ok = await authenticationController.login(email, password);
+    if (!ok) _mostrarError();
+  }
+
+  /// El motivo lo dejó el controlador en `error`; aquí solo se enseña.
+  void _mostrarError() {
+    messengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(authenticationController.error.value)),
+    );
   }
 
   Future<void> _loginWithGoogle() async {
     FocusScope.of(context).unfocus();
     loggy.debug('_loginWithGoogle');
-    try {
-      await authenticationController.loginWithGoogle();
-    } catch (err) {
-      loggy.error('Error during Google login: $err');
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text(err.toString())),
-      );
-    }
+    final ok = await authenticationController.loginWithGoogle();
+    if (!ok) _mostrarError();
   }
 
   Future<void> _submit() async {

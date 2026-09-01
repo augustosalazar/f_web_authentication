@@ -25,17 +25,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with UiLoggy {
 
   Future<void> _sendResetLink(String email) async {
     loggy.debug('_sendResetLink $email');
-    try {
-      await authenticationController.forgotPassword(email);
+    final ok = await authenticationController.forgotPassword(email);
 
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text('Password reset link sent to $email')),
-      );
-    } catch (err) {
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text('Failed to send password reset link')),
-      );
-    }
+    messengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(ok
+            ? 'Password reset link sent to $email'
+            : authenticationController.error.value),
+      ),
+    );
   }
 
   @override

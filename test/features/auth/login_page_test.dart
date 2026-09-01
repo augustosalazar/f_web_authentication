@@ -15,6 +15,7 @@ void main() {
   late MockAuthenticationController mockAuthController;
 
   late RxBool logged;
+  late RxString error;
   late RxBool isLoading;
   late RxBool googleEnabled;
   late RxBool isSocialLoading;
@@ -26,11 +27,13 @@ void main() {
     mockAuthController = MockAuthenticationController();
 
     logged = false.obs;
+    error = ''.obs;
     isLoading = false.obs;
     googleEnabled = false.obs;
     isSocialLoading = false.obs;
 
     when(() => mockAuthController.logged).thenReturn(logged);
+    when(() => mockAuthController.error).thenReturn(error);
     when(() => mockAuthController.isLoading).thenReturn(isLoading);
     when(() => mockAuthController.isLogged).thenAnswer((_) => logged.value);
     when(() => mockAuthController.googleEnabled).thenReturn(googleEnabled);
@@ -100,8 +103,12 @@ void main() {
   });
 
   testWidgets('Login failure shows snackbar', (WidgetTester tester) async {
+    // El controlador no lanza: deja el motivo en `error` y devuelve false.
     when(() => mockAuthController.login('error@test.com', 'password123'))
-        .thenThrow(const RobleApiException('Login failed'));
+        .thenAnswer((_) async {
+      error.value = const RobleApiException('Login failed').message;
+      return false;
+    });
 
     await tester.pumpWidget(createWidgetUnderTest());
 
@@ -133,6 +140,7 @@ void main() {
       googleEnabled.value = true;
       when(() => mockAuthController.loginWithGoogle()).thenAnswer((_) async {
         logged.value = true;
+        return true;
       });
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -146,8 +154,12 @@ void main() {
     testWidgets('un fallo del proveedor se muestra en un snackbar',
         (WidgetTester tester) async {
       googleEnabled.value = true;
-      when(() => mockAuthController.loginWithGoogle()).thenThrow(
-          const RobleApiAuthException('El navegador bloqueo la ventana'));
+      when(() => mockAuthController.loginWithGoogle()).thenAnswer((_) async {
+        error.value =
+            const RobleApiAuthException('El navegador bloqueo la ventana')
+                .message;
+        return false;
+      });
 
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.tap(find.byKey(const Key('google_login_button')));

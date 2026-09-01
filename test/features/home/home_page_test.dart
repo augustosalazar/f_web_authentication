@@ -27,7 +27,7 @@ void main() {
     );
     auth = MockAuthenticationController();
     when(() => auth.loggedUser).thenAnswer((_) => usuario.value);
-    when(() => auth.logOut()).thenAnswer((_) async {});
+    when(() => auth.logOut()).thenAnswer((_) async => true);
 
     Get.put<AuthenticationController>(auth);
   });

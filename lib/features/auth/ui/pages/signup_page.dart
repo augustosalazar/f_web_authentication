@@ -53,54 +53,50 @@ class _SignUpPageState extends State<SignUpPage> with UiLoggy {
     super.dispose();
   }
 
+  /// El motivo lo dejó el controlador en `error`; aquí solo se enseña.
+  void _mostrarError() {
+    messengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(authenticationController.error.value)),
+    );
+  }
+
   Future<void> _signup(
     String theName,
     String theEmail,
     String thePassword,
     bool direct,
   ) async {
-    try {
-      await authenticationController.signUp(
-          theName, theEmail, thePassword, direct);
+    final ok = await authenticationController.signUp(
+        theName, theEmail, thePassword, direct);
 
-      if (direct) {
-        messengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text('User created successfully')),
-        );
+    if (!ok) return _mostrarError();
 
-        return;
-      }
-
-      setState(() => registerPhase = false);
-
+    if (direct) {
       messengerKey.currentState?.showSnackBar(
-        SnackBar(
-            content: Text(
-                'User created successfully, check your email for verification')),
+        SnackBar(content: Text('User created successfully')),
       );
-    } catch (err) {
-      loggy.error('SignUp error $err');
 
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text(err.toString())),
-      );
+      return;
     }
+
+    setState(() => registerPhase = false);
+
+    messengerKey.currentState?.showSnackBar(
+      SnackBar(
+          content: Text(
+              'User created successfully, check your email for verification')),
+    );
   }
 
   Future<void> _validate(String email, String validationCode) async {
-    try {
-      await authenticationController.validate(email, validationCode);
+    final ok = await authenticationController.validate(email, validationCode);
 
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text('Email validated successfully')),
-      );
-      setState(() => registerPhase = true);
-    } catch (err) {
-      logError('Validation error $err');
-      messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text(err.toString())),
-      );
-    }
+    if (!ok) return _mostrarError();
+
+    messengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text('Email validated successfully')),
+    );
+    setState(() => registerPhase = true);
   }
 
   Future<void> _submitRegister() async {

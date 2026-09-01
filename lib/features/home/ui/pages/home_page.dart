@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:loggy/loggy.dart';
 
 import '../../../auth/ui/viewmodels/authentication_controller.dart';
 import '../../../chat/ui/pages/chat_page.dart';
@@ -27,7 +26,7 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Roble'),
+        title: const Text('Flutter with Roble'),
         actions: [
           IconButton(
             key: const Key('logout_button'),
@@ -106,11 +105,10 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _logout(AuthenticationController auth) async {
-    try {
-      await auth.logOut();
-    } catch (e) {
-      logInfo(e);
-    }
+    // Antes un fallo al cerrar sesión se iba al log y nadie se enteraba.
+    if (await auth.logOut()) return;
+
+    Get.snackbar('No se pudo cerrar la sesión del todo', auth.error.value);
   }
 }
 

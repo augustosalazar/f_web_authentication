@@ -1,14 +1,24 @@
-import 'package:f_web_authentication/features/auth/domain/models/authentication_user.dart';
-import 'package:f_web_authentication/features/product/ui/viewmodels/product_controller.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
+
+import '../../../../core/error_message.dart';
+import '../../domain/models/authentication_user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 
+/// La sesión: quién entró y si sigue dentro.
+///
+/// Los métodos no lanzan. Devuelven `true` o `false` y, cuando algo falla,
+/// dejan el motivo en [error] —lo mismo que hacen los controladores de
+/// productos, chat y archivos—, así que la pantalla decide qué enseñar sin
+/// tener que envolver cada llamada en un `try`.
 class AuthenticationController extends GetxController with UiLoggy {
   final IAuthRepository authentication;
   final logged = false.obs;
   final _loggedUser = Rxn<AuthenticationUser>();
   final RxBool isLoading = false.obs;
+
+  /// Vacío mientras todo va bien.
+  final RxString error = ''.obs;
 
   /// `true` cuando el proyecto tiene Google activo: decide si se pinta el boton.
   final RxBool googleEnabled = false.obs;
@@ -26,12 +36,19 @@ class AuthenticationController extends GetxController with UiLoggy {
 
   Future<void> _initialize() async {
     loggy.debug('AuthenticationController initialized');
-    logged.value = await authentication.restoreSession();
-    if (logged.value) {
-      loggy.info('User is logged in');
-      await getLoggedUser();
+    try {
+      logged.value = await authentication.restoreSession();
+      if (logged.value) {
+        loggy.info('User is logged in');
+        await getLoggedUser();
+      }
+      await refreshGoogleAvailability();
+    } catch (e) {
+      // Arrancar sin sesión es normal —un token caducado, sin red—, así que
+      // esto no se le enseña a nadie: se queda en la pantalla de entrada.
+      loggy.debug('No se pudo restaurar la sesión: $e');
+      logged.value = false;
     }
-    await refreshGoogleAvailability();
   }
 
   /// Consulta si Google esta habilitado en el proyecto.
@@ -44,13 +61,19 @@ class AuthenticationController extends GetxController with UiLoggy {
   ///
   /// La ventana la abre el paquete y hay que pedirla desde el gesto del
   /// usuario, así que este método no puede hacer nada asíncrono antes.
-  Future<void> loginWithGoogle() {
+  Future<bool> loginWithGoogle() {
     loggy.debug('AuthenticationController: Google sign in');
     isSocialLoading.value = true;
+    error.value = '';
 
-    return authentication.signInWithGoogle().then((user) {
+    return authentication.signInWithGoogle().then<bool>((user) {
       _loggedUser.value = user;
       logged.value = true;
+      return true;
+    }).catchError((Object e) {
+      loggy.error('Error during Google login: $e');
+      error.value = errorMessage(e);
+      return false;
     }).whenComplete(() => isSocialLoading.value = false);
   }
 
@@ -63,46 +86,85 @@ class AuthenticationController extends GetxController with UiLoggy {
   bool get isLogged => logged.value;
 
   Future<bool> login(email, password) async {
-    loggy.debug('AuthenticationController: Login $email $password');
-    await authentication.login(email, password);
-    await getLoggedUser();
-    logged.value = true;
-
-    return true;
+    loggy.debug('AuthenticationController: Login $email');
+    error.value = '';
+    try {
+      await authentication.login(email, password);
+      await getLoggedUser();
+      logged.value = true;
+      return true;
+    } catch (e) {
+      loggy.error('Login error $e');
+      error.value = errorMessage(e);
+      return false;
+    }
   }
 
   Future<bool> signUp(name, email, password, bool direct) async {
-    loggy.debug('AuthenticationController: Sign Up $email $password');
-    await authentication.signUp(email, password, name, direct);
-    return true;
+    loggy.debug('AuthenticationController: Sign Up $email');
+    error.value = '';
+    try {
+      await authentication.signUp(email, password, name, direct);
+      return true;
+    } catch (e) {
+      loggy.error('SignUp error $e');
+      error.value = errorMessage(e);
+      return false;
+    }
   }
 
   Future<bool> validate(String email, String validationCode) async {
     loggy.debug('Controller Validate $email $validationCode');
-    var rta = await authentication.validate(email, validationCode);
-    return rta;
+    error.value = '';
+    try {
+      return await authentication.validate(email, validationCode);
+    } catch (e) {
+      loggy.error('Validation error $e');
+      error.value = errorMessage(e);
+      return false;
+    }
   }
 
-  Future<void> logOut() async {
+  Future<bool> logOut() async {
     loggy.debug('AuthenticationController: Log Out');
-    ProductController productController = Get.find();
+    error.value = '';
+    // Se baja la bandera antes de llamar al servidor: quien esté mirando sale
+    // de la sesión aunque la llamada tarde o falle. Lo que haya que limpiar
+    // detrás cuelga de esta misma bandera, en `main`.
     logged.value = false;
-    await authentication.logOut();
-    await productController.clearCache();
-    logged.value = false;
+    try {
+      await authentication.logOut();
+      _loggedUser.value = null;
+      return true;
+    } catch (e) {
+      loggy.error('LogOut error $e');
+      error.value = errorMessage(e);
+      return false;
+    }
   }
 
-  Future<void> forgotPassword(String email) async {
+  Future<bool> forgotPassword(String email) async {
     loggy.debug('AuthenticationController: Forgot Password $email');
-    await authentication.forgotPassword(email);
+    error.value = '';
+    try {
+      await authentication.forgotPassword(email);
+      return true;
+    } catch (e) {
+      loggy.error('ForgotPassword error $e');
+      error.value = errorMessage(e);
+      return false;
+    }
   }
 
   Future<AuthenticationUser> getLoggedUser() async {
     loggy.debug('AuthenticationController: Get Logged User');
     isLoading.value = true;
-    var rta = await authentication.getLoggedUser();
-    _loggedUser.value = rta;
-    isLoading.value = false;
-    return rta;
+    try {
+      final rta = await authentication.getLoggedUser();
+      _loggedUser.value = rta;
+      return rta;
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

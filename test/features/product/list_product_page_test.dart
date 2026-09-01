@@ -64,6 +64,7 @@ void main() {
 
     when(() => mockAuthController.logOut()).thenAnswer((_) async {
       logged.value = false;
+      return true;
     });
 
     // =========================
