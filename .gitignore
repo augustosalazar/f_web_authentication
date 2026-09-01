@@ -46,3 +46,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Informe de cobertura: se regenera con `flutter test --coverage`
+/coverage/
