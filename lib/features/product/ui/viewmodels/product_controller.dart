@@ -1,6 +1,7 @@
 import 'package:f_web_authentication/features/product/domain/repositories/i_product_repository.dart';
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
+import '../../../../core/error_message.dart';
 import '../../domain/models/product.dart';
 
 class ProductController extends GetxController {
@@ -34,7 +35,7 @@ class ProductController extends GetxController {
           ? await productUseCase.getOutOfStockProducts()
           : await productUseCase.getProducts());
     } catch (e) {
-      error.value = _mensajeDe(e);
+      error.value = errorMessage(e);
       // La lista se vacía: dejar la anterior mostraría el catálogo completo
       // bajo el filtro puesto, que es lo contrario de lo que se pidió.
       _products.clear();
@@ -47,14 +48,6 @@ class ProductController extends GetxController {
   Future<void> toggleOutOfStock() async {
     onlyOutOfStock.value = !onlyOutOfStock.value;
     await getProducts();
-  }
-
-  String _mensajeDe(Object e) {
-    try {
-      return (e as dynamic).message as String? ?? e.toString();
-    } catch (_) {
-      return e.toString();
-    }
   }
 
   Future<void> forceRefresh() async {
@@ -70,7 +63,7 @@ class ProductController extends GetxController {
     try {
       _products.assignAll(await productUseCase.forceRefresh());
     } catch (e) {
-      error.value = _mensajeDe(e);
+      error.value = errorMessage(e);
       _products.clear();
     } finally {
       isLoading.value = false;
