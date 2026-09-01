@@ -26,6 +26,38 @@ flutter pub run flutter_launcher_icons:main
 
 Use the .env.sample as template to include Roble´s project contract
 
+## Running on web
+
+Fix the port. Don't use a plain `flutter run -d chrome`:
+
+```
+flutter run -d chrome --web-port=5001
+```
+
+The SSO return destination registered in the Roble console (`ROBLE_SSO_REDIRECT`
+in `.env`) points at a specific URL — `http://localhost:5001` for local
+development. Without `--web-port`, Flutter picks a **different port on every
+run**, so Google authenticates correctly and then sends the browser back to a
+port where nothing is listening. What you see is:
+
+```
+This site can't be reached — localhost refused to connect
+ERR_CONNECTION_REFUSED
+```
+
+It looks like a login failure and it isn't: the `?code=...` in that URL means
+the provider did its job. That code is single-use, so retry from the login
+button rather than reloading the failed URL.
+
+Two related gotchas:
+
+- `localhost` and `127.0.0.1` are **different origins** to the provider, even
+  though they are the same machine. Open the app on whichever one is registered.
+- When the app moves to a real domain, register a **second** return destination
+  in the console (`mi-app-web` → `https://domain`) instead of repointing the
+  local one, and switch `ROBLE_SSO_REDIRECT` per build. Otherwise deploying
+  breaks local development.
+
 Using this structure:
 
 
