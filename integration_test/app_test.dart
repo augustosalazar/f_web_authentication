@@ -2,19 +2,13 @@ import 'dart:convert';
 
 import 'package:f_web_authentication/core/i_local_preferences.dart';
 import 'package:f_web_authentication/core/roble_client.dart';
-import 'package:f_web_authentication/features/auth/data/datasources/remote/authentication_source_service_roble.dart';
-import 'package:f_web_authentication/features/auth/data/datasources/remote/i_authentication_source.dart';
-import 'package:f_web_authentication/features/auth/data/repositories/auth_repository.dart';
-import 'package:f_web_authentication/features/auth/domain/repositories/i_auth_repository.dart';
+import 'package:f_web_authentication/features/auth/auth_dependencies.dart';
 import 'package:f_web_authentication/features/auth/ui/pages/login_page.dart';
-import 'package:f_web_authentication/features/auth/ui/viewmodels/authentication_controller.dart';
-import 'package:f_web_authentication/features/product/data/datasources/cache/local_product_cache_source.dart';
-import 'package:f_web_authentication/features/product/data/datasources/remote/i_product_source.dart';
-import 'package:f_web_authentication/features/product/data/datasources/remote/remote_product_roble_source.dart';
-import 'package:f_web_authentication/features/product/data/repositories/product_repository.dart';
-import 'package:f_web_authentication/features/product/domain/repositories/i_product_repository.dart';
+import 'package:f_web_authentication/features/chat/chat_dependencies.dart';
+import 'package:f_web_authentication/features/files/files_dependencies.dart';
+import 'package:f_web_authentication/features/home/ui/pages/home_page.dart';
+import 'package:f_web_authentication/features/product/product_dependencies.dart';
 import 'package:f_web_authentication/features/product/ui/pages/list_product_page.dart';
-import 'package:f_web_authentication/features/product/ui/viewmodels/product_controller.dart';
 import 'package:f_web_authentication/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -100,19 +94,18 @@ Future<Widget> createAuthApp() async {
     client: mockHttpClient,
     storage: RoblePreferencesStorage(mockLocalPreferences),
   );
-  final authentication = AuthenticationSourceServiceRoble(roble);
-  await authentication.restoreSession();
-
   Get.put<RobleApiDataBase>(roble);
-  Get.put<IAuthenticationSource>(authentication);
 
-  Get.put<IAuthRepository>(AuthRepository(Get.find()));
-  Get.put<AuthenticationController>(AuthenticationController(Get.find()));
-
-  Get.put<IProductSource>(RemoteProductRobleSource(roble));
-  Get.put<LocalProductCacheSource>(LocalProductCacheSource(Get.find()));
-  Get.put<IProductRepository>(ProductRepository(Get.find(), Get.find()));
-  Get.put<ProductController>(ProductController(Get.find()));
+  // Los mismos registros que hace `main`, no una copia a mano.
+  //
+  // Antes esto ponía cada dependencia por su cuenta, y por eso se separó de la
+  // app sin que nada avisara: la prueba seguía construyendo lo que ella creía
+  // que existía. Llamando a los `register*` de cada feature, un cambio en el
+  // cableado llega aquí solo.
+  registerAuth(roble);
+  registerProduct(roble);
+  registerChat(roble);
+  registerFiles(roble);
 
   return MyApp();
 }
@@ -315,10 +308,12 @@ void main() {
         )).called(greaterThanOrEqualTo(1));
 
     // =========================
-    // Debe entrar a la lista
+    // Debe entrar al inicio
     // =========================
-    expect(find.byType(ListProductPage), findsOneWidget);
-    expect(find.text('Welcome One name'), findsOneWidget);
+    // Ya no se aterriza en la lista de productos: el inicio ofrece un módulo
+    // por tarjeta, y cerrar sesión cuelga de ahí.
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.text('Hola, One name'), findsOneWidget);
 
     // =========================
     // Logout
@@ -448,10 +443,14 @@ void main() {
         )).called(1);
 
     // =========================
-    // Lista inicial
+    // Del inicio a la lista
     // =========================
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.text('Hola, One name'), findsOneWidget);
+
+    await tapAndPause(tester, find.byKey(const Key('home_card_products')));
+
     expect(find.byType(ListProductPage), findsOneWidget);
-    expect(find.text('Welcome One name'), findsOneWidget);
     expect(find.text('New Laptop'), findsNothing);
 
     // =========================
@@ -677,8 +676,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.byType(HomePage), findsOneWidget);
+      expect(find.text('Hola, One name'), findsOneWidget);
+
+      await tapAndPause(tester, find.byKey(const Key('home_card_products')));
+
       expect(find.byType(ListProductPage), findsOneWidget);
-      expect(find.text('Welcome One name'), findsOneWidget);
 
       // =========================
       // ADD PRODUCT 1
